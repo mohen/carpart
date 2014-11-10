@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" 
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap>
+
+	<resultMap id="Custom" class="org.carpart.vo.CustomVo">
+		<result property="cusId" column="CUS_ID" />
+		<result property="regTime" column="REG_TIME" />
+		<result property="wxCode" column="WX_CODE" />
+		<result property="wxName" column="WX_NAME" />
+		<result property="trueName" column="TRUE_NAME" />
+		<result property="carCode" column="CAR_CODE" />
+		<result property="phone" column="PHONE" />
+		<result property="city" column="CITY" />
+		<result property="address" column="ADDRESS" />
+		<result property="email" column="EMAIL" />
+		<result property="memo" column="MEMO" />
+		<result property="certCode" column="CERT_CODE" />
+		<result property="status" column="STATUS" />
+	</resultMap>
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="Custom.columns">
+	    <![CDATA[
+        CUS_ID ,REG_TIME ,WX_CODE ,WX_NAME ,TRUE_NAME ,CAR_CODE ,PHONE ,CITY ,ADDRESS ,EMAIL ,MEMO ,CERT_CODE ,STATUS 
+	    ]]>
+	</sql>
+
+	<insert id="Custom.insert">
+    <![CDATA[
+        INSERT INTO cp_custom (
+        	CUS_ID ,
+        	REG_TIME ,
+        	WX_CODE ,
+        	WX_NAME ,
+        	TRUE_NAME ,
+        	CAR_CODE ,
+        	PHONE ,
+        	CITY ,
+        	ADDRESS ,
+        	EMAIL ,
+        	MEMO ,
+        	CERT_CODE ,
+        	STATUS 
+        ) VALUES (
+        	#cusId# ,
+        	#regTime# ,
+        	#wxCode# ,
+        	#wxName# ,
+        	#trueName# ,
+        	#carCode# ,
+        	#phone# ,
+        	#city# ,
+        	#address# ,
+        	#email# ,
+        	#memo# ,
+        	#certCode# ,
+        	#status# 
+        )
+    ]]>
+		<!-- mysql: type="post" SELECT select last_insert_id() sqlserver: type="post" 
+			SELECT @@identity AS ID oracle: type="pre" SELECT sequenceName.nextval AS 
+			ID FROM DUAL DB2: type="pre" values nextval for sequenceName -->
+		<selectKey resultClass="java.lang.Long" type="post"
+			keyProperty="cusId">
+			select last_insert_id()
+		</selectKey>
+	</insert>
+
+	<update id="Custom.update">
+		UPDATE cp_custom
+		<dynamic prepend="SET">
+			<isNotNull prepend="," property="regTime">
+				REG_TIME = #regTime#
+			</isNotNull>
+			<isNotNull prepend="," property="wxCode">
+				WX_CODE = #wxCode#
+			</isNotNull>
+			<isNotNull prepend="," property="wxName">
+				WX_NAME = #wxName#
+			</isNotNull>
+			<isNotNull prepend="," property="trueName">
+				TRUE_NAME = #trueName#
+			</isNotNull>
+			<isNotNull prepend="," property="carCode">
+				CAR_CODE = #carCode#
+			</isNotNull>
+			<isNotNull prepend="," property="city">
+				CITY = #city#
+			</isNotNull>
+			<isNotNull prepend="," property="address">
+				ADDRESS = #address#
+			</isNotNull>
+			<isNotNull prepend="," property="email">
+				EMAIL = #email#
+			</isNotNull>
+			<isNotNull prepend="," property="memo">
+				MEMO = #memo#
+			</isNotNull>
+			<isNotNull prepend="," property="certCode">
+				CERT_CODE = #certCode#
+			</isNotNull>
+			<isNotNull prepend="," property="status">
+				STATUS = #status#
+			</isNotNull>
+		</dynamic>
+		WHERE
+		CUS_ID = #cusId#
+
+	</update>
+
+	<delete id="Custom.delete">
+    <![CDATA[
+        DELETE FROM cp_custom WHERE
+        CUS_ID = #cusId# 
+    ]]>
+	</delete>
+
+	<select id="Custom.getById" resultMap="Custom">
+		SELECT
+		<include refid="Custom.columns" />
+	    <![CDATA[
+	        FROM cp_custom 
+	        WHERE 
+		        CUS_ID = #cusId# 
+	    ]]>
+	</select>
+
+	<sql id="Custom.findPage.where">
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="cusId">
+				CUS_ID = #cusId#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="regTimeBegin">
+				REG_TIME >=
+				#regTimeBegin#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="regTimeEnd">
+				REG_TIME &lt;=
+				#regTimeEnd#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="wxCode">
+				WX_CODE = #wxCode#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="wxName">
+				WX_NAME like
+				'%$wxName$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="trueName">
+				TRUE_NAME like
+				'%$trueName$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carCode">
+				CAR_CODE = #carCode#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="phone">
+				PHONE = #phone#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="city">
+				CITY = #city#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="address">
+				ADDRESS = #address#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="email">
+				EMAIL = #email#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="memo">
+				MEMO = #memo#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="certCode">
+				CERT_CODE = #certCode#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="status">
+				STATUS = #status#
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+
+	<select id="Custom.findPage.count" resultClass="int">
+		SELECT count(*) FROM cp_custom
+		<include refid="Custom.findPage.where" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 #offset#,#pageSize#,#lastRows# 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="Custom.findPage" resultMap="Custom">
+		SELECT
+		<include refid="Custom.columns" />
+		FROM cp_custom
+		<include refid="Custom.findPage.where" />
+		<dynamic prepend="ORDER BY">
+			<isNotEmpty property="sortColumns">$sortColumns$</isNotEmpty>
+		</dynamic>
+	</select>
+
+
+</sqlMap>
+
