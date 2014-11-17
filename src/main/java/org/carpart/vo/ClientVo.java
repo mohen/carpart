@@ -45,6 +45,11 @@ public class ClientVo extends BaseVo {
 	 * 状态
 	 */
 	private java.lang.String status;
+	
+	/**
+	 * 停车场ID
+	 */
+	private java.lang.Integer parkId=0;
 	//columns END
 	 /**
 	 * @param 客户端ID 
@@ -131,6 +136,13 @@ public class ClientVo extends BaseVo {
 		return this.status;
 	}
 	
+	public java.lang.Integer getParkId() {
+		return parkId;
+	}
+	public void setParkId(java.lang.Integer parkId) {
+		this.parkId = parkId;
+	}
+
 	private Set errorVos = new HashSet(0);
 	public void setErrorVos(Set<ErrorVo> errorVos){
 		this.errorVos = errorVos;
