@@ -11,12 +11,13 @@
 		<result property="clientCode" column="client_code" />
 		<result property="clientKey" column="client_key" />
 		<result property="status" column="status" />
+		<result property="parkId" column="park_id" />
 	</resultMap>
 
 	<!-- 用于select查询公用抽取的列 -->
 	<sql id="Client.columns">
 	    <![CDATA[
-        client_id ,client_desc ,client_type ,client_ip ,client_code ,client_key ,status 
+        client_id ,client_desc ,client_type ,client_ip ,client_code ,client_key ,status ,park_id
 	    ]]>
 	</sql>
 
@@ -29,7 +30,8 @@
         	client_ip ,
         	client_code ,
         	client_key ,
-        	status 
+        	status ,
+        	park_id
         ) VALUES (
         	#clientId# ,
         	#clientDesc# ,
@@ -37,7 +39,8 @@
         	#clientIp# ,
         	#clientCode# ,
         	#clientKey# ,
-        	#status# 
+        	#status# ,
+        	#parkId#
         )
     ]]>
 		<!-- mysql: type="post" SELECT select last_insert_id() sqlserver: type="post" 
@@ -66,6 +69,9 @@
 			</isNotNull>
 			<isNotNull prepend="," property="status">
 				status = #status#
+			</isNotNull>
+			<isNotNull prepend="," property="parkId">
+				park_id = #parkId#
 			</isNotNull>
 		</dynamic>
 		WHERE
@@ -114,6 +120,9 @@
 			</isNotEmpty>
 			<isNotEmpty prepend="AND" property="status">
 				status = #status#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="parkId">
+				park_id = #parkId#
 			</isNotEmpty>
 		</dynamic>
 	</sql>
