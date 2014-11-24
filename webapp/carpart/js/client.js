@@ -5,7 +5,8 @@ clientAlias = {
 	clientIp : "IP",
 	clientCode : "密文",
 	clientKey : "加密KEY",
-	status : "状态"
+	status : "状态",
+	parkName : '停车场'
 };
 clientAliasName = "客户端管理";
 clientBaseUrl = 'client.do';
@@ -136,6 +137,11 @@ Ext.onReady(function() {
 				renderer : CLIENTTYPERender,
 				dataIndex : 'clientType'
 			}, {
+				header : clientAlias.parkName,
+				width : 50,
+				sortable : true,
+				dataIndex : 'parkName'
+			}, {
 				header : clientAlias.clientIp,
 				sortable : true,
 				dataIndex : 'clientIp'
@@ -168,7 +174,8 @@ Ext.onReady(function() {
 							totalProperty : 'TOTALCOUNT', // 记录总数
 							root : 'ROOT' // Json中的列表数据根节点
 						}, ['clientId', 'clientDesc', 'clientType', 'clientIp',
-								'clientCode', 'clientKey', 'status'])
+								'clientCode', 'clientKey', 'status', 'parkId',
+								'parkName'])
 			});
 
 	/**
@@ -286,7 +293,61 @@ Ext.onReady(function() {
 	grid.on('rowdblclick', function(grid, rowIndex, event) {
 				updateCatalogItem();
 			});
-
+	var parkStore = new Ext.data.Store({
+				proxy : new Ext.data.HttpProxy({
+							url : 'park.do?reqCode=list'
+						}),
+				reader : new Ext.data.JsonReader({
+							totalProperty : 'TOTALCOUNT',
+							root : 'ROOT'
+						}, [{
+									name : 'value',
+									mapping : 'parkId'
+								}, {
+									name : 'text',
+									mapping : 'parkName'
+								}]),
+				baseParams : {
+					areacode : ''
+				}
+			});
+	parkStore.load();
+	var parkCombo = new Ext.form.ComboBox({
+				hiddenName : 'parkId',
+				fieldLabel : '停车场',
+				emptyText : '请选择...',
+				triggerAction : 'all',
+				store : parkStore,
+				displayField : 'text',
+				valueField : 'value',
+				loadingText : '正在加载数据...',
+				mode : 'remote', // 数据会自动读取,如果设置为local又调用了store.load()则会读取2次；也可以将其设置为local，然后通过store.load()方法来读取
+				forceSelection : true,
+				typeAhead : true,
+				pageSize : 10,
+				minListWidth : 270,
+				resizable : true,
+				editable : false,
+				anchor : '100%'
+			});
+	var parkCombo2 = new Ext.form.ComboBox({
+				hiddenName : 'parkId',
+				fieldLabel : '停车场',
+				emptyText : '请选择...',
+				triggerAction : 'all',
+				store : parkStore,
+				displayField : 'text',
+				valueField : 'value',
+				loadingText : '正在加载数据...',
+				mode : 'remote', // 数据会自动读取,如果设置为local又调用了store.load()则会读取2次；也可以将其设置为local，然后通过store.load()方法来读取
+				forceSelection : true,
+				typeAhead : true,
+				pageSize : 10,
+				minListWidth : 270,
+				resizable : true,
+				editable : false,
+				anchor : '100%'
+			});
 	var myForm = new Ext.form.FormPanel({
 		collapsible : false,
 		border : true,
@@ -368,7 +429,7 @@ Ext.onReady(function() {
 									anchor : '100%',
 									fieldLabel : clientAlias.clientCode,
 									name : 'clientCode'
-								}]
+								}, parkCombo]
 					}]
 		}]
 	});
@@ -410,14 +471,14 @@ Ext.onReady(function() {
 			});
 
 	var updateForm = new Ext.form.FormPanel({
-				collapsible : false,
-				border : true,
-				labelWidth : 60, // 标签宽度
-				// frame : true, //是否渲染表单面板背景色
-				labelAlign : 'right', // 标签对齐方式
-				bodyStyle : 'padding:5 5 0', // 表单元素和表单面板的边距
-				buttonAlign : 'center',
-					items : [{
+		collapsible : false,
+		border : true,
+		labelWidth : 60, // 标签宽度
+		// frame : true, //是否渲染表单面板背景色
+		labelAlign : 'right', // 标签对齐方式
+		bodyStyle : 'padding:5 5 0', // 表单元素和表单面板的边距
+		buttonAlign : 'center',
+		items : [{
 			layout : 'column',
 			border : false,
 			items : [{
@@ -490,10 +551,10 @@ Ext.onReady(function() {
 									anchor : '100%',
 									fieldLabel : clientAlias.clientCode,
 									name : 'clientCode'
-								}]
+								}, parkCombo2]
 					}]
 		}]
-			});
+	});
 	var updateWindow = new Ext.Window({
 				title : '<span class="commoncss">修改' + clientAliasName
 						+ '<span>', // 窗口标题
