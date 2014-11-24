@@ -12,6 +12,7 @@
 		<result property="clientKey" column="client_key" />
 		<result property="status" column="status" />
 		<result property="parkId" column="park_id" />
+		<result property="parkName" column="park_id"  select="Park.findParkNameById"/>
 	</resultMap>
 
 	<!-- 用于select查询公用抽取的列 -->
