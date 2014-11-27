@@ -28,32 +28,53 @@ public class CarRpcServiceImpl implements CarRpcService {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public String queryOrderStatus(String orderCode, String clientCode, String clientKey) {
+	public String queryOrderStatus(String orderCode, String clientCode,
+			String clientKey) {
+		// log.debug(String.format("调用:%s参数:%s,%s,%s","queryOrderStatus","orderCode="+orderCode,"clientCode="+clientCode,"clientKey="+clientKey));
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
-			this.logClientAction(Integer.valueOf(message), String.format("查询订单:%s状态", orderCode));
-			IService<OrderVo> orderService = (IService) SpringBeanLoader.getSpringBean("orderService");
+			this.logClientAction(Integer.valueOf(message),
+					String.format("查询订单:%s状态", orderCode));
+			IService<OrderVo> orderService = (IService) SpringBeanLoader
+					.getSpringBean("orderService");
 			Dto pDto = new BaseDto();
 			pDto.put("orderCode", orderCode);
-			OrderVo vo = orderService.queryById(pDto);
-			message = vo.getStatus();
+			try {
+				OrderVo vo = orderService.queryById(pDto);
+				if (vo == null) {
+					message = logsError(Integer.valueOf(message),
+							CPConstants.ERROR_TYPE_CLIENT,
+							String.format("查询订单:%s不存在!", orderCode));
+				} else {
+					message = vo.getStatus();
+				}
+			} catch (Exception e) {
+				message = logsError(Integer.valueOf(message),
+						CPConstants.ERROR_TYPE_CLIENT,
+						String.format("查询订单:%s错误:" + e.getMessage(), orderCode));
+			}
+
 		}
 		return message;
 	}
 
 	@Override
-	public double queryOrderFee(String orderCode, String clientCode, String clientKey) {
+	public double queryOrderFee(String orderCode, String clientCode,
+			String clientKey) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public String queryOrderInfo(String orderCode, String clientCode, String clientKey) {
+	public String queryOrderInfo(String orderCode, String clientCode,
+			String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
-			this.logClientAction(Integer.valueOf(message), String.format("查询订单:%s信息", orderCode));
-			IService<OrderVo> orderService = (IService) SpringBeanLoader.getSpringBean("orderService");
+			this.logClientAction(Integer.valueOf(message),
+					String.format("查询订单:%s信息", orderCode));
+			IService<OrderVo> orderService = (IService) SpringBeanLoader
+					.getSpringBean("orderService");
 			Dto pDto = new BaseDto();
 			pDto.put("orderCode", orderCode);
 			OrderVo vo = orderService.queryById(pDto);
@@ -69,17 +90,22 @@ public class CarRpcServiceImpl implements CarRpcService {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public String addNewUser(String wxName, String wxCode, String city, String carCode, String trueName, String phone, String address, String certCode, String email, String clientCode, String clientKey) {
+	public String addNewUser(String wxName, String wxCode, String city,
+			String carCode, String trueName, String phone, String address,
+			String certCode, String email, String clientCode, String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
-			this.logClientAction(Integer.valueOf(message), String.format("新增用户:%s信息", wxCode));
+			this.logClientAction(Integer.valueOf(message),
+					String.format("新增用户:%s信息", wxCode));
 			int clientId = Integer.valueOf(message);
 			Dto pDto = new BaseDto();
-			IService customService = (IService) SpringBeanLoader.getSpringBean("customService");
+			IService customService = (IService) SpringBeanLoader
+					.getSpringBean("customService");
 			pDto.put("wxCode", wxCode);
 			int count = customService.queryCount(pDto);
 			if (count > 0) {
-				message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("系统已经存在wxCode=%s 的客户", wxCode));
+				message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT,
+						String.format("系统已经存在wxCode=%s 的客户", wxCode));
 			} else {
 				CustomVo vo = new CustomVo();
 				vo.setWxName(wxName);
@@ -99,7 +125,9 @@ public class CarRpcServiceImpl implements CarRpcService {
 				if (pToDto.getAsInteger("cusId") > 0) {
 					message = CPConstants.RETURN_TRUE;
 				} else {
-					message = logsError(clientId, CPConstants.ERROR_TYPE_SERVER, String.format("新增wxCode=%s 的客户 产生数据库错误", wxCode));
+					message = logsError(clientId,
+							CPConstants.ERROR_TYPE_SERVER,
+							String.format("新增wxCode=%s 的客户 产生数据库错误", wxCode));
 				}
 			}
 		}
@@ -108,11 +136,14 @@ public class CarRpcServiceImpl implements CarRpcService {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public String listCarPart2Xml(String cityCode, String clientCode, String clientKey) {
+	public String listCarPart2Xml(String cityCode, String clientCode,
+			String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
-			this.logClientAction(Integer.valueOf(message), String.format("查询城市合作停车场列表:%s信息", cityCode));
-			IService<ParkVo> parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
+			this.logClientAction(Integer.valueOf(message),
+					String.format("查询城市合作停车场列表:%s信息", cityCode));
+			IService<ParkVo> parkService = (IService) SpringBeanLoader
+					.getSpringBean("parkService");
 			Dto pDto = new BaseDto();
 			pDto.put("cityCode", cityCode);
 			List list = parkService.queryByList(pDto);
@@ -123,14 +154,19 @@ public class CarRpcServiceImpl implements CarRpcService {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public String addNewOrder(String wxCode, String partMapLb, String clientCode, String clientKey) {
+	public String addNewOrder(String wxCode, String partMapLb,
+			String clientCode, String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
 			int clientId = Integer.valueOf(message);
-			this.logClientAction(clientId, String.format("新增订单客户:%s停车场:%s", wxCode, partMapLb));
-			IService parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
-			IService customService = (IService) SpringBeanLoader.getSpringBean("customService");
-			IService orderService = (IService) SpringBeanLoader.getSpringBean("orderService");
+			this.logClientAction(clientId,
+					String.format("新增订单客户:%s停车场:%s", wxCode, partMapLb));
+			IService parkService = (IService) SpringBeanLoader
+					.getSpringBean("parkService");
+			IService customService = (IService) SpringBeanLoader
+					.getSpringBean("customService");
+			IService orderService = (IService) SpringBeanLoader
+					.getSpringBean("orderService");
 			Dto pDto = new BaseDto();
 			pDto.put("partMapLb", partMapLb);
 			List list = parkService.queryByList(pDto);
@@ -139,7 +175,8 @@ public class CarRpcServiceImpl implements CarRpcService {
 			if (success) {
 				parkId = ((ParkVo) list.get(0)).getParkId();
 			} else {
-				message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("系统不存在坐标为:%s的停车场", partMapLb));
+				message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT,
+						String.format("系统不存在坐标为:%s的停车场", partMapLb));
 				success = false;
 			}
 			int cusId = 0;
@@ -152,7 +189,9 @@ public class CarRpcServiceImpl implements CarRpcService {
 				if (success) {
 					cusId = ((CustomVo) list2.get(0)).getCusId();
 				} else {
-					message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("系统不存在微信号为:%s的客户", wxCode));
+					message = logsError(clientId,
+							CPConstants.ERROR_TYPE_CLIENT,
+							String.format("系统不存在微信号为:%s的客户", wxCode));
 					success = false;
 				}
 			}
@@ -160,7 +199,8 @@ public class CarRpcServiceImpl implements CarRpcService {
 				OrderVo vo = new OrderVo();
 				Date date = new Date();
 				vo.setCreateTime(date);
-				vo.setOrderCode(IDHelper.getInstance().generatOrderCode());
+				String orderCode = IDHelper.getInstance().generatOrderCode();
+				vo.setOrderCode(orderCode);
 				vo.setCusId(cusId);
 				vo.setParkId(parkId);
 				vo.setFeeAmount(0f);
@@ -171,8 +211,16 @@ public class CarRpcServiceImpl implements CarRpcService {
 				vo.setStatus(CPConstants.ORDER_STATUS_PRE_REG);
 				pDto.clear();
 				G4Utils.copyPropFromBean2Dto(vo, pDto);
-				orderService.save(pDto);
-				message = CPConstants.RETURN_TRUE;
+				try {
+					orderService.save(pDto);
+					message = orderCode;
+				} catch (Exception e) {
+					message = logsError(clientId,
+							CPConstants.ERROR_TYPE_CLIENT,
+							String.format("订单心中错误:" + e.getMessage(), wxCode));
+					success = false;
+				}
+
 			}
 
 		}
@@ -187,21 +235,26 @@ public class CarRpcServiceImpl implements CarRpcService {
 	 * @return
 	 */
 	@SuppressWarnings({ "unchecked" })
-	private String changeOrderStatus(String orderCode, String newStatus, Dto pDto, int clientId) {
+	private String changeOrderStatus(String orderCode, String newStatus,
+			Dto pDto, int clientId) {
 		String message = "";
-		IService<OrderVo> orderService = (IService) SpringBeanLoader.getSpringBean("orderService");
+		IService<OrderVo> orderService = (IService) SpringBeanLoader
+				.getSpringBean("orderService");
 		pDto.put("orderCode", orderCode);
 		OrderVo vo = orderService.queryById(pDto);
 		String oldStatus = vo.getStatus();
-		this.logClientAction(clientId, String.format("修改订单状态从:%s 到%s", oldStatus, newStatus));
+		this.logClientAction(clientId,
+				String.format("修改订单状态从:%s 到%s", oldStatus, newStatus));
 		if (Integer.valueOf(oldStatus) - Integer.valueOf(newStatus) > 0) {
-			message = logsError(clientId, CPConstants.ERROR_TYPE_BIZ, String.format("系统不允许订单从状态:%s迁徙到:%s", oldStatus, newStatus));
+			message = logsError(clientId, CPConstants.ERROR_TYPE_BIZ,
+					String.format("系统不允许订单从状态:%s迁徙到:%s", oldStatus, newStatus));
 		} else {
 			pDto.put("status", newStatus);
 			Date startTime = vo.getStartPartTime();
 			Object endTime = pDto.get("endPartTime");
 			if (startTime != null && endTime != null) {
-				int minute = G4Utils.getIntervalMinute(startTime,(Date) endTime);
+				int minute = G4Utils.getIntervalMinute(startTime,
+						(Date) endTime);
 				if (vo.getPartTimes().intValue() != minute) {
 					pDto.put("partTimes", minute);
 				}
@@ -215,72 +268,90 @@ public class CarRpcServiceImpl implements CarRpcService {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public String fitOrderStatusToInPart(String orderCode, String clientCode, String clientKey) {
+	public String fitOrderStatusToInPart(String orderCode, String clientCode,
+			String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
 			Dto pDto = new BaseDto();
 			pDto.put("startPartTime", new Date());
-			message = this.changeOrderStatus(orderCode, CPConstants.ORDER_STATUS_IN_PARK, pDto, Integer.valueOf(message));
+			message = this.changeOrderStatus(orderCode,
+					CPConstants.ORDER_STATUS_IN_PARK, pDto,
+					Integer.valueOf(message));
 		}
 		return message;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public String fitOrderStatusToCancelIn(String orderCode, String clientCode, String clientKey) {
+	public String fitOrderStatusToCancelIn(String orderCode, String clientCode,
+			String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
 			Dto pDto = new BaseDto();
 			Date date = new Date();
 			pDto.put("endPartTime", date);
-			message = this.changeOrderStatus(orderCode, CPConstants.ORDER_STATUS_CANCEL_IN, pDto, Integer.valueOf(message));
+			message = this.changeOrderStatus(orderCode,
+					CPConstants.ORDER_STATUS_CANCEL_IN, pDto,
+					Integer.valueOf(message));
 		}
 		return message;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public String fitOrderStatusToPayNotOut(String orderCode, float payMoney, String clientCode, String clientKey) {
+	public String fitOrderStatusToPayNotOut(String orderCode, float payMoney,
+			String clientCode, String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
 			Dto pDto = new BaseDto();
 			pDto.put("endPartTime", new Date());
-			message = this.changeOrderStatus(orderCode, CPConstants.ORDER_STATUS_PAY_NOT_OUT, pDto, Integer.valueOf(message));
+			message = this.changeOrderStatus(orderCode,
+					CPConstants.ORDER_STATUS_PAY_NOT_OUT, pDto,
+					Integer.valueOf(message));
 		}
 		return message;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public String fitOrderStatusToPayAndOut(String orderCode, String clientCode, String clientKey) {
+	public String fitOrderStatusToPayAndOut(String orderCode,
+			String clientCode, String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
 			Dto pDto = new BaseDto();
 			pDto.put("endPartTime", new Date());
-			message = this.changeOrderStatus(orderCode, CPConstants.ORDER_STATUS_PAY_AND_OUT, pDto, Integer.valueOf(message));
+			message = this.changeOrderStatus(orderCode,
+					CPConstants.ORDER_STATUS_PAY_AND_OUT, pDto,
+					Integer.valueOf(message));
 		}
 		return message;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public String fitOrderStatusToFreePark(String orderCode, String clientCode, String clientKey) {
+	public String fitOrderStatusToFreePark(String orderCode, String clientCode,
+			String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
 			Dto pDto = new BaseDto();
 			pDto.put("endPartTime", new Date());
-			message = this.changeOrderStatus(orderCode, CPConstants.ORDER_STATUS_FREE_PARK, pDto, Integer.valueOf(message));
+			message = this.changeOrderStatus(orderCode,
+					CPConstants.ORDER_STATUS_FREE_PARK, pDto,
+					Integer.valueOf(message));
 		}
 		return message;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public String queryErrorInfo(String errorCode, String clientCode, String clientKey) {
+	public String queryErrorInfo(String errorCode, String clientCode,
+			String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
-			this.logClientAction(Integer.valueOf(message), String.format("查询错误代码:%s信息", errorCode));
-			IService<ErrorVo> errorService = (IService) SpringBeanLoader.getSpringBean("errorService");
+			this.logClientAction(Integer.valueOf(message),
+					String.format("查询错误代码:%s信息", errorCode));
+			IService<ErrorVo> errorService = (IService) SpringBeanLoader
+					.getSpringBean("errorService");
 			Dto pDto = new BaseDto();
 			pDto.put("errCode", errorCode);
 			ErrorVo vo = errorService.queryById(pDto);
@@ -306,7 +377,10 @@ public class CarRpcServiceImpl implements CarRpcService {
 		int clientInfo = clientVo.getClientId();
 		String message = String.valueOf(clientInfo);
 		if (clientInfo == 0) {
-			message = logsError(CPConstants.LOCAL_SERVER_ID, CPConstants.ERROR_TYPE_SERVER, String.format("系统中不存在clientCode=%s clientKey=%s 的客户端", clientCode, clientKey));
+			message = logsError(CPConstants.LOCAL_SERVER_ID,
+					CPConstants.ERROR_TYPE_SERVER, String.format(
+							"系统中不存在clientCode=%s clientKey=%s 的客户端",
+							clientCode, clientKey));
 		}
 		return message;
 
@@ -321,8 +395,10 @@ public class CarRpcServiceImpl implements CarRpcService {
 	 * @return
 	 */
 	private String logsError(int clientId, String errorType, String detail) {
-		log.info(String.format("开始客户端:%s 错误 类型:%s  内容:%s", clientId, errorType, detail));
-		IService errorService = (IService) SpringBeanLoader.getSpringBean("errorService");
+		log.info(String.format("开始客户端:%s 错误 类型:%s  内容:%s", clientId, errorType,
+				detail));
+		IService errorService = (IService) SpringBeanLoader
+				.getSpringBean("errorService");
 		ErrorVo vo = new ErrorVo();
 		vo.setClientId(clientId);
 		vo.setCreateTime(new Date());
@@ -349,7 +425,8 @@ public class CarRpcServiceImpl implements CarRpcService {
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private ClientVo validClientInfo(String clientCode, String clientKey) {
-		IService clientService = (IService) SpringBeanLoader.getSpringBean("clientService");
+		IService clientService = (IService) SpringBeanLoader
+				.getSpringBean("clientService");
 		Dto pDto = new BaseDto();
 		pDto.put("clientCode", clientCode);
 		pDto.put("clientKey", clientKey);
@@ -369,7 +446,8 @@ public class CarRpcServiceImpl implements CarRpcService {
 	 */
 	@SuppressWarnings("unchecked")
 	private void logClientAction(int clientId, String action) {
-		IService<ClientVo> clientService = (IService) SpringBeanLoader.getSpringBean("clientService");
+		IService<ClientVo> clientService = (IService) SpringBeanLoader
+				.getSpringBean("clientService");
 		Dto pDto = new BaseDto();
 		pDto.put("clientId", clientId);
 		ClientVo vo = clientService.queryById(pDto);
