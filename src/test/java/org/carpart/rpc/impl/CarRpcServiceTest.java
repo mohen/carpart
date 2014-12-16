@@ -99,7 +99,7 @@ public class CarRpcServiceTest {
 	 * .
 	 */
 	@Test
-	public final void testAddNewUser() {
+	public final void testSaveCustomInfo() {
 		String wxName = "测试1";
 		String wxCode = "test1";
 		String carCode = "桂A-A8G90";
@@ -110,7 +110,7 @@ public class CarRpcServiceTest {
 		String email = "4858485@163.com";
 
 		String city = "4501";
-		String message = service.addNewUser(wxName, wxCode, carCode, city, trueName, phone, address, certCode, email, clientCode, clientKey);
+		String message = service.saveCustomInfo(wxName, wxCode, carCode, city, trueName, phone, address, certCode, email, clientCode, clientKey);
 		System.err.println(message);
 		Assert.assertNotNull(message);
 	}

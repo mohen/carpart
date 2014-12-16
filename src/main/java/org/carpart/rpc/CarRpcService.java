@@ -29,7 +29,58 @@ public interface CarRpcService {
 	 * @return success表示 成功 其他为系统错误码 格式如:ERR_1000@错误描述
 	 */
 
-	public String addNewUser(String name, String wxCode, String city, String carCode, String trueName, String phone, String address, String certCode, String email, String clientCode, String clientKey);
+	public String addCustomInfo(String name, String wxCode, String city, String clientCode, String clientKey);
+
+	/**
+	 * 新增 微信客户 用于微信端客户关注注册后调用
+	 * 
+	 * @param name
+	 *            微信昵称 必填
+	 * @param wxCode
+	 *            微信号 必填
+	 * @param city
+	 *            城市区号前4位  必填
+	 * @param carCode
+	 *            车牌号 选填
+	 * @param trueName
+	 *            真实姓名 选填
+	 * @param phone
+	 *            联系电话 选填
+	 * @param address
+	 *            家庭住址 选填
+	 * @param certCode
+	 *            身份证号 选填
+	 * @param email
+	 *            电子邮件 选填
+	 * @return success表示 成功 其他为系统错误码 格式如:ERR_1000@错误描述
+	 */
+
+	public String addNewUser(String name, String wxCode, String city, String clientCode, String clientKey);
+	/**
+	 * 更新或者保存 微信客户 用于微信端客户关注注册后调用
+	 * 
+	 * @param name
+	 *            微信昵称 必填
+	 * @param wxCode
+	 *            微信号 必填
+	 * @param city
+	 *            城市区号前4位  必填
+	 * @param carCode
+	 *            车牌号 选填
+	 * @param trueName
+	 *            真实姓名 选填
+	 * @param phone
+	 *            联系电话 选填
+	 * @param address
+	 *            家庭住址 选填
+	 * @param certCode
+	 *            身份证号 选填
+	 * @param email
+	 *            电子邮件 选填
+	 * @return success表示 成功 其他为系统错误码 格式如:ERR_1000@错误描述
+	 */
+
+	public String saveCustomInfo(String name, String wxCode, String city, String carCode, String trueName, String phone, String address, String certCode, String email, String clientCode, String clientKey);
 
 	/**
 	 * 停车场列表 用于罗列 合作停车场地图列表
@@ -48,6 +99,21 @@ public interface CarRpcService {
 	 *         上限1000元</feeRulesDesc>--计费规则 </part> </parts>
 	 */
 	public String listCarPart2Xml(String cityCode, String clientCode, String clientKey);
+	/**
+	 * 停车场列表 用于罗列 合作停车场地图列表
+	 * @param partMapLb
+	 * @return xml表示 成功 其他为系统错误码 格式如:ERR_1000 格式如下: <parts> <part>
+	 *         <name>万象城</name>--名字 <location>108.398348,22.81765</location> --
+	 *         经纬度 <address>青秀区民族大道136号 </address> --地址
+	 *         <officeTime>全天</officeTime> --营业时间 <feeRulesDesc>前半小时免费 以三小时刻度
+	 *         每刻度5元 不满三小时 按一刻度计算 上限1000元</feeRulesDesc>--计费规则 </part> <part>
+	 *         <name>国贸购物中心</name>
+	 *         <location>108.330165,22.819499</location>--经纬度
+	 *         <address>民族共和路口民族大道41号</address> --地址 <officeTime>全天</officeTime>
+	 *         --营业时间 <feeRulesDesc>前半小时免费 以三小时刻度 每刻度5元 不满三小时 按一刻度计算
+	 *         上限1000元</feeRulesDesc>--计费规则 </part> </parts>
+	 */
+	public String queryCarPart2Xml(String partMapLb, String clientCode, String clientKey);
 
 	/**
 	 * 获取订单状态
@@ -58,9 +124,19 @@ public interface CarRpcService {
 	 *         70 -免费停放 80 -销账 90 -已记账 其他为系统错误码 格式如:ERR_1000
 	 */
 	public String queryOrderStatus(String orderCode, String clientCode, String clientKey);
-
+	
 	/**
-	 * 获取订单需要支付费用
+	 * 
+	 * @param orderCode
+	 * @param clientCode
+	 * @param clientKey
+	 * @return
+	 */
+	//public String confirmTopayAndout(String orderCode, String clientCode, String clientKey);
+
+	//public String queryOrderstatusTopayOut(String orderCode, String clientCode, String clientKey);
+	/**
+	 * 获取订单还需要支付费用
 	 * 
 	 * @param orderCode
 	 * @return 还需要支付的金额
