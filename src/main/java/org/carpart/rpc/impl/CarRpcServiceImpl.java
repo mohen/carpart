@@ -35,17 +35,8 @@ public class CarRpcServiceImpl implements CarRpcService {
 			IService<OrderVo> orderService = (IService) SpringBeanLoader.getSpringBean("orderService");
 			Dto pDto = new BaseDto();
 			pDto.put("orderCode", orderCode);
-			try {
-				OrderVo vo = orderService.queryById(pDto);
-				if (vo == null) {
-					message = logsError(Integer.valueOf(message), CPConstants.ERROR_TYPE_CLIENT, String.format("查询订单:%s不存在!", orderCode));
-				} else {
-					message = vo.getStatus();
-				}
-			} catch (Exception e) {
-				message = logsError(Integer.valueOf(message), CPConstants.ERROR_TYPE_CLIENT, String.format("查询订单:%s错误:" + e.getMessage(), orderCode));
-			}
-
+			OrderVo vo = orderService.queryById(pDto);
+			message = vo.getStatus();
 		}
 		return message;
 	}
@@ -74,59 +65,11 @@ public class CarRpcServiceImpl implements CarRpcService {
 	}
 
 	/**
-	 * 更新或者保存用户信息
+	 * 增加新用户
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public String saveCustomInfo(String wxName, String wxCode, String city, String carCode, String trueName, String phone, String address, String certCode, String email, String clientCode, String clientKey) {
-		String message = loginValid(clientCode, clientKey);
-		if (!message.startsWith("ERR")) {
-			this.logClientAction(Integer.valueOf(message), String.format("新增用户:%s信息", wxCode));
-			int clientId = Integer.valueOf(message);
-			Dto pDto = new BaseDto();
-			IService<CustomVo> customService = (IService<CustomVo>) SpringBeanLoader.getSpringBean("customService");
-			pDto.put("wxCode", wxCode);
-			CustomVo vo = new CustomVo();
-			vo.setWxName(wxName);
-			vo.setWxCode(wxCode);
-			vo.setCarCode(carCode);
-			vo.setCity(city);
-			vo.setTrueName(trueName);
-			vo.setPhone(phone);
-			vo.setAddress(address);
-			vo.setCertCode(certCode);
-			vo.setEmail(email);
-			vo.setStatus("1");
-			Dto pToDto = new BaseDto();
-			int count = customService.queryCount(pDto);
-			if (count > 0) {
-				G4Utils.copyPropFromBean2Dto(vo, pToDto);
-				customService.update(pToDto);
-				if (pToDto.getAsInteger("cusId") > 0) {
-					message = CPConstants.RETURN_TRUE;
-				} else {
-					message = logsError(clientId, CPConstants.ERROR_TYPE_SERVER, String.format("更新wxCode=%s 的客户 产生数据库错误", wxCode));
-				}
-			} else {
-				vo.setRegTime(new Date());
-				G4Utils.copyPropFromBean2Dto(vo, pToDto);
-				customService.save(pToDto);
-				if (pToDto.getAsInteger("cusId") > 0) {
-					message = CPConstants.RETURN_TRUE;
-				} else {
-					message = logsError(clientId, CPConstants.ERROR_TYPE_SERVER, String.format("新增wxCode=%s 的客户 产生数据库错误", wxCode));
-				}
-			}
-		}
-		return message;
-	}
-
-	/**
-	 * 新增用户信息
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public String addCustomInfo(String wxName, String wxCode, String city, String clientCode, String clientKey) {
+	public String addNewUser(String wxName, String wxCode, String city, String carCode, String trueName, String phone, String address, String certCode, String email, String clientCode, String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
 			this.logClientAction(Integer.valueOf(message), String.format("新增用户:%s信息", wxCode));
@@ -141,44 +84,13 @@ public class CarRpcServiceImpl implements CarRpcService {
 				CustomVo vo = new CustomVo();
 				vo.setWxName(wxName);
 				vo.setWxCode(wxCode);
+				vo.setCarCode(carCode);
 				vo.setCity(city);
-				vo.setStatus("1");
-				vo.setRegTime(new Date());
-				Dto pToDto = new BaseDto();
-				G4Utils.copyPropFromBean2Dto(vo, pToDto);
-				customService.save(pToDto);
-				if (pToDto.getAsInteger("cusId") > 0) {
-					message = CPConstants.RETURN_TRUE;
-				} else {
-					message = logsError(clientId, CPConstants.ERROR_TYPE_SERVER, String.format("新增wxCode=%s 的客户 产生数据库错误", wxCode));
-				}
-			}
-		}
-		return message;
-	}
-
-	/**
-	 * 新增用户信息
-	 */
-	@Deprecated
-	@SuppressWarnings("unchecked")
-	@Override
-	public String addNewUser(String wxName, String wxCode, String city, String clientCode, String clientKey) {
-		String message = loginValid(clientCode, clientKey);
-		if (!message.startsWith("ERR")) {
-			this.logClientAction(Integer.valueOf(message), String.format("新增用户:%s信息", wxCode));
-			int clientId = Integer.valueOf(message);
-			Dto pDto = new BaseDto();
-			IService customService = (IService) SpringBeanLoader.getSpringBean("customService");
-			pDto.put("wxCode", wxCode);
-			int count = customService.queryCount(pDto);
-			if (count > 0) {
-				message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("系统已经存在wxCode=%s 的客户", wxCode));
-			} else {
-				CustomVo vo = new CustomVo();
-				vo.setWxName(wxName);
-				vo.setWxCode(wxCode);
-				vo.setCity(city);
+				vo.setTrueName(trueName);
+				vo.setPhone(phone);
+				vo.setAddress(address);
+				vo.setCertCode(certCode);
+				vo.setEmail(email);
 				vo.setStatus("1");
 				vo.setRegTime(new Date());
 				Dto pToDto = new BaseDto();
@@ -202,7 +114,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 			this.logClientAction(Integer.valueOf(message), String.format("查询城市合作停车场列表:%s信息", cityCode));
 			IService<ParkVo> parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
 			Dto pDto = new BaseDto();
-			pDto.put("city", cityCode);
+			pDto.put("cityCode", cityCode);
 			List list = parkService.queryByList(pDto);
 			message = XmlHelper.parseList2Xml2(list, "parks", "park");
 		}
@@ -248,8 +160,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 				OrderVo vo = new OrderVo();
 				Date date = new Date();
 				vo.setCreateTime(date);
-				String orderCode = IDHelper.getInstance().generatOrderCode();
-				vo.setOrderCode(orderCode);
+				vo.setOrderCode(IDHelper.getInstance().generatOrderCode());
 				vo.setCusId(cusId);
 				vo.setParkId(parkId);
 				vo.setFeeAmount(0f);
@@ -260,14 +171,8 @@ public class CarRpcServiceImpl implements CarRpcService {
 				vo.setStatus(CPConstants.ORDER_STATUS_PRE_REG);
 				pDto.clear();
 				G4Utils.copyPropFromBean2Dto(vo, pDto);
-				try {
-					orderService.save(pDto);
-					message = orderCode;
-				} catch (Exception e) {
-					message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("订单心中错误:" + e.getMessage(), wxCode));
-					success = false;
-				}
-
+				orderService.save(pDto);
+				message = CPConstants.RETURN_TRUE;
 			}
 
 		}
@@ -296,7 +201,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 			Date startTime = vo.getStartPartTime();
 			Object endTime = pDto.get("endPartTime");
 			if (startTime != null && endTime != null) {
-				int minute = G4Utils.getIntervalMinute(startTime, (Date) endTime);
+				int minute = G4Utils.getIntervalMinute(startTime,(Date) endTime);
 				if (vo.getPartTimes().intValue() != minute) {
 					pDto.put("partTimes", minute);
 				}
@@ -473,12 +378,6 @@ public class CarRpcServiceImpl implements CarRpcService {
 
 	public void exeNeedPayMoney(String orderCode) {
 
-	}
-
-	@Override
-	public String queryCarPart2Xml(String partMapLb, String clientCode, String clientKey) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }
