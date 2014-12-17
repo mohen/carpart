@@ -114,7 +114,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 			this.logClientAction(Integer.valueOf(message), String.format("查询城市合作停车场列表:%s信息", cityCode));
 			IService<ParkVo> parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
 			Dto pDto = new BaseDto();
-			pDto.put("cityCode", cityCode);
+			pDto.put("city", cityCode);
 			List list = parkService.queryByList(pDto);
 			message = XmlHelper.parseList2Xml2(list, "parks", "park");
 		}
