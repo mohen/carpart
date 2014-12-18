@@ -29,7 +29,7 @@ public class OrderVo extends BaseVo {
 	 */
 	private java.lang.Integer cusId;
 	/**
-	 * wxCode
+	 * wxCode 
 	 */
 	private java.lang.Integer wxCode;
 	/**
