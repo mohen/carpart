@@ -31,7 +31,7 @@ public class OrderVo extends BaseVo {
 	/**
 	 * wxCode 
 	 */
-	private java.lang.Integer wxCode;
+	private java.lang.String  wxCode;
 	/**
 	 * 停车场
 	 */
@@ -394,11 +394,11 @@ public class OrderVo extends BaseVo {
 		this.cusName = cusName;
 	}
 
-	public java.lang.Integer getWxCode() {
+	public java.lang.String getWxCode() {
 		return wxCode;
 	}
 
-	public void setWxCode(java.lang.Integer wxCode) {
+	public void setWxCode(java.lang.String wxCode) {
 		this.wxCode = wxCode;
 	}
 

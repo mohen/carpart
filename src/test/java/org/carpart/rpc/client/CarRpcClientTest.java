@@ -72,12 +72,18 @@ public class CarRpcClientTest {
 	 */
 	@Test
 	public final void testQueryOrderStatus() {
-		String orderCode = "DT20141124104254DD100000041";
+		String orderCode = "DT20141126171011DD10000013";
 		String message = service.queryOrderStatus(orderCode, clientCode, clientKey);
 		System.err.println(message);
 		Assert.assertNotNull(message);
 	}
-
+	@Test
+	public final void testCancelNewOrder() {
+		String orderCode = "DT20141126171011DD10000013";
+		String message = service.cancelNewOrder(orderCode, clientCode, clientKey);
+		System.err.println(message);
+		Assert.assertNotNull(message);
+	}
 	/**
 	 * Test method for
 	 * {@link org.carpart.rpc.impl.CarRpcServiceImpl#queryOrderFee(java.lang.String, java.lang.String, java.lang.String)}
@@ -138,10 +144,9 @@ public class CarRpcClientTest {
 	 */
 	@Test
 	public final void testListCarPart2Xml() {
-		String message = service.listCarPart2Xml("5101", clientCode, clientKey);
+		String message = service.listCarPart2Xml("成都", clientCode, clientKey);
 		System.err.println(message);
 		Assert.assertNotNull(message);
-
 	}
 
 	/**

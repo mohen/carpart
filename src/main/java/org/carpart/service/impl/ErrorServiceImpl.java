@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.carpart.vo.ClientVo;
 import org.carpart.vo.ErrorVo;
 import org.g4studio.common.service.impl.BaseServiceImpl;
 import org.g4studio.core.metatype.Dto;
@@ -55,7 +56,10 @@ public class ErrorServiceImpl extends BaseServiceImpl implements IService<ErrorV
 		g4Dao.update(VO_NAME + ".update", vo);
 		return pDto;
 	}
-
+	@Override
+	public int update(ErrorVo vo) {
+		return g4Dao.update(VO_NAME + ".update", vo);
+	}
 	@Override
 	public Dto delete(Dto pDto) {
 		g4Dao.delete(VO_NAME + ".delete", pDto);

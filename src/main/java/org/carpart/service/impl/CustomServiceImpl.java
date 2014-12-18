@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.carpart.service.IService;
+import org.carpart.vo.ClientVo;
 import org.carpart.vo.CustomVo;
 import org.g4studio.common.service.impl.BaseServiceImpl;
 import org.g4studio.core.metatype.Dto;
@@ -53,7 +54,10 @@ public class CustomServiceImpl extends BaseServiceImpl implements IService<Custo
 		g4Dao.update(VO_NAME + ".update", vo);
 		return pDto;
 	}
-
+	@Override
+	public int update(CustomVo vo) {
+		return g4Dao.update(VO_NAME + ".update", vo);
+	}
 	@Override
 	public Dto delete(Dto pDto) {
 		g4Dao.delete(VO_NAME + ".delete", pDto);
