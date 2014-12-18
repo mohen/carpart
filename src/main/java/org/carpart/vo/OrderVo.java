@@ -37,6 +37,10 @@ public class OrderVo extends BaseVo {
 	 */
 	private String parkName;
 	/**
+	 * 经纬度
+	 */
+	private java.lang.String mapLb;
+	/**
 	 * 微信昵称
 	 */
 	private String cusName;
@@ -208,6 +212,14 @@ public class OrderVo extends BaseVo {
 	 */
 	public void setEndPartTime(java.util.Date value) {
 		this.endPartTime = value;
+	}
+
+	public java.lang.String getMapLb() {
+		return mapLb;
+	}
+
+	public void setMapLb(java.lang.String mapLb) {
+		this.mapLb = mapLb;
 	}
 
 	/**
