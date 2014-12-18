@@ -5,6 +5,7 @@
 
 package org.carpart.vo;
 
+import org.apache.commons.lang.StringUtils;
 import org.g4studio.core.metatype.BaseVo;
 import org.g4studio.core.util.G4Constants;
 import org.g4studio.core.util.G4Utils;
@@ -164,6 +165,7 @@ public class OrderVo extends BaseVo {
 	 *            - String
 	 */
 	public void setStartPartTimeString(String value) {
+		if(StringUtils.isNotBlank(value))
 		setStartPartTime(G4Utils.stringToDate(value, G4Constants.FORMAT_DateTime, G4Constants.FORMAT_DateTime));
 	}
 
@@ -193,7 +195,8 @@ public class OrderVo extends BaseVo {
 	 *            - String
 	 */
 	public void setEndPartTimeString(String value) {
-		setEndPartTime(G4Utils.stringToDate(value, G4Constants.FORMAT_DateTime, G4Constants.FORMAT_DateTime));
+		if (StringUtils.isNotBlank(value))
+			setEndPartTime(G4Utils.stringToDate(value, G4Constants.FORMAT_DateTime, G4Constants.FORMAT_DateTime));
 	}
 
 	/**
