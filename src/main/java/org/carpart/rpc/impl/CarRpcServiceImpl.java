@@ -146,12 +146,17 @@ public class CarRpcServiceImpl implements CarRpcService {
 				vo.setRegTime(new Date());
 				Dto pToDto = new BaseDto();
 				G4Utils.copyPropFromBean2Dto(vo, pToDto);
-				customService.save(pToDto);
-				if (pToDto.getAsInteger("cusId") > 0) {
-					message = CPConstants.RETURN_TRUE;
-				} else {
-					message = logsError(clientId, CPConstants.ERROR_TYPE_SERVER, String.format("新增wxCode=%s 的客户 产生数据库错误", wxCode));
+				try {
+					customService.save(pToDto);
+					if (pToDto.getAsInteger("cusId") > 0) {
+						message = CPConstants.RETURN_TRUE;
+					} else {
+						message = logsError(clientId, CPConstants.ERROR_TYPE_SERVER, String.format("新增wxCode=%s 的客户 产生数据库错误", wxCode));
+					}
+				} catch (Exception e) {
+					message = logsError(clientId, CPConstants.ERROR_TYPE_SERVER, String.format("新增wxCode=%s 的客户 产生异常:" + e.getMessage(), wxCode));
 				}
+
 			}
 		}
 		return message;
