@@ -33,6 +33,10 @@ public class OrderVo extends BaseVo {
 	 */
 	private java.lang.String  wxCode;
 	/**
+	 * mapLb 
+	 */
+	private java.lang.String  mapLb;
+	/**
 	 * 停车场
 	 */
 	private String parkName;
@@ -404,6 +408,14 @@ public class OrderVo extends BaseVo {
 
 	public void setParkName(String parkName) {
 		this.parkName = parkName;
+	}
+
+	public java.lang.String getMapLb() {
+		return mapLb;
+	}
+
+	public void setMapLb(java.lang.String mapLb) {
+		this.mapLb = mapLb;
 	}
 
 }
