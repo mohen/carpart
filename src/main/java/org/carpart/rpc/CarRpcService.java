@@ -55,7 +55,7 @@ public interface CarRpcService {
 	 * @return success表示 成功 其他为系统错误码 格式如:ERR_1000@错误描述
 	 */
 
-	public String addNewUser(String name, String wxCode, String city, String clientCode, String clientKey);
+	public String addNewUser(String name, String wxCode, String city, String carCode, String trueName, String phone, String address, String certCode, String email, String clientCode, String clientKey);
 	/**
 	 * 更新或者保存 微信客户 用于微信端客户关注注册后调用
 	 * 

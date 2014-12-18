@@ -122,7 +122,15 @@ public class CarRpcClientTest {
 		System.err.println(message);
 		Assert.assertNotNull(message);
 	}
-
+	@Test
+	public final void testAddCustomInfo() {
+		String wxName = "成都测试1";
+		String wxCode = "9328429";
+		String city = "成都";
+		String message = service.addCustomInfo(wxName, wxCode, city,  clientCode, clientKey);
+		System.err.println(message);
+		Assert.assertNotNull(message);
+	}
 	/**
 	 * Test method for
 	 * {@link org.carpart.rpc.impl.CarRpcServiceImpl#listCarPart2Xml(java.lang.String, java.lang.String, java.lang.String)}
