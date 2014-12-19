@@ -539,4 +539,31 @@ public class CarRpcServiceImpl implements CarRpcService {
 		return message;
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public String queryParkInfo(String mapLb, String clientCode, String clientKey) {
+		String message = loginValid(clientCode, clientKey);
+		if (!message.startsWith("ERR")) {
+			int clientId = Integer.valueOf(message);
+			this.logClientAction(clientId, String.format("查询停车场:%s信息", mapLb));
+			IService<ParkVo> parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
+			Dto pDto = new BaseDto();
+			pDto.put("mapLb", mapLb);
+			List list = parkService.queryByList(pDto);
+			int parkId = 0;
+			boolean success = list.size() > 0;
+			ParkVo vo = new ParkVo();
+			if (success) {
+				vo = (ParkVo) list.get(0);
+			} else {
+				message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("系统不存在坐标为:%s的停车场", mapLb));
+				success = false;
+			}
+			Dto dto = new BaseDto();
+			G4Utils.copyPropFromBean2Dto(vo, dto);
+			message = XmlHelper.parseDto2Xml(dto, "park");
+		}
+		return message;
+	}
+
 }
