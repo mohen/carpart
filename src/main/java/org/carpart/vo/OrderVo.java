@@ -41,6 +41,43 @@ public class OrderVo extends BaseVo {
 	 */
 	private java.lang.String mapLb;
 	/**
+	 * 地址
+	 */
+	private java.lang.String address;
+	/**
+	 * 计费规则说明
+	 */
+	private java.lang.String rulesDesc;
+	
+	/**
+	 * 营业时间
+	 */
+	private java.lang.String officeTime;
+	public java.lang.String getAddress() {
+		return address;
+	}
+
+	public void setAddress(java.lang.String address) {
+		this.address = address;
+	}
+
+	public java.lang.String getRulesDesc() {
+		return rulesDesc;
+	}
+
+	public void setRulesDesc(java.lang.String rulesDesc) {
+		this.rulesDesc = rulesDesc;
+	}
+
+	public java.lang.String getOfficeTime() {
+		return officeTime;
+	}
+
+	public void setOfficeTime(java.lang.String officeTime) {
+		this.officeTime = officeTime;
+	}
+
+	/**
 	 * 微信昵称
 	 */
 	private String cusName;

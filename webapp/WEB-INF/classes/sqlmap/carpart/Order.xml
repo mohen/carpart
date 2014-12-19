@@ -10,6 +10,9 @@
 		<result property="wxCode" column="WX_CODE" />
 		<result property="parkName" column="PARK_NAME" />
 		<result property="mapLb" column="MAP_LB" />
+		<result property="address" column="ADDRESS" />
+		<result property="officeTime" column="OFFICE_TIME" />
+		<result property="rulesDesc" column="RULES_DESC" />
 		<result property="cusName" column="CUS_NAME" />
 		<result property="createTime" column="CREATE_TIME" />
 		<result property="startPartTime" column="START_PART_TIME" />
@@ -27,7 +30,7 @@
 	<!-- 用于select查询公用抽取的列 -->
 	<sql id="Order.columns">
 	    <![CDATA[
-        o.ORDER_CODE ,o.PARK_ID ,o.CUS_ID ,o.CREATE_TIME ,o.START_PART_TIME ,o.END_PART_TIME ,o.PART_TIMES ,o.VALID_TIMES ,o.FEE_AMOUNT ,o.NEED_AMOUNT ,o.PAY_AMOUNT ,o.ORDER_LOGS ,o.MEMO ,o.STATUS,p.park_name,c.wx_name cus_name,c.WX_CODE WX_CODE,p.MAP_LB MAP_LB 
+        o.ORDER_CODE ,o.PARK_ID ,o.CUS_ID ,o.CREATE_TIME ,o.START_PART_TIME ,o.END_PART_TIME ,o.PART_TIMES ,o.VALID_TIMES ,o.FEE_AMOUNT ,o.NEED_AMOUNT ,o.PAY_AMOUNT ,o.ORDER_LOGS ,o.MEMO ,o.STATUS,p.park_name,c.wx_name cus_name,c.WX_CODE WX_CODE,p.MAP_LB MAP_LB ,p.ADDRESS ADDRESS ,p.OFFICE_TIME OFFICE_TIME ,p.RULES_DESC RULES_DESC
 	    ]]>
 	</sql>
 
