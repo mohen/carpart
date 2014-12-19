@@ -7,5 +7,7 @@ package org.g4studio.common.service;
  * @since 2009-07-21
  */
 public interface BaseService {
+
 	public void rollback(String action);
+
 }
