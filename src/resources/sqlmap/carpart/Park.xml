@@ -14,6 +14,7 @@
 		<result property="mapLb" column="MAP_LB" />
 		<result property="memo" column="MEMO" />
 		<result property="status" column="STATUS" />
+		<result property="disDetail" column="DIS_DETAIL" />
 	</resultMap>
 		<select id="Park.findParkNameById" parameterClass="java.lang.Long" resultClass="java.lang.String" >  
     	SELECT
@@ -26,7 +27,7 @@
 	<!-- 用于select查询公用抽取的列 -->
 	<sql id="Park.columns">
 	    <![CDATA[
-        PARK_ID ,PARK_NAME ,ADDRESS ,CITY ,OFFICE_TIME ,FEE_RULES ,RULES_DESC ,MAP_LB ,MEMO ,STATUS 
+        PARK_ID ,PARK_NAME ,ADDRESS ,CITY ,OFFICE_TIME ,FEE_RULES ,RULES_DESC ,MAP_LB ,MEMO ,DIS_DETAIL,STATUS 
 	    ]]>
 	</sql>
 

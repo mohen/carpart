@@ -1,13 +1,9 @@
 package org.g4studio.common.service.impl;
 
-import java.sql.SQLException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.carpart.rpc.impl.CarRpcServiceImpl;
 import org.g4studio.common.dao.Dao;
 import org.g4studio.common.service.BaseService;
-import org.g4studio.core.metatype.BaseVo;
 import org.g4studio.core.properties.PropertiesFactory;
 import org.g4studio.core.properties.PropertiesFile;
 import org.g4studio.core.properties.PropertiesHelper;
@@ -38,10 +34,11 @@ public class BaseServiceImpl implements BaseService {
 	public void rollback(String action) {
 		try {
 			if (this.g4Dao != null) {
-				//this.g4Dao.getConnection().rollback();
+				 this.g4Dao.getConnection().rollback();
 			}
 		} catch (Exception e) {
-			log.error(String.format("操作:%s  ->数据库回滚异常:",action), e);
+			log.error(String.format("操作:%s  ->数据库回滚异常:", action), e);
 		}
 	}
+
 }

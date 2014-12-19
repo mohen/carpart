@@ -50,6 +50,10 @@ public class ParkVo extends BaseVo {
 	 */
 	private java.lang.String mapLb;
 	/**
+	 * 信息
+	 */
+	private java.lang.String disDetail;
+	/**
 	 * 备注信息
 	 */
 	private java.lang.String memo;
@@ -208,6 +212,14 @@ public class ParkVo extends BaseVo {
 
 	public Set<OrderVo> getOrderVos() {
 		return orderVos;
+	}
+
+	public java.lang.String getDisDetail() {
+		return disDetail;
+	}
+
+	public void setDisDetail(java.lang.String disDetail) {
+		this.disDetail = disDetail;
 	}
 
 }

@@ -29,17 +29,55 @@ public class OrderVo extends BaseVo {
 	 */
 	private java.lang.Integer cusId;
 	/**
-	 * wxCode 
+	 * wxCode
 	 */
-	private java.lang.String  wxCode;
-	/**
-	 * mapLb 
-	 */
-	private java.lang.String  mapLb;
+	private java.lang.String wxCode;
 	/**
 	 * 停车场
 	 */
 	private String parkName;
+	/**
+	 * 经纬度
+	 */
+	private java.lang.String mapLb;
+	/**
+	 * 地址
+	 */
+	private java.lang.String address;
+	/**
+	 * 计费规则说明
+	 */
+	private java.lang.String rulesDesc;
+
+	/**
+	 * 营业时间
+	 */
+	private java.lang.String officeTime;
+
+	public java.lang.String getAddress() {
+		return address;
+	}
+
+	public void setAddress(java.lang.String address) {
+		this.address = address;
+	}
+
+	public java.lang.String getRulesDesc() {
+		return rulesDesc;
+	}
+
+	public void setRulesDesc(java.lang.String rulesDesc) {
+		this.rulesDesc = rulesDesc;
+	}
+
+	public java.lang.String getOfficeTime() {
+		return officeTime;
+	}
+
+	public void setOfficeTime(java.lang.String officeTime) {
+		this.officeTime = officeTime;
+	}
+
 	/**
 	 * 微信昵称
 	 */
@@ -144,7 +182,8 @@ public class OrderVo extends BaseVo {
 	 *            - String
 	 */
 	public void setCreateTimeString(String value) {
-		setCreateTime(G4Utils.stringToDate(value, G4Constants.FORMAT_DateTime, G4Constants.FORMAT_DateTime));
+		if (StringUtils.isNotEmpty(value))
+			setCreateTime(G4Utils.stringToDate(value, G4Constants.FORMAT_DateTime, G4Constants.FORMAT_DateTime));
 	}
 
 	/**
@@ -173,8 +212,8 @@ public class OrderVo extends BaseVo {
 	 *            - String
 	 */
 	public void setStartPartTimeString(String value) {
-		if(StringUtils.isNotBlank(value))
-		setStartPartTime(G4Utils.stringToDate(value, G4Constants.FORMAT_DateTime, G4Constants.FORMAT_DateTime));
+		if (StringUtils.isNotBlank(value))
+			setStartPartTime(G4Utils.stringToDate(value, G4Constants.FORMAT_DateTime, G4Constants.FORMAT_DateTime));
 	}
 
 	/**
@@ -214,6 +253,14 @@ public class OrderVo extends BaseVo {
 		this.endPartTime = value;
 	}
 
+	public java.lang.String getMapLb() {
+		return mapLb;
+	}
+
+	public void setMapLb(java.lang.String mapLb) {
+		this.mapLb = mapLb;
+	}
+
 	/**
 	 * @return 出库时间
 	 */
@@ -247,7 +294,8 @@ public class OrderVo extends BaseVo {
 	 *            - String
 	 */
 	public void setValidTimesString(String value) {
-		setValidTimes(G4Utils.stringToDate(value, G4Constants.FORMAT_DateTime, G4Constants.FORMAT_DateTime));
+		if (StringUtils.isNotEmpty(value))
+			setValidTimes(G4Utils.stringToDate(value, G4Constants.FORMAT_DateTime, G4Constants.FORMAT_DateTime));
 	}
 
 	/**
@@ -408,14 +456,6 @@ public class OrderVo extends BaseVo {
 
 	public void setParkName(String parkName) {
 		this.parkName = parkName;
-	}
-
-	public java.lang.String getMapLb() {
-		return mapLb;
-	}
-
-	public void setMapLb(java.lang.String mapLb) {
-		this.mapLb = mapLb;
 	}
 
 }
