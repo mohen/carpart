@@ -5,12 +5,14 @@
 
 package org.carpart.service.impl;
 
+import org.carpart.CPException;
 import org.carpart.service.IService;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.carpart.vo.ClientVo;
 import org.carpart.vo.OrderVo;
 import org.g4studio.common.service.impl.BaseServiceImpl;
 import org.g4studio.core.metatype.Dto;
@@ -48,7 +50,7 @@ public class OrderServiceImpl extends BaseServiceImpl implements IService<OrderV
 	}
 
 	@Override
-	public Dto update(Dto pDto) {
+	public Dto update(Dto pDto){
 		OrderVo vo = new OrderVo();
 		G4Utils.copyPropFromDto2Bean(pDto, vo);
 		if (vo.getCusId() == null) {
@@ -59,7 +61,10 @@ public class OrderServiceImpl extends BaseServiceImpl implements IService<OrderV
 		g4Dao.update(VO_NAME + ".update", vo);
 		return pDto;
 	}
-
+	@Override
+	public int update(OrderVo vo) {
+		return g4Dao.update(VO_NAME + ".update", vo);
+	}
 	@Override
 	public Dto delete(Dto pDto) {
 		g4Dao.delete(VO_NAME + ".delete", pDto);

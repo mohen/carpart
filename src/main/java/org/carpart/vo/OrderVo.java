@@ -48,11 +48,12 @@ public class OrderVo extends BaseVo {
 	 * 计费规则说明
 	 */
 	private java.lang.String rulesDesc;
-	
+
 	/**
 	 * 营业时间
 	 */
 	private java.lang.String officeTime;
+
 	public java.lang.String getAddress() {
 		return address;
 	}
@@ -181,7 +182,8 @@ public class OrderVo extends BaseVo {
 	 *            - String
 	 */
 	public void setCreateTimeString(String value) {
-		setCreateTime(G4Utils.stringToDate(value, G4Constants.FORMAT_DateTime, G4Constants.FORMAT_DateTime));
+		if (StringUtils.isNotEmpty(value))
+			setCreateTime(G4Utils.stringToDate(value, G4Constants.FORMAT_DateTime, G4Constants.FORMAT_DateTime));
 	}
 
 	/**
@@ -210,8 +212,8 @@ public class OrderVo extends BaseVo {
 	 *            - String
 	 */
 	public void setStartPartTimeString(String value) {
-		if(StringUtils.isNotBlank(value))
-		setStartPartTime(G4Utils.stringToDate(value, G4Constants.FORMAT_DateTime, G4Constants.FORMAT_DateTime));
+		if (StringUtils.isNotBlank(value))
+			setStartPartTime(G4Utils.stringToDate(value, G4Constants.FORMAT_DateTime, G4Constants.FORMAT_DateTime));
 	}
 
 	/**
@@ -292,7 +294,8 @@ public class OrderVo extends BaseVo {
 	 *            - String
 	 */
 	public void setValidTimesString(String value) {
-		setValidTimes(G4Utils.stringToDate(value, G4Constants.FORMAT_DateTime, G4Constants.FORMAT_DateTime));
+		if (StringUtils.isNotEmpty(value))
+			setValidTimes(G4Utils.stringToDate(value, G4Constants.FORMAT_DateTime, G4Constants.FORMAT_DateTime));
 	}
 
 	/**

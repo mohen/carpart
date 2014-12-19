@@ -168,6 +168,14 @@ public class CarRpcServiceTest {
 		Assert.assertNotNull(message);
 	}
 
+	@Test
+	public final void testCancelNewOrder() {
+		String orderCode = "DT20141126172053DD10000015";
+		String message = service.cancelNewOrder(orderCode, clientCode, clientKey);
+		System.err.println(message);
+		Assert.assertNotNull(message);
+	}
+
 	/**
 	 * Test method for
 	 * {@link org.carpart.rpc.impl.CarRpcServiceImpl#fitOrderStatusToPayNotOut(java.lang.String, float, java.lang.String, java.lang.String)}
@@ -175,7 +183,7 @@ public class CarRpcServiceTest {
 	 */
 	@Test
 	public final void testFitOrderStatusToPayNotOut() {
-		String orderCode = "DT20141024162405DD10000003";
+		String orderCode = "DT20141126171921DD10000014";
 		String message = service.fitOrderStatusToPayNotOut(orderCode, 0, clientCode, clientKey);
 		System.err.println(message);
 		Assert.assertNotNull(message);
