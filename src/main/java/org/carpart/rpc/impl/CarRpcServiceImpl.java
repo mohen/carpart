@@ -237,7 +237,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 			IService customService = (IService) SpringBeanLoader.getSpringBean("customService");
 			IService orderService = (IService) SpringBeanLoader.getSpringBean("orderService");
 			Dto pDto = new BaseDto();
-			pDto.put("partMapLb", partMapLb);
+			pDto.put("mapLb", partMapLb);
 			List list = parkService.queryByList(pDto);
 			int parkId = 0;
 			boolean success = list.size() > 0;
