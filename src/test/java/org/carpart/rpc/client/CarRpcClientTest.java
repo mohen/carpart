@@ -79,7 +79,7 @@ public class CarRpcClientTest {
 	}
 	@Test
 	public final void testCancelNewOrder() {
-		String orderCode = "DT20141126171011DD10000013";
+		String orderCode = "DT20141126174120DD10000017";
 		String message = service.cancelNewOrder(orderCode, clientCode, clientKey);
 		System.err.println(message);
 		Assert.assertNotNull(message);
@@ -156,8 +156,8 @@ public class CarRpcClientTest {
 	 */
 	@Test
 	public final void testAddNewOrder() {
-		String wxCode = "mohen";
-		String partMapLb = "1000,2,323";
+		String wxCode = "j3WQt5iBVYfxyASmE5PJK8HqHkM";
+		String partMapLb = "104.075159,30.539867";
 		String message = service.addNewOrder(wxCode, partMapLb, clientCode, clientKey);
 		System.err.println(message);
 		Assert.assertNotNull(message);
@@ -175,7 +175,6 @@ public class CarRpcClientTest {
 		System.err.println(message);
 		Assert.assertNotNull(message);
 	}
-
 	/**
 	 * Test method for
 	 * {@link org.carpart.rpc.impl.CarRpcServiceImpl#fitOrderStatusToCancelIn(java.lang.String, java.lang.String, java.lang.String)}

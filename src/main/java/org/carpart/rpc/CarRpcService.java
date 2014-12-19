@@ -167,7 +167,7 @@ public interface CarRpcService {
 	 * @param orderCode
 	 * @param clientCode
 	 * @param clientKey
-	 * @return
+	 * @return  撤销成功返回success 错误返回 如 : ERR1000052@订单:DT20141126174120DD10000017#非预登记状态,不允许撤销!
 	 */
 	public String cancelNewOrder(String orderCode, String clientCode, String clientKey);
 
