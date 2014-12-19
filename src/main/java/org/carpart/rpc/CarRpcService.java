@@ -238,6 +238,9 @@ public interface CarRpcService {
 	 * 			<parkId>1</parkId>--停车场ID
 	 * 			<parkName>国贸商场</parkName>--停车场时间
 	 * 			<mapLb>108.398348,22.81765</mapLb> -- 经纬度
+	 * 			<address>民族大道</address>--地址
+	 * 			<officeTime>全天</officeTime>--营业时间
+	 * 			<rulesDesc>前半小时免费 以三小时刻度 每刻度5元 不满三小时 按一刻度计算 上限500元</rulesDesc>--计费规则
 	 * 			<partTimes>200</partTimes>--停泊时间 (分钟)
 	 * 			<feeAmount>0</feeAmount>--应付费用
 	 * 			<payAmount>0</payAmount>--已付费用
