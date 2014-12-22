@@ -148,6 +148,12 @@
 			<isNotEmpty prepend="AND" property="mapLb">
 				MAP_LB = #mapLb#
 			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="minMapLb">
+				MAP_LB >= #minMapLb#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="maxMapLb">
+			 <![CDATA[	MAP_LB <= #maxMapLb#   ]]>
+			</isNotEmpty>
 			<isNotEmpty prepend="AND" property="memo">
 				MEMO = #memo#
 			</isNotEmpty>

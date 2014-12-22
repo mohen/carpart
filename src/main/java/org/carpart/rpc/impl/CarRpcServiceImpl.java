@@ -228,6 +228,40 @@ public class CarRpcServiceImpl implements CarRpcService {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
+	public String listNearbyCarPart2Xml(String mabLb,int raidus, String clientCode, String clientKey) {
+		String message = loginValid(clientCode, clientKey);
+		if (!message.startsWith("ERR")) {
+			int clientId = Integer.valueOf(message);
+			this.logClientAction(clientId, String.format("查询经纬度:%s附件的停车场信息", mabLb));
+			IService<ParkVo> parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
+			Dto pDto = new BaseDto();
+			if (mabLb.indexOf(",") > 0) {
+				try {
+					double lat = Double.valueOf(mabLb.split(",")[0]);
+					double lon = Double.valueOf(mabLb.split(",")[1]);
+					double[] mapLbAround = G4Utils.getMapLbAround(lat, lon, raidus);
+					if (mapLbAround.length == 4) {
+						String minMapLb = String.format("%s,%s", mapLbAround[0], mapLbAround[1]);
+						pDto.put("minMapLb", minMapLb);
+						String maxMapLb = String.format("%s,%s", mapLbAround[2], mapLbAround[3]);
+						pDto.put("maxMapLb", maxMapLb);
+						List list = parkService.queryByList(pDto);
+						message = XmlHelper.parseList2Xml2(list, "parks", "park");
+					} else {
+						message = logsError(clientId, CPConstants.ERROR_TYPE_SERVER, String.format("获取坐标:%s 方圆1000米范围错误", mabLb));
+					}
+				} catch (Exception e) {
+					message = logsError(clientId, CPConstants.ERROR_TYPE_SERVER, String.format("坐标:%s的转换错误 必须为:数字,数字 如:103.98530660277922,30.909334238073832", mabLb));
+				}
+			} else {
+				message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("坐标:%s的格式错误 必须为:数字,数字 如:103.98530660277922,30.909334238073832", mabLb));
+			}
+		}
+		return message;
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
 	public String addNewOrder(String wxCode, String partMapLb, String clientCode, String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {

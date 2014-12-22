@@ -62,7 +62,24 @@ public class ParkVo extends BaseVo {
 	 * 缩略图信息
 	 */
 	private java.lang.String thumbnailUrl;
+	/**
+	 * 最小经纬度
+	 */
+	private java.lang.String minMapLb;
+	/**
+	 * 最大经纬度
+	 */
+	private java.lang.String maxMapLb;
+	
 	 
+	public void setMinMapLb(java.lang.String minMapLb) {
+		this.minMapLb = minMapLb;
+	}
+
+	public void setMaxMapLb(java.lang.String maxMapLb) {
+		this.maxMapLb = maxMapLb;
+	}
+
 	/**
 	 * 状态
 	 */
