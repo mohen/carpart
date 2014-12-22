@@ -228,7 +228,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public String listNearbyCarPart2Xml(String mabLb,int raidus, String clientCode, String clientKey) {
+	public String listNearbyCarPart2Xml(String mabLb, int raidus, String clientCode, String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
 			int clientId = Integer.valueOf(message);
@@ -239,6 +239,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 				try {
 					double lat = Double.valueOf(mabLb.split(",")[0]);
 					double lon = Double.valueOf(mabLb.split(",")[1]);
+					raidus = raidus < 1000 ? 1000 : raidus;
 					double[] mapLbAround = G4Utils.getMapLbAround(lat, lon, raidus);
 					if (mapLbAround.length == 4) {
 						String minMapLb = String.format("%s,%s", mapLbAround[0], mapLbAround[1]);
@@ -251,7 +252,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 						message = logsError(clientId, CPConstants.ERROR_TYPE_SERVER, String.format("获取坐标:%s 方圆1000米范围错误", mabLb));
 					}
 				} catch (Exception e) {
-					message = logsError(clientId, CPConstants.ERROR_TYPE_SERVER, String.format("坐标:%s的转换错误 必须为:数字,数字 如:103.98530660277922,30.909334238073832", mabLb));
+					message = logsError(clientId, CPConstants.ERROR_TYPE_SERVER, String.format("坐标:%s的转换错误:%s   必须为:数字,数字 如:103.98530660277922,30.909334238073832", mabLb, e.getMessage()));
 				}
 			} else {
 				message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("坐标:%s的格式错误 必须为:数字,数字 如:103.98530660277922,30.909334238073832", mabLb));

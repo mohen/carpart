@@ -103,7 +103,7 @@ public interface CarRpcService {
 	public String listCarPart2Xml(String cityCode, String clientCode, String clientKey);
 	
 	/**
-	 * 停车场列表 用于罗列 合作停车场地图列表
+	 * 获取经纬度附近半径内的 合作停车场地图列表
 	 * 
 	 * @param mapLb
 	 *            经纬度
