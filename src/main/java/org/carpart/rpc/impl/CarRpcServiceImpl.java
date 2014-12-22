@@ -23,10 +23,13 @@ import org.g4studio.core.metatype.impl.BaseDto;
 import org.g4studio.core.util.G4Utils;
 import org.g4studio.core.xml.XmlHelper;
 
+import bsh.Interpreter;
+
 @WebService
 public class CarRpcServiceImpl implements CarRpcService {
 	private static Log log = LogFactory.getLog(CarRpcServiceImpl.class);
 
+	private static int systemId=1;
 	@SuppressWarnings("unchecked")
 	@Override
 	public String queryOrderStatus(String orderCode, String clientCode, String clientKey) {
@@ -55,7 +58,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 	@Override
 	public double queryOrderFee(String orderCode, String clientCode, String clientKey) {
 		String message = loginValid(clientCode, clientKey);
-		double money=0;
+		double money = 0;
 		if (!message.startsWith("ERR")) {
 			Integer clientId = Integer.valueOf(message);
 			this.logClientAction(clientId, String.format("查询订单:%s信息", orderCode));
@@ -68,6 +71,34 @@ public class CarRpcServiceImpl implements CarRpcService {
 			message = XmlHelper.parseDto2Xml(dto, "order");
 		}
 		return money;
+	}
+
+	/**
+	 * 计算停车 金额
+	 * 
+	 * @param startTime
+	 * @param endTime
+	 * @param shuffle
+	 * @param payMoney
+	 * @return
+	 */
+	private double feelOrderFee(Date startDate, Date endDate, String shuffle, double payMoney) {
+		double money = 0;
+		try {
+				int iMinute = G4Utils.getIntervalMinute(startDate, endDate);
+				Interpreter inter = new Interpreter();
+				inter.set("iMinute", iMinute);
+				inter.set("iMinute15", iMinute%15);
+				
+				Object eval = inter.eval(shuffle);
+				if(eval!=null){
+					money=Double.valueOf(eval.toString())-payMoney;
+				}
+		} catch (Exception e) {
+			logsError(systemId, CPConstants.ERROR_TYPE_SERVER, String.format("计算规则:%s错误:%s" ,shuffle, e.getMessage()));
+		}
+		return money;
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -548,7 +579,6 @@ public class CarRpcServiceImpl implements CarRpcService {
 	public void exeNeedPayMoney(String orderCode) {
 
 	}
-
 
 	@Override
 	public String cancelNewOrder(String orderCode, String clientCode, String clientKey) {
