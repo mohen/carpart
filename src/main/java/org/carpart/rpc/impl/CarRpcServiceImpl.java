@@ -32,19 +32,20 @@ public class CarRpcServiceImpl implements CarRpcService {
 	public String queryOrderStatus(String orderCode, String clientCode, String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
-			this.logClientAction(Integer.valueOf(message), String.format("查询订单:%s状态", orderCode));
+			Integer clientId = Integer.valueOf(message);
+			this.logClientAction(clientId, String.format("查询订单:%s状态", orderCode));
 			IService<OrderVo> orderService = (IService) SpringBeanLoader.getSpringBean("orderService");
 			Dto pDto = new BaseDto();
 			pDto.put("orderCode", orderCode);
 			try {
 				OrderVo vo = orderService.queryById(pDto);
 				if (vo == null) {
-					message = logsError(Integer.valueOf(message), CPConstants.ERROR_TYPE_CLIENT, String.format("查询订单:%s不存在!", orderCode));
+					message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("查询订单:%s不存在!", orderCode));
 				} else {
 					message = vo.getStatus();
 				}
 			} catch (Exception e) {
-				message = logsError(Integer.valueOf(message), CPConstants.ERROR_TYPE_CLIENT, String.format("查询订单:%s错误:" + e.getMessage(), orderCode));
+				message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("查询订单:%s错误:" + e.getMessage(), orderCode));
 			}
 
 		}
@@ -53,8 +54,20 @@ public class CarRpcServiceImpl implements CarRpcService {
 
 	@Override
 	public double queryOrderFee(String orderCode, String clientCode, String clientKey) {
-		// TODO Auto-generated method stub
-		return 0;
+		String message = loginValid(clientCode, clientKey);
+		double money=0;
+		if (!message.startsWith("ERR")) {
+			Integer clientId = Integer.valueOf(message);
+			this.logClientAction(clientId, String.format("查询订单:%s信息", orderCode));
+			IService<OrderVo> orderService = (IService) SpringBeanLoader.getSpringBean("orderService");
+			Dto pDto = new BaseDto();
+			pDto.put("orderCode", orderCode);
+			OrderVo vo = orderService.queryById(pDto);
+			Dto dto = new BaseDto();
+			G4Utils.copyPropFromBean2Dto(vo, dto);
+			message = XmlHelper.parseDto2Xml(dto, "order");
+		}
+		return money;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -62,7 +75,8 @@ public class CarRpcServiceImpl implements CarRpcService {
 	public String queryOrderInfo(String orderCode, String clientCode, String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
-			this.logClientAction(Integer.valueOf(message), String.format("查询订单:%s信息", orderCode));
+			Integer clientId = Integer.valueOf(message);
+			this.logClientAction(clientId, String.format("查询订单:%s信息", orderCode));
 			IService<OrderVo> orderService = (IService) SpringBeanLoader.getSpringBean("orderService");
 			Dto pDto = new BaseDto();
 			pDto.put("orderCode", orderCode);
@@ -82,8 +96,8 @@ public class CarRpcServiceImpl implements CarRpcService {
 	public String saveCustomInfo(String wxName, String wxCode, String city, String carCode, String trueName, String phone, String address, String certCode, String email, String clientCode, String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
-			this.logClientAction(Integer.valueOf(message), String.format("新增用户:%s信息", wxCode));
-			int clientId = Integer.valueOf(message);
+			Integer clientId = Integer.valueOf(message);
+			this.logClientAction(clientId, String.format("新增用户:%s信息", wxCode));
 			Dto pDto = new BaseDto();
 			IService<CustomVo> customService = (IService<CustomVo>) SpringBeanLoader.getSpringBean("customService");
 			pDto.put("wxCode", wxCode);
@@ -129,8 +143,8 @@ public class CarRpcServiceImpl implements CarRpcService {
 	public String addCustomInfo(String wxName, String wxCode, String city, String clientCode, String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
-			this.logClientAction(Integer.valueOf(message), String.format("新增用户:%s信息", wxCode));
-			int clientId = Integer.valueOf(message);
+			Integer clientId = Integer.valueOf(message);
+			this.logClientAction(clientId, String.format("新增用户:%s信息", wxCode));
 			Dto pDto = new BaseDto();
 			IService customService = (IService) SpringBeanLoader.getSpringBean("customService");
 			pDto.put("wxCode", wxCode);
@@ -166,8 +180,8 @@ public class CarRpcServiceImpl implements CarRpcService {
 	public String addNewUser(String wxName, String wxCode, String city, String carCode, String trueName, String phone, String address, String certCode, String email, String clientCode, String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
-			this.logClientAction(Integer.valueOf(message), String.format("新增用户:%s信息", wxCode));
-			int clientId = Integer.valueOf(message);
+			Integer clientId = Integer.valueOf(message);
+			this.logClientAction(clientId, String.format("新增用户:%s信息", wxCode));
 			Dto pDto = new BaseDto();
 			IService<CustomVo> customService = (IService<CustomVo>) SpringBeanLoader.getSpringBean("customService");
 			pDto.put("wxCode", wxCode);
@@ -189,7 +203,6 @@ public class CarRpcServiceImpl implements CarRpcService {
 				try {
 					customService.update(pToDto);
 				} catch (CPException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				if (pToDto.getAsInteger("cusId") > 0) {
@@ -216,7 +229,8 @@ public class CarRpcServiceImpl implements CarRpcService {
 	public String listCarPart2Xml(String cityCode, String clientCode, String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
-			this.logClientAction(Integer.valueOf(message), String.format("查询城市合作停车场列表:%s信息", cityCode));
+			Integer clientId = Integer.valueOf(message);
+			this.logClientAction(clientId, String.format("查询城市合作停车场列表:%s信息", cityCode));
 			IService<ParkVo> parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
 			Dto pDto = new BaseDto();
 			pDto.put("city", cityCode);
@@ -430,7 +444,8 @@ public class CarRpcServiceImpl implements CarRpcService {
 	public String queryErrorInfo(String errorCode, String clientCode, String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
-			this.logClientAction(Integer.valueOf(message), String.format("查询错误代码:%s信息", errorCode));
+			Integer clientId = Integer.valueOf(message);
+			this.logClientAction(clientId, String.format("查询错误代码:%s信息", errorCode));
 			IService<ErrorVo> errorService = (IService) SpringBeanLoader.getSpringBean("errorService");
 			Dto pDto = new BaseDto();
 			pDto.put("errCode", errorCode);
@@ -534,11 +549,6 @@ public class CarRpcServiceImpl implements CarRpcService {
 
 	}
 
-	@Override
-	public String queryCarPart2Xml(String partMapLb, String clientCode, String clientKey) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public String cancelNewOrder(String orderCode, String clientCode, String clientKey) {

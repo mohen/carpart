@@ -101,13 +101,14 @@ public interface CarRpcService {
 	 *         上限1000元</feeRulesDesc>--计费规则 </part> </parts>
 	 */
 	public String listCarPart2Xml(String cityCode, String clientCode, String clientKey);
-	
+
 	/**
 	 * 获取经纬度附近半径内的 合作停车场地图列表
 	 * 
 	 * @param mapLb
-	 *            经纬度
-	 *  @param raidus  半径长度  单位:米
+	 *            格式 ：108.398348,22.81765 经纬度
+	 * @param raidus
+	 *            半径长度 单位:米
 	 * @return xml表示 成功 其他为系统错误码 格式如:ERR_1000 格式如下: <parts>
 	 *         <part><parkId>1</parkId>--id <parkName>万象城</parkName>--名字
 	 *         <mapLb>108.398348,22.81765</mapLb> -- 经纬度 <address>青秀区民族大道136号
@@ -120,24 +121,7 @@ public interface CarRpcService {
 	 *         --营业时间 <feeRulesDesc>前半小时免费 以三小时刻度 每刻度5元 不满三小时 按一刻度计算
 	 *         上限1000元</feeRulesDesc>--计费规则 </part> </parts>
 	 */
-	public String listNearbyCarPart2Xml(String mapLb,int raidus, String clientCode, String clientKey);
-
-	/**
-	 * 停车场列表 用于罗列 合作停车场地图列表
-	 * 
-	 * @param partMapLb
-	 * @return xml表示 成功 其他为系统错误码 格式如:ERR_1000 格式如下: <parts> part><parkId>1</parkId>--id <parkName>万象城</parkName>--名字
-	 *         <mapLb>108.398348,22.81765</mapLb> -- 经纬度 <address>青秀区民族大道136号
-	 *         </address> --地址 <officeTime>全天</officeTime> --营业时间
-	 *         <feeRulesDesc>前半小时免费 以三小时刻度 每刻度5元 不满三小时 按一刻度计算
-	 *         上限500元</feeRulesDesc>--计费规则 <status>1</status> --状态
-	 *         <city>4501</city>--城市 </part> <part> <name>国贸购物中心</name>
-	 *         <mapLb>108.330165,22.819499</mapLb>--经纬度
-	 *         <address>民族共和路口民族大道41号</address> --地址 <officeTime>全天</officeTime>
-	 *         --营业时间 <feeRulesDesc>前半小时免费 以三小时刻度 每刻度5元 不满三小时 按一刻度计算
-	 *         上限1000元</feeRulesDesc>--计费规则 </part></parts>
-	 */
-	public String queryCarPart2Xml(String partMapLb, String clientCode, String clientKey);
+	public String listNearbyCarPart2Xml(String mapLb, int raidus, String clientCode, String clientKey);
 
 	/**
 	 * 获取订单状态
