@@ -57,6 +57,12 @@ public class ParkVo extends BaseVo {
 	 * 备注信息
 	 */
 	private java.lang.String memo;
+	
+	/**
+	 * 缩略图信息
+	 */
+	private java.lang.String thumbnailUrl;
+	 
 	/**
 	 * 状态
 	 */
@@ -220,6 +226,14 @@ public class ParkVo extends BaseVo {
 
 	public void setDisDetail(java.lang.String disDetail) {
 		this.disDetail = disDetail;
+	}
+
+	public java.lang.String getThumbnailUrl() {
+		return thumbnailUrl;
+	}
+
+	public void setThumbnailUrl(java.lang.String thumbnailUrl) {
+		this.thumbnailUrl = thumbnailUrl;
 	}
 
 }

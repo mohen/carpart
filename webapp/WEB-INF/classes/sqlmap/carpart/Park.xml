@@ -15,6 +15,7 @@
 		<result property="memo" column="MEMO" />
 		<result property="status" column="STATUS" />
 		<result property="disDetail" column="DIS_DETAIL" />
+		<result property="thumbnailUrl" column="THUMBNAIL_URL" />
 	</resultMap>
 		<select id="Park.findParkNameById" parameterClass="java.lang.Long" resultClass="java.lang.String" >  
     	SELECT
@@ -27,7 +28,7 @@
 	<!-- 用于select查询公用抽取的列 -->
 	<sql id="Park.columns">
 	    <![CDATA[
-        PARK_ID ,PARK_NAME ,ADDRESS ,CITY ,OFFICE_TIME ,FEE_RULES ,RULES_DESC ,MAP_LB ,MEMO ,DIS_DETAIL,STATUS 
+        PARK_ID ,PARK_NAME ,ADDRESS ,CITY ,OFFICE_TIME ,FEE_RULES ,RULES_DESC ,MAP_LB ,MEMO ,DIS_DETAIL,STATUS,THUMBNAIL_URL 
 	    ]]>
 	</sql>
 
@@ -43,7 +44,8 @@
         	RULES_DESC ,
         	MAP_LB ,
         	MEMO ,
-        	STATUS 
+        	STATUS,
+        	THUMBNAIL_URL
         ) VALUES (
         	#parkId# ,
         	#parkName# ,
@@ -54,7 +56,8 @@
         	#rulesDesc# ,
         	#mapLb# ,
         	#memo# ,
-        	#status# 
+        	#status# ,
+        	#thumbnailUrl#
         )
     ]]>
 		<!-- mysql: type="post" SELECT select last_insert_id() sqlserver: type="post" 
@@ -93,6 +96,10 @@
 			<isNotNull prepend="," property="status">
 				STATUS = #status#
 			</isNotNull>
+			<isNotNull prepend="," property="thumbnailUrl">
+				THUMBNAIL_URL = #thumbnailUrl#
+			</isNotNull>
+			
 		</dynamic>
 		WHERE
 		PARK_ID = #parkId#
