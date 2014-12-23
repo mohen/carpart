@@ -7,6 +7,7 @@ import javax.jws.WebService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.common.util.StringUtils;
 import org.carpart.CPConstants;
 import org.carpart.CPException;
 import org.carpart.rpc.CarRpcService;
@@ -29,7 +30,8 @@ import bsh.Interpreter;
 public class CarRpcServiceImpl implements CarRpcService {
 	private static Log log = LogFactory.getLog(CarRpcServiceImpl.class);
 
-	private static int systemId=1;
+	private static int systemId = 1;
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public String queryOrderStatus(String orderCode, String clientCode, String clientKey) {
@@ -55,20 +57,57 @@ public class CarRpcServiceImpl implements CarRpcService {
 		return message;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public double queryOrderFee(String orderCode, String clientCode, String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		double money = 0;
 		if (!message.startsWith("ERR")) {
 			Integer clientId = Integer.valueOf(message);
-			this.logClientAction(clientId, String.format("查询订单:%s信息", orderCode));
+			this.logClientAction(clientId, String.format("计算订单:%s费用", orderCode));
 			IService<OrderVo> orderService = (IService) SpringBeanLoader.getSpringBean("orderService");
 			Dto pDto = new BaseDto();
 			pDto.put("orderCode", orderCode);
 			OrderVo vo = orderService.queryById(pDto);
-			Dto dto = new BaseDto();
-			G4Utils.copyPropFromBean2Dto(vo, dto);
-			message = XmlHelper.parseDto2Xml(dto, "order");
+			if (vo == null) {
+				message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("订单:%s 不存在,无法计算费用!", orderCode));
+			} else {
+				String status = vo.getStatus();
+				if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PARKING) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PAY_NOT_OUT)) {
+					try {
+						Date startDate = vo.getStartPartTime();
+						Integer parkId = vo.getParkId();
+						IService<ParkVo> parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
+						pDto.clear();
+						pDto.put("parkId", parkId);
+						ParkVo parkVo = parkService.queryById(pDto);
+						String feeRules = parkVo.getFeeRules();
+						if (StringUtils.isEmpty(feeRules)) {
+							message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("停车场:%s规则未配置,无法计算费用!", parkVo.getParkName()));
+						} else {
+							double payMoney = vo.getPayAmount();
+							Date feedDate = new Date();
+							int iMinute = G4Utils.getIntervalMinute(startDate, feedDate);
+							double orderFee = this.feelOrderFee(startDate, feedDate, feeRules, iMinute);
+							double needPayMoney = orderFee - payMoney;
+							vo.setFeedTime(feedDate);
+							vo.setFeeAmount(orderFee);
+							vo.setNeedAmount(needPayMoney);
+							vo.setPartTimes((double) iMinute);
+							if (orderFee > 0) {
+								vo.setStatus(CPConstants.ORDER_STATUS_PARKING);
+							}
+							orderService.update(vo);
+							money = needPayMoney;
+						}
+					} catch (Exception ex) {
+						message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("计算订单:%s 费用失败:%s!", orderCode, ex.getMessage()));
+					}
+
+				} else {
+					message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("查询订单:%s 状态为 %s ,无法计算费用!", orderCode, status));
+				}
+			}
 		}
 		return money;
 	}
@@ -79,22 +118,19 @@ public class CarRpcServiceImpl implements CarRpcService {
 	 * @param startTime
 	 * @param endTime
 	 * @param shuffle
-	 * @param payMoney
 	 * @return
 	 */
-	private double feelOrderFee(Date startDate, Date endDate, String shuffle, double payMoney) {
+	private double feelOrderFee(Date startDate, Date endDate, String shuffle, int iMinute) {
 		double money = 0;
 		try {
-				int iMinute = G4Utils.getIntervalMinute(startDate, endDate);
-				Interpreter inter = new Interpreter();
-				inter.set("iMinute", iMinute);
-				
-				Object eval = inter.eval(shuffle);
-				if(eval!=null){
-					money=Double.valueOf(eval.toString())-payMoney;
-				}
+			Interpreter inter = new Interpreter();
+			inter.set("iMinute", iMinute);
+			Object eval = inter.eval(shuffle);
+			if (eval != null) {
+				money = Double.valueOf(eval.toString());
+			}
 		} catch (Exception e) {
-			logsError(systemId, CPConstants.ERROR_TYPE_SERVER, String.format("计算规则:%s错误:%s" ,shuffle, e.getMessage()));
+			logsError(systemId, CPConstants.ERROR_TYPE_SERVER, String.format("计算规则:%s错误:%s", shuffle, e.getMessage()));
 		}
 		return money;
 
@@ -285,15 +321,16 @@ public class CarRpcServiceImpl implements CarRpcService {
 					double lon = Double.valueOf(mabLb.split(",")[1]);
 					raidus = raidus < 1000 ? 1000 : raidus;
 					double[] mapLbAround = G4Utils.getMapLbAround(lat, lon, raidus);
-					for(int i=0;i<mapLbAround.length;i++)System.err.println(mapLbAround[i]);
+					for (int i = 0; i < mapLbAround.length; i++)
+						System.err.println(mapLbAround[i]);
 					if (mapLbAround.length == 4) {
-						double minMapLat =  mapLbAround[0];
+						double minMapLat = mapLbAround[0];
 						pDto.put("minMapLat", minMapLat);
-						double maxMapLat =  mapLbAround[2];
+						double maxMapLat = mapLbAround[2];
 						pDto.put("maxMapLat", maxMapLat);
-						double minMapLng =  mapLbAround[3];
+						double minMapLng = mapLbAround[3];
 						pDto.put("minMapLng", minMapLng);
-						double maxMapLng =  mapLbAround[1];
+						double maxMapLng = mapLbAround[1];
 						pDto.put("maxMapLng", maxMapLng);
 						List list = parkService.queryByList(pDto);
 						message = XmlHelper.parseList2Xml2(list, "parks", "park");
@@ -353,10 +390,10 @@ public class CarRpcServiceImpl implements CarRpcService {
 				vo.setOrderCode(orderCode);
 				vo.setCusId(cusId);
 				vo.setParkId(parkId);
-				vo.setFeeAmount(0f);
-				vo.setNeedAmount(0f);
-				vo.setPayAmount(0f);
-				vo.setPartTimes(0f);
+				vo.setFeeAmount((double) 0);
+				vo.setNeedAmount((double) 0);
+				vo.setPayAmount((double) 0);
+				vo.setPartTimes((double) 0);
 				vo.setValidTimes(G4Utils.addMinutes(date, 30));
 				vo.setStatus(CPConstants.ORDER_STATUS_PRE_REG);
 				pDto.clear();
@@ -536,7 +573,9 @@ public class CarRpcServiceImpl implements CarRpcService {
 		Dto pToDto = new BaseDto();
 		G4Utils.copyPropFromBean2Dto(vo, pToDto);
 		errorService.save(pToDto);
-		return String.format(pToDto.getAsString("errCode") + "@%s", detail);
+		String message = String.format(pToDto.getAsString("errCode") + "@%s", detail);
+		log.info(message);
+		return message;
 
 	}
 

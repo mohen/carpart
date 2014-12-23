@@ -77,7 +77,10 @@ public class CarRpcServiceTest {
 	 */
 	@Test
 	public final void testQueryOrderFee() {
-		fail("Not yet implemented"); // TODO
+		String orderCode = "DT20141126154407DD10000009";
+		double money = service.queryOrderFee(orderCode, clientCode, clientKey);
+		System.err.println(money);
+		Assert.assertNotNull(money);
 	}
 
 	/**
@@ -127,12 +130,12 @@ public class CarRpcServiceTest {
 		Assert.assertNotNull(message);
 
 	}
+
 	@Test
 	public final void testListNearbyCarPart2Xml() {
-		String message = service.listNearbyCarPart2Xml("104.065773,30.536549",1000, clientCode, clientKey);
+		String message = service.listNearbyCarPart2Xml("104.065773,30.536549", 2000, clientCode, clientKey);
 		System.err.println(message);
 		Assert.assertNotNull(message);
-
 	}
 
 	/**

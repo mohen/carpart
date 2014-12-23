@@ -94,10 +94,15 @@ public class OrderVo extends BaseVo {
 	 * 出库时间
 	 */
 	private java.util.Date endPartTime;
+	
+	/**
+	 * 最近一次计费时间
+	 */
+	private java.util.Date feedTime;
 	/**
 	 * 计时
 	 */
-	private java.lang.Float partTimes;
+	private java.lang.Double partTimes;
 	/**
 	 * 有效时间
 	 */
@@ -105,15 +110,15 @@ public class OrderVo extends BaseVo {
 	/**
 	 * 合计计费
 	 */
-	private java.lang.Float feeAmount;
+	private java.lang.Double feeAmount;
 	/**
 	 * 欠费余额
 	 */
-	private java.lang.Float needAmount;
+	private java.lang.Double needAmount;
 	/**
 	 * 已付款金额
 	 */
-	private java.lang.Float payAmount;
+	private java.lang.Double payAmount;
 	/**
 	 * 订单日志
 	 */
@@ -271,14 +276,14 @@ public class OrderVo extends BaseVo {
 	/**
 	 * @param 计时
 	 */
-	public void setPartTimes(java.lang.Float value) {
+	public void setPartTimes(java.lang.Double value) {
 		this.partTimes = value;
 	}
 
 	/**
 	 * @return 计时
 	 */
-	public java.lang.Float getPartTimes() {
+	public java.lang.Double getPartTimes() {
 		return this.partTimes;
 	}
 
@@ -315,42 +320,42 @@ public class OrderVo extends BaseVo {
 	/**
 	 * @param 合计计费
 	 */
-	public void setFeeAmount(java.lang.Float value) {
+	public void setFeeAmount(java.lang.Double value) {
 		this.feeAmount = value;
 	}
 
 	/**
 	 * @return 合计计费
 	 */
-	public java.lang.Float getFeeAmount() {
+	public java.lang.Double getFeeAmount() {
 		return this.feeAmount;
 	}
 
 	/**
 	 * @param 欠费余额
 	 */
-	public void setNeedAmount(java.lang.Float value) {
+	public void setNeedAmount(java.lang.Double value) {
 		this.needAmount = value;
 	}
 
 	/**
 	 * @return 欠费余额
 	 */
-	public java.lang.Float getNeedAmount() {
+	public java.lang.Double getNeedAmount() {
 		return this.needAmount;
 	}
 
 	/**
 	 * @param 已付款金额
 	 */
-	public void setPayAmount(java.lang.Float value) {
+	public void setPayAmount(java.lang.Double value) {
 		this.payAmount = value;
 	}
 
 	/**
 	 * @return 已付款金额
 	 */
-	public java.lang.Float getPayAmount() {
+	public java.lang.Double getPayAmount() {
 		return this.payAmount;
 	}
 
@@ -456,6 +461,14 @@ public class OrderVo extends BaseVo {
 
 	public void setParkName(String parkName) {
 		this.parkName = parkName;
+	}
+
+	public java.util.Date getFeedTime() {
+		return feedTime;
+	}
+
+	public void setFeedTime(java.util.Date feedTime) {
+		this.feedTime = feedTime;
 	}
 
 }
