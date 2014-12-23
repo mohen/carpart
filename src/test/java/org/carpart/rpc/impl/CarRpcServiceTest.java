@@ -129,7 +129,7 @@ public class CarRpcServiceTest {
 	}
 	@Test
 	public final void testListNearbyCarPart2Xml() {
-		String message = service.listNearbyCarPart2Xml("104.075159,30.539867",1000000000, clientCode, clientKey);
+		String message = service.listNearbyCarPart2Xml("104.065773,30.536549",1000, clientCode, clientKey);
 		System.err.println(message);
 		Assert.assertNotNull(message);
 

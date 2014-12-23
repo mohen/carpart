@@ -88,7 +88,6 @@ public class CarRpcServiceImpl implements CarRpcService {
 				int iMinute = G4Utils.getIntervalMinute(startDate, endDate);
 				Interpreter inter = new Interpreter();
 				inter.set("iMinute", iMinute);
-				inter.set("iMinute15", iMinute%15);
 				
 				Object eval = inter.eval(shuffle);
 				if(eval!=null){
@@ -286,11 +285,16 @@ public class CarRpcServiceImpl implements CarRpcService {
 					double lon = Double.valueOf(mabLb.split(",")[1]);
 					raidus = raidus < 1000 ? 1000 : raidus;
 					double[] mapLbAround = G4Utils.getMapLbAround(lat, lon, raidus);
+					for(int i=0;i<mapLbAround.length;i++)System.err.println(mapLbAround[i]);
 					if (mapLbAround.length == 4) {
-						String minMapLb = String.format("%s,%s", mapLbAround[0], mapLbAround[1]);
-						pDto.put("minMapLb", minMapLb);
-						String maxMapLb = String.format("%s,%s", mapLbAround[2], mapLbAround[3]);
-						pDto.put("maxMapLb", maxMapLb);
+						double minMapLat =  mapLbAround[0];
+						pDto.put("minMapLat", minMapLat);
+						double maxMapLat =  mapLbAround[2];
+						pDto.put("maxMapLat", maxMapLat);
+						double minMapLng =  mapLbAround[3];
+						pDto.put("minMapLng", minMapLng);
+						double maxMapLng =  mapLbAround[1];
+						pDto.put("maxMapLng", maxMapLng);
 						List list = parkService.queryByList(pDto);
 						message = XmlHelper.parseList2Xml2(list, "parks", "park");
 					} else {

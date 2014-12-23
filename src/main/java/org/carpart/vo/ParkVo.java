@@ -63,21 +63,45 @@ public class ParkVo extends BaseVo {
 	 */
 	private java.lang.String thumbnailUrl;
 	/**
-	 * 最小经纬度
+	 * 经度
 	 */
-	private java.lang.String minMapLb;
+	private java.lang.String mapLat;
 	/**
-	 * 最大经纬度
+	 * MIN经度
 	 */
-	private java.lang.String maxMapLb;
+	private java.lang.String minMapLat;
+	/**
+	 * MAX经度
+	 */
+	private java.lang.String maxMapLat;
+	/**
+	 * 纬度
+	 */
+	private java.lang.String mapLng;
+	/**
+	 * MIN纬度
+	 */
+	private java.lang.String minMapLng;
+	/**
+	 * MAX纬度
+	 */
+	private java.lang.String maxMapLng;
+
 	
-	 
-	public void setMinMapLb(java.lang.String minMapLb) {
-		this.minMapLb = minMapLb;
+	public void setMinMapLat(java.lang.String minMapLat) {
+		this.minMapLat = minMapLat;
 	}
 
-	public void setMaxMapLb(java.lang.String maxMapLb) {
-		this.maxMapLb = maxMapLb;
+	public void setMaxMapLat(java.lang.String maxMapLat) {
+		this.maxMapLat = maxMapLat;
+	}
+
+	public void setMinMapLng(java.lang.String minMapLng) {
+		this.minMapLng = minMapLng;
+	}
+
+	public void setMaxMapLng(java.lang.String maxMapLng) {
+		this.maxMapLng = maxMapLng;
 	}
 
 	/**
@@ -251,6 +275,22 @@ public class ParkVo extends BaseVo {
 
 	public void setThumbnailUrl(java.lang.String thumbnailUrl) {
 		this.thumbnailUrl = thumbnailUrl;
+	}
+
+	public java.lang.String getMapLat() {
+		return mapLat;
+	}
+
+	public void setMapLat(java.lang.String mapLat) {
+		this.mapLat = mapLat;
+	}
+
+	public java.lang.String getMapLng() {
+		return mapLng;
+	}
+
+	public void setMapLng(java.lang.String mapLng) {
+		this.mapLng = mapLng;
 	}
 
 }
