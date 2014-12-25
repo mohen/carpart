@@ -88,7 +88,9 @@ public class CarRpcServiceImpl implements CarRpcService {
 							double payMoney = vo.getPayAmount();
 							Date feedDate = new Date();
 							int iMinute = G4Utils.getIntervalMinute(startDate, feedDate);
+							System.err.println(iMinute);
 							double orderFee = this.feelOrderFee(startDate, feedDate, feeRules, iMinute);
+							System.err.println(orderFee);
 							double needPayMoney = orderFee - payMoney;
 							vo.setFeedTime(feedDate);
 							vo.setFeeAmount(orderFee);
@@ -358,7 +360,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 			IService customService = (IService) SpringBeanLoader.getSpringBean("customService");
 			IService orderService = (IService) SpringBeanLoader.getSpringBean("orderService");
 			Dto pDto = new BaseDto();
-			pDto.put("partMapLb", partMapLb);
+			pDto.put("mapLb", partMapLb);
 			List list = parkService.queryByList(pDto);
 			int parkId = 0;
 			boolean success = list.size() > 0;
@@ -682,6 +684,12 @@ public class CarRpcServiceImpl implements CarRpcService {
 			message = XmlHelper.parseDto2Xml(dto, "park");
 		}
 		return message;
+	}
+
+	@Override
+	public double payOrderFee(String orderCode, double money, int type, String clientCode, String clientKey) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

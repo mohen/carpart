@@ -154,6 +154,20 @@ public interface CarRpcService {
 	public double queryOrderFee(String orderCode, String clientCode, String clientKey);
 
 	/**
+	 * 线上支付订单费用
+	 * 
+	 * @param orderCode
+	 *            订单号
+	 * @param money
+	 *            支付金额(元)
+	 * @param type
+	 *            支付类型  1 线上支付  2 线下支付
+	 * @param
+	 * @return 正数 为还需要支付的金额    负数为找回的金额 --(主要用于现金支付)
+	 */
+	public double payOrderFee(String orderCode, double money, int type, String clientCode, String clientKey);
+
+	/**
 	 * 新增-预登记订单 订单状态为 10 预登记 用于微信端 客户新增订单时 调用
 	 * 
 	 * @param wxCode
