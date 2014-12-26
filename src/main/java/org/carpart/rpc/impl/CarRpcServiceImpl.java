@@ -1,5 +1,6 @@
 package org.carpart.rpc.impl;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -21,6 +22,7 @@ import org.carpart.vo.ParkVo;
 import org.g4studio.common.util.SpringBeanLoader;
 import org.g4studio.core.metatype.Dto;
 import org.g4studio.core.metatype.impl.BaseDto;
+import org.g4studio.core.util.G4Constants;
 import org.g4studio.core.util.G4Utils;
 import org.g4studio.core.xml.XmlHelper;
 
@@ -686,10 +688,65 @@ public class CarRpcServiceImpl implements CarRpcService {
 		return message;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public double payOrderFee(String orderCode, double money, int type, String clientCode, String clientKey) {
-		// TODO Auto-generated method stub
-		return 0;
+		String message = loginValid(clientCode, clientKey);
+		if (!message.startsWith("ERR")) {
+			Integer clientId = Integer.valueOf(message);
+			this.logClientAction(clientId, String.format("支付订单:%s费用:%s", orderCode, money));
+			IService<OrderVo> orderService = (IService) SpringBeanLoader.getSpringBean("orderService");
+			Dto pDto = new BaseDto();
+			pDto.put("orderCode", orderCode);
+			OrderVo vo = orderService.queryById(pDto);
+			if (vo == null) {
+				message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("订单:%s 不存在,无法计算费用!", orderCode));
+			} else {
+				String status = vo.getStatus();
+				if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PARKING) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PAY_NOT_OUT)) {
+					try {
+						Date startDate = vo.getStartPartTime();
+						Integer parkId = vo.getParkId();
+						IService<ParkVo> parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
+						pDto.clear();
+						pDto.put("parkId", parkId);
+						ParkVo parkVo = parkService.queryById(pDto);
+						String feeRules = parkVo.getFeeRules();
+						if (StringUtils.isEmpty(feeRules)) {
+							message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("停车场:%s规则未配置,无法计算费用!", parkVo.getParkName()));
+						} else {
+							Date feedDate = new Date();
+							SimpleDateFormat sf = new SimpleDateFormat(G4Constants.FORMAT_DateTime);
+							double payMoney = vo.getPayAmount() + money;
+							vo.setPayAmount(payMoney);
+							String logs = vo.getOrderLogs() == null ? "" : vo.getOrderLogs();
+							StringBuilder sb = new StringBuilder(logs);
+							String typeStr = type == 1 ? "线上" : "线下";
+							sb.append(String.format("<p>%s:%s支付:￥%s</p>", sf.format(feedDate), typeStr, money));
+							vo.setOrderLogs(sb.toString());
+							int iMinute = G4Utils.getIntervalMinute(startDate, feedDate);
+							double orderFee = this.feelOrderFee(startDate, feedDate, feeRules, iMinute);
+							double needPayMoney = orderFee - payMoney;
+							vo.setFeedTime(feedDate);
+							vo.setFeeAmount(orderFee);
+							vo.setNeedAmount(needPayMoney);
+							vo.setPartTimes((double) iMinute);
+							if (orderFee > 0) {
+								vo.setStatus(CPConstants.ORDER_STATUS_PARKING);
+							}
+							orderService.update(vo);
+							money = needPayMoney;
+						}
+					} catch (Exception ex) {
+						message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("计算订单:%s 费用失败:%s!", orderCode, ex.getMessage()));
+					}
+
+				} else {
+					message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("查询订单:%s 状态为 %s ,无法计算费用!", orderCode, status));
+				}
+			}
+		}
+		return money;
 	}
 
 }

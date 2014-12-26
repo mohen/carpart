@@ -83,6 +83,14 @@ public class CarRpcServiceTest {
 		Assert.assertNotNull(money);
 	}
 
+	@Test
+	public final void testPayOrderFee() {
+		String orderCode = "DT20141126154407DD10000009";
+		double money = service.payOrderFee(orderCode, 15, 1, clientCode, clientKey);
+		System.err.println(money);
+		Assert.assertNotNull(money);
+	}
+
 	/**
 	 * Test method for
 	 * {@link org.carpart.rpc.impl.CarRpcServiceImpl#queryOrderInfo(java.lang.String, java.lang.String, java.lang.String)}
