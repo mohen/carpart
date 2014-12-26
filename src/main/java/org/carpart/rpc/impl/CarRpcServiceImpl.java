@@ -151,6 +151,37 @@ public class CarRpcServiceImpl implements CarRpcService {
 			Dto pDto = new BaseDto();
 			pDto.put("orderCode", orderCode);
 			OrderVo vo = orderService.queryById(pDto);
+			String status = vo.getStatus();
+			if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PARKING) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PAY_NOT_OUT)) {
+				try {
+					Date startDate = vo.getStartPartTime();
+					Integer parkId = vo.getParkId();
+					IService<ParkVo> parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
+					pDto.clear();
+					pDto.put("parkId", parkId);
+					ParkVo parkVo = parkService.queryById(pDto);
+					String feeRules = parkVo.getFeeRules();
+					if (StringUtils.isEmpty(feeRules)) {
+						message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("停车场:%s规则未配置,无法计算费用!", parkVo.getParkName()));
+					} else {
+						double payMoney = vo.getPayAmount();
+						Date feedDate = new Date();
+						int iMinute = G4Utils.getIntervalMinute(startDate, feedDate);
+						double orderFee = this.feelOrderFee(startDate, feedDate, feeRules, iMinute);
+						double needPayMoney = orderFee - payMoney;
+						vo.setFeedTime(feedDate);
+						vo.setFeeAmount(orderFee);
+						vo.setNeedAmount(needPayMoney);
+						vo.setPartTimes((double) iMinute);
+						if (orderFee > 0) {
+							vo.setStatus(CPConstants.ORDER_STATUS_PARKING);
+						}
+						orderService.update(vo);
+					}
+				} catch (Exception ex) {
+					message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("计算订单:%s 费用失败:%s!", orderCode, ex.getMessage()));
+				}
+			}
 			Dto dto = new BaseDto();
 			G4Utils.copyPropFromBean2Dto(vo, dto);
 			message = XmlHelper.parseDto2Xml(dto, "order");
