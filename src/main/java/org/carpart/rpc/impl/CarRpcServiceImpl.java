@@ -33,7 +33,6 @@ public class CarRpcServiceImpl implements CarRpcService {
 	private static Log log = LogFactory.getLog(CarRpcServiceImpl.class);
 
 	private static int systemId = 1;
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public String queryOrderStatus(String orderCode, String clientCode, String clientKey) {
@@ -241,7 +240,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public String addCustomInfo(String wxName, String wxCode, String city, String clientCode, String clientKey) {
+	public String createCustomInfo(String wxName, String wxCode, String city, String clientCode, String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
 			Integer clientId = Integer.valueOf(message);
@@ -272,59 +271,6 @@ public class CarRpcServiceImpl implements CarRpcService {
 		return message;
 	}
 
-	/**
-	 * 新增用户信息
-	 */
-	@Deprecated
-	@SuppressWarnings("unchecked")
-	@Override
-	public String addNewUser(String wxName, String wxCode, String city, String carCode, String trueName, String phone, String address, String certCode, String email, String clientCode, String clientKey) {
-		String message = loginValid(clientCode, clientKey);
-		if (!message.startsWith("ERR")) {
-			Integer clientId = Integer.valueOf(message);
-			this.logClientAction(clientId, String.format("新增用户:%s信息", wxCode));
-			Dto pDto = new BaseDto();
-			IService<CustomVo> customService = (IService<CustomVo>) SpringBeanLoader.getSpringBean("customService");
-			pDto.put("wxCode", wxCode);
-			CustomVo vo = new CustomVo();
-			vo.setWxName(wxName);
-			vo.setWxCode(wxCode);
-			vo.setCarCode(carCode);
-			vo.setCity(city);
-			vo.setTrueName(trueName);
-			vo.setPhone(phone);
-			vo.setAddress(address);
-			vo.setCertCode(certCode);
-			vo.setEmail(email);
-			vo.setStatus("1");
-			Dto pToDto = new BaseDto();
-			int count = customService.queryCount(pDto);
-			if (count > 0) {
-				G4Utils.copyPropFromBean2Dto(vo, pToDto);
-				try {
-					customService.update(pToDto);
-				} catch (CPException e) {
-					e.printStackTrace();
-				}
-				if (pToDto.getAsInteger("cusId") > 0) {
-					message = CPConstants.RETURN_TRUE;
-				} else {
-					message = logsError(clientId, CPConstants.ERROR_TYPE_SERVER, String.format("更新wxCode=%s 的客户 产生数据库错误", wxCode));
-				}
-			} else {
-				vo.setRegTime(new Date());
-				G4Utils.copyPropFromBean2Dto(vo, pToDto);
-				customService.save(pToDto);
-				if (pToDto.getAsInteger("cusId") > 0) {
-					message = CPConstants.RETURN_TRUE;
-				} else {
-					message = logsError(clientId, CPConstants.ERROR_TYPE_SERVER, String.format("新增wxCode=%s 的客户 产生数据库错误", wxCode));
-				}
-			}
-		}
-		return message;
-	}
-
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public String listCarPart2Xml(String cityCode, String clientCode, String clientKey) {
@@ -340,7 +286,19 @@ public class CarRpcServiceImpl implements CarRpcService {
 		}
 		return message;
 	}
-
+	public String listCarPart2JSON(String cityCode, String clientCode, String clientKey) {
+		String message = loginValid(clientCode, clientKey);
+		if (!message.startsWith("ERR")) {
+			Integer clientId = Integer.valueOf(message);
+			this.logClientAction(clientId, String.format("查询城市合作停车场列表:%s信息", cityCode));
+			IService<ParkVo> parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
+			Dto pDto = new BaseDto();
+			pDto.put("city", cityCode);
+			List list = parkService.queryByList(pDto);
+			message = XmlHelper.parseList2Xml2(list, "parks", "park");
+		}
+		return message;
+	}
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public String listNearbyCarPart2Xml(String mabLb, int raidus, String clientCode, String clientKey) {
@@ -384,31 +342,21 @@ public class CarRpcServiceImpl implements CarRpcService {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public String addNewOrder(String wxCode, String partMapLb, String clientCode, String clientKey) {
+	public String createOrder(String wxCode, String clientCode, String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
 			int clientId = Integer.valueOf(message);
-			this.logClientAction(clientId, String.format("新增订单客户:%s停车场:%s", wxCode, partMapLb));
+			this.logClientAction(clientId, String.format("新增订单客户:%s", wxCode));
 			IService parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
 			IService customService = (IService) SpringBeanLoader.getSpringBean("customService");
 			IService orderService = (IService) SpringBeanLoader.getSpringBean("orderService");
 			Dto pDto = new BaseDto();
-			pDto.put("mapLb", partMapLb);
-			List list = parkService.queryByList(pDto);
-			int parkId = 0;
-			boolean success = list.size() > 0;
-			if (success) {
-				parkId = ((ParkVo) list.get(0)).getParkId();
-			} else {
-				message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("系统不存在坐标为:%s的停车场", partMapLb));
-				success = false;
-			}
+			boolean success = true;
 			int cusId = 0;
 			if (success) {
 				pDto.clear();
 				pDto.put("wxCode", wxCode);
 				List list2 = customService.queryByList(pDto);
-
 				success = list2.size() > 0;
 				if (success) {
 					cusId = ((CustomVo) list2.get(0)).getCusId();
@@ -424,7 +372,6 @@ public class CarRpcServiceImpl implements CarRpcService {
 				String orderCode = IDHelper.getInstance().generatOrderCode();
 				vo.setOrderCode(orderCode);
 				vo.setCusId(cusId);
-				vo.setParkId(parkId);
 				vo.setFeeAmount((double) 0);
 				vo.setNeedAmount((double) 0);
 				vo.setPayAmount((double) 0);
@@ -454,7 +401,6 @@ public class CarRpcServiceImpl implements CarRpcService {
 	 * @param status
 	 * @return
 	 */
-	@SuppressWarnings({ "unchecked" })
 	private String changeOrderStatus(String orderCode, String newStatus, Dto pDto, int clientId) {
 		String message = "";
 		IService<OrderVo> orderService = (IService) SpringBeanLoader.getSpringBean("orderService");
@@ -487,61 +433,12 @@ public class CarRpcServiceImpl implements CarRpcService {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public String fitOrderStatusToInPart(String orderCode, String clientCode, String clientKey) {
+	public String inPart(String orderCode, String clientCode, String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
 			Dto pDto = new BaseDto();
 			pDto.put("startPartTime", new Date());
 			message = this.changeOrderStatus(orderCode, CPConstants.ORDER_STATUS_IN_PARK, pDto, Integer.valueOf(message));
-		}
-		return message;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public String fitOrderStatusToCancelIn(String orderCode, String clientCode, String clientKey) {
-		String message = loginValid(clientCode, clientKey);
-		if (!message.startsWith("ERR")) {
-			Dto pDto = new BaseDto();
-			Date date = new Date();
-			pDto.put("endPartTime", date);
-			message = this.changeOrderStatus(orderCode, CPConstants.ORDER_STATUS_CANCEL_IN, pDto, Integer.valueOf(message));
-		}
-		return message;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public String fitOrderStatusToPayNotOut(String orderCode, float payMoney, String clientCode, String clientKey) {
-		String message = loginValid(clientCode, clientKey);
-		if (!message.startsWith("ERR")) {
-			Dto pDto = new BaseDto();
-			pDto.put("endPartTime", new Date());
-			message = this.changeOrderStatus(orderCode, CPConstants.ORDER_STATUS_PAY_NOT_OUT, pDto, Integer.valueOf(message));
-		}
-		return message;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public String fitOrderStatusToPayAndOut(String orderCode, String clientCode, String clientKey) {
-		String message = loginValid(clientCode, clientKey);
-		if (!message.startsWith("ERR")) {
-			Dto pDto = new BaseDto();
-			pDto.put("endPartTime", new Date());
-			message = this.changeOrderStatus(orderCode, CPConstants.ORDER_STATUS_PAY_AND_OUT, pDto, Integer.valueOf(message));
-		}
-		return message;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public String fitOrderStatusToFreePark(String orderCode, String clientCode, String clientKey) {
-		String message = loginValid(clientCode, clientKey);
-		if (!message.startsWith("ERR")) {
-			Dto pDto = new BaseDto();
-			pDto.put("endPartTime", new Date());
-			message = this.changeOrderStatus(orderCode, CPConstants.ORDER_STATUS_FREE_PARK, pDto, Integer.valueOf(message));
 		}
 		return message;
 	}
@@ -659,7 +556,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 	}
 
 	@Override
-	public String cancelNewOrder(String orderCode, String clientCode, String clientKey) {
+	public String cancelOrder(String orderCode, String clientCode, String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		int clientId = 0;
 		if (!message.startsWith("ERR")) {
@@ -778,6 +675,18 @@ public class CarRpcServiceImpl implements CarRpcService {
 			}
 		}
 		return money;
+	}
+
+	@Override
+	public String queryOrderHistory(String wxCode, String yearMonth, String clientCode, String clientKey) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String outPart(String orderCode, String clientCode, String clientKey) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

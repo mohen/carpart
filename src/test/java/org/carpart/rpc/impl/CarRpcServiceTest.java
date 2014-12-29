@@ -154,8 +154,7 @@ public class CarRpcServiceTest {
 	@Test
 	public final void testAddNewOrder() {
 		String wxCode = "mohen";
-		String partMapLb = "1000,2,323";
-		String message = service.addNewOrder(wxCode, partMapLb, clientCode, clientKey);
+		String message = service.createOrder(wxCode, clientCode, clientKey);
 		System.err.println(message);
 		Assert.assertNotNull(message);
 	}
@@ -168,7 +167,7 @@ public class CarRpcServiceTest {
 	@Test
 	public final void testFitOrderStatusToInPart() {
 		String orderCode = "DT20141024162405DD10000003";
-		String message = service.fitOrderStatusToInPart(orderCode, clientCode, clientKey);
+		String message = service.inPart(orderCode, clientCode, clientKey);
 		System.err.println(message);
 		Assert.assertNotNull(message);
 	}
@@ -181,7 +180,7 @@ public class CarRpcServiceTest {
 	@Test
 	public final void testFitOrderStatusToCancelIn() {
 		String orderCode = "DT20141024162405DD10000003";
-		String message = service.fitOrderStatusToCancelIn(orderCode, clientCode, clientKey);
+		String message = service.cancelOrder(orderCode, clientCode, clientKey);
 		System.err.println(message);
 		Assert.assertNotNull(message);
 	}
@@ -189,49 +188,12 @@ public class CarRpcServiceTest {
 	@Test
 	public final void testCancelNewOrder() {
 		String orderCode = "DT20141126172053DD10000015";
-		String message = service.cancelNewOrder(orderCode, clientCode, clientKey);
+		String message = service.cancelOrder(orderCode, clientCode, clientKey);
 		System.err.println(message);
 		Assert.assertNotNull(message);
 	}
 
-	/**
-	 * Test method for
-	 * {@link org.carpart.rpc.impl.CarRpcServiceImpl#fitOrderStatusToPayNotOut(java.lang.String, float, java.lang.String, java.lang.String)}
-	 * .
-	 */
-	@Test
-	public final void testFitOrderStatusToPayNotOut() {
-		String orderCode = "DT20141126171921DD10000014";
-		String message = service.fitOrderStatusToPayNotOut(orderCode, 0, clientCode, clientKey);
-		System.err.println(message);
-		Assert.assertNotNull(message);
-	}
-
-	/**
-	 * Test method for
-	 * {@link org.carpart.rpc.impl.CarRpcServiceImpl#fitOrderStatusToPayAndOut(java.lang.String, java.lang.String, java.lang.String)}
-	 * .
-	 */
-	@Test
-	public final void testFitOrderStatusToPayAndOut() {
-		String orderCode = "DT20141024162405DD10000003";
-		String message = service.fitOrderStatusToPayAndOut(orderCode, clientCode, clientKey);
-		System.err.println(message);
-		Assert.assertNotNull(message);
-	}
-
-	/**
-	 * Test method for
-	 * {@link org.carpart.rpc.impl.CarRpcServiceImpl#fitOrderStatusToFreePark(java.lang.String, java.lang.String, java.lang.String)}
-	 * .
-	 */
-	@Test
-	public final void testFitOrderStatusToFreePark() {
-		String orderCode = "DT20141024162405DD10000003";
-		String message = service.fitOrderStatusToFreePark(orderCode, clientCode, clientKey);
-		System.err.println(message);
-		Assert.assertNotNull(message);
-	}
+	
 
 	/**
 	 * Test method for
