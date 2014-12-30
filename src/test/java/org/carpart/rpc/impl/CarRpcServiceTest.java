@@ -138,7 +138,13 @@ public class CarRpcServiceTest {
 		Assert.assertNotNull(message);
 
 	}
+	@Test
+	public final void testListCarPart2JSON() {
+		String message = service.listCarPart2JSON("南宁", clientCode, clientKey);
+		System.err.println(message);
+		Assert.assertNotNull(message);
 
+	}
 	@Test
 	public final void testListNearbyCarPart2Xml() {
 		String message = service.listNearbyCarPart2Xml("104.065773,30.536549", 2000, clientCode, clientKey);

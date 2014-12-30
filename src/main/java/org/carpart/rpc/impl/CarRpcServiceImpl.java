@@ -20,6 +20,7 @@ import org.carpart.vo.ErrorVo;
 import org.carpart.vo.OrderVo;
 import org.carpart.vo.ParkVo;
 import org.g4studio.common.util.SpringBeanLoader;
+import org.g4studio.core.json.JsonHelper;
 import org.g4studio.core.metatype.Dto;
 import org.g4studio.core.metatype.impl.BaseDto;
 import org.g4studio.core.util.G4Constants;
@@ -295,7 +296,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 			Dto pDto = new BaseDto();
 			pDto.put("city", cityCode);
 			List list = parkService.queryByList(pDto);
-			message = XmlHelper.parseList2Xml2(list, "parks", "park");
+			message =JsonHelper.encodeList2PageJson(list, list.size(),G4Constants.FORMAT_DateTime) ;
 		}
 		return message;
 	}
