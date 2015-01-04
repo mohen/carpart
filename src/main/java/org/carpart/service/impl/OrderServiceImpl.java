@@ -5,18 +5,17 @@
 
 package org.carpart.service.impl;
 
-import org.carpart.CPException;
-import org.carpart.service.IService;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.carpart.vo.ClientVo;
+import org.carpart.bean.Order;
+import org.carpart.service.IService;
 import org.carpart.vo.OrderVo;
 import org.g4studio.common.service.impl.BaseServiceImpl;
 import org.g4studio.core.metatype.Dto;
 import org.g4studio.core.util.G4Utils;
+import org.nutz.dao.Chain;
 
 public class OrderServiceImpl extends BaseServiceImpl implements IService<OrderVo> {
 
@@ -26,6 +25,10 @@ public class OrderServiceImpl extends BaseServiceImpl implements IService<OrderV
 	public Dto save(Dto pDto) {
 		g4Dao.insert(VO_NAME + ".insert", pDto);
 		return pDto;
+	}
+	
+	public void save(Order order){
+		 order = nutzDao.insert(order);
 	}
 
 	@Override

@@ -21,6 +21,11 @@ public class BaseServiceImpl implements BaseService {
 	 * 连接平台数据库
 	 */
 	protected Dao g4Dao;
+	
+	/**
+	 * 辅助nutzDao
+	 */
+	protected org.nutz.dao.Dao nutzDao;
 
 	protected static PropertiesHelper g4PHelper = PropertiesFactory.getPropertiesHelper(PropertiesFile.G4);
 
@@ -29,6 +34,12 @@ public class BaseServiceImpl implements BaseService {
 	public void setG4Dao(Dao g4Dao) {
 		this.g4Dao = g4Dao;
 	}
+	
+
+	public void setNutzDao(org.nutz.dao.Dao nutzDao) {
+		this.nutzDao = nutzDao;
+	}
+
 
 	@Override
 	public void rollback(String action) {

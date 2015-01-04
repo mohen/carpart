@@ -121,8 +121,6 @@ public interface CarRpcService {
 	 * 
 	 * @param wxCode
 	 *            客户微信号
-	 * @param partMapLb
-	 *            停车场入口经纬度
 	 * @return 返回订单二维码 其他为系统错误码 格式如:ERR_1000
 	 */
 	public String createOrder(String wxCode, String clientCode, String clientKey);

@@ -6,6 +6,8 @@ import java.util.List;
 
 import javax.jws.WebService;
 
+import net.sf.json.util.JSONStringer;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.common.util.StringUtils;
@@ -347,13 +349,18 @@ public class CarRpcServiceImpl implements CarRpcService {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
 			int clientId = Integer.valueOf(message);
-			this.logClientAction(clientId, String.format("新增订单客户:%s", wxCode));
-			IService parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
+			this.logClientAction(clientId, String.format("获取客户:%s二维码", wxCode));
+			
 			IService customService = (IService) SpringBeanLoader.getSpringBean("customService");
-			IService orderService = (IService) SpringBeanLoader.getSpringBean("orderService");
+			IService orderService = (IService) SpringBeanLoader.getSpringBean("orderService");			
+			IService parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
 			Dto pDto = new BaseDto();
 			boolean success = true;
 			int cusId = 0;
+			JSONStringer json=new JSONStringer();
+			/**
+			 * 检查传递的微信号 客户是否存在
+			 */
 			if (success) {
 				pDto.clear();
 				pDto.put("wxCode", wxCode);
@@ -366,8 +373,14 @@ public class CarRpcServiceImpl implements CarRpcService {
 					success = false;
 				}
 			}
+			/**
+			 * 检查当天是否已经申请订单
+			 */
 			if (success) {
 				OrderVo vo = new OrderVo();
+				
+				
+				
 				Date date = new Date();
 				vo.setCreateTime(date);
 				String orderCode = IDHelper.getInstance().generatOrderCode();

@@ -62,7 +62,10 @@
 	<bean id="g4Dao" class="org.g4studio.common.dao.impl.DaoImpl">
 		<property name="sqlMapClient" ref="sqlMapClientG4" />
 	</bean>
-	
+	<!-- 配置nutzDao  -->
+	<bean id="nutzDao" class="org.nutz.dao.impl.NutDao">
+		<property name="dataSource" ref="dataSourceG4" />
+	</bean>
 	<!-- JDBC事务管理器配置 -->
 	<bean id="transactionManagerG4" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 		<property name="dataSource">
