@@ -12,7 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.common.util.StringUtils;
 import org.carpart.CPConstants;
-import org.carpart.CPException;
+import org.carpart.bean.Park;
 import org.carpart.rpc.CarRpcService;
 import org.carpart.service.IService;
 import org.carpart.util.IDHelper;
@@ -28,6 +28,8 @@ import org.g4studio.core.metatype.impl.BaseDto;
 import org.g4studio.core.util.G4Constants;
 import org.g4studio.core.util.G4Utils;
 import org.g4studio.core.xml.XmlHelper;
+import org.nutz.dao.Cnd;
+import org.nutz.dao.Dao;
 
 import bsh.Interpreter;
 
@@ -281,10 +283,9 @@ public class CarRpcServiceImpl implements CarRpcService {
 		if (!message.startsWith("ERR")) {
 			Integer clientId = Integer.valueOf(message);
 			this.logClientAction(clientId, String.format("查询城市合作停车场列表:%s信息", cityCode));
-			IService<ParkVo> parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
-			Dto pDto = new BaseDto();
-			pDto.put("city", cityCode);
-			List list = parkService.queryByList(pDto);
+			
+			Dao dao = (Dao) SpringBeanLoader.getSpringBean("nutzDao");
+			List<Park> list = dao.query(Park.class, Cnd.where("city", "=", cityCode));
 			message = XmlHelper.parseList2Xml2(list, "parks", "park");
 		}
 		return message;
