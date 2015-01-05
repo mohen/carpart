@@ -12,8 +12,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.common.util.StringUtils;
 import org.carpart.CPConstants;
+import org.carpart.bean.Client;
+import org.carpart.bean.Custom;
+import org.carpart.bean.Error;
+import org.carpart.bean.Order;
 import org.carpart.bean.Park;
 import org.carpart.rpc.CarRpcService;
+import org.carpart.rpc.ClientRpcService;
 import org.carpart.service.IService;
 import org.carpart.util.IDHelper;
 import org.carpart.vo.ClientVo;
@@ -22,22 +27,41 @@ import org.carpart.vo.ErrorVo;
 import org.carpart.vo.OrderVo;
 import org.carpart.vo.ParkVo;
 import org.g4studio.common.util.SpringBeanLoader;
-import org.g4studio.core.json.JsonHelper;
 import org.g4studio.core.metatype.Dto;
 import org.g4studio.core.metatype.impl.BaseDto;
 import org.g4studio.core.util.G4Constants;
 import org.g4studio.core.util.G4Utils;
 import org.g4studio.core.xml.XmlHelper;
 import org.nutz.dao.Cnd;
+import org.nutz.dao.Condition;
 import org.nutz.dao.Dao;
+import org.nutz.dao.Sqls;
+import org.nutz.dao.sql.Sql;
+import org.nutz.dao.util.cri.SqlExpression;
+import org.nutz.json.Json;
+import org.nutz.trans.Atom;
+import org.nutz.trans.Trans;
 
 import bsh.Interpreter;
 
 @WebService
 public class CarRpcServiceImpl implements CarRpcService {
 	private static Log log = LogFactory.getLog(CarRpcServiceImpl.class);
+	private Dao dao = null;
+
+	private ClientRpcService clientRpc = null;
+
+	public CarRpcServiceImpl() {
+		if (dao == null) {
+			dao = (Dao) SpringBeanLoader.getSpringBean("nutzDao");
+		}
+		if (clientRpc == null) {
+			clientRpc = (ClientRpcService) SpringBeanLoader.getSpringBean("clientRpcService");
+		}
+	}
 
 	private static int systemId = 1;
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public String queryOrderStatus(String orderCode, String clientCode, String clientKey) {
@@ -45,11 +69,8 @@ public class CarRpcServiceImpl implements CarRpcService {
 		if (!message.startsWith("ERR")) {
 			Integer clientId = Integer.valueOf(message);
 			this.logClientAction(clientId, String.format("查询订单:%s状态", orderCode));
-			IService<OrderVo> orderService = (IService) SpringBeanLoader.getSpringBean("orderService");
-			Dto pDto = new BaseDto();
-			pDto.put("orderCode", orderCode);
 			try {
-				OrderVo vo = orderService.queryById(pDto);
+				Order vo = this.fetchOrder(orderCode);
 				if (vo == null) {
 					message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("查询订单:%s不存在!", orderCode));
 				} else {
@@ -71,10 +92,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 		if (!message.startsWith("ERR")) {
 			Integer clientId = Integer.valueOf(message);
 			this.logClientAction(clientId, String.format("计算订单:%s费用", orderCode));
-			IService<OrderVo> orderService = (IService) SpringBeanLoader.getSpringBean("orderService");
-			Dto pDto = new BaseDto();
-			pDto.put("orderCode", orderCode);
-			OrderVo vo = orderService.queryById(pDto);
+			Order vo = this.fetchOrder(orderCode);
 			if (vo == null) {
 				message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("订单:%s 不存在,无法计算费用!", orderCode));
 			} else {
@@ -83,10 +101,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 					try {
 						Date startDate = vo.getStartPartTime();
 						Integer parkId = vo.getParkId();
-						IService<ParkVo> parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
-						pDto.clear();
-						pDto.put("parkId", parkId);
-						ParkVo parkVo = parkService.queryById(pDto);
+						Park parkVo = this.fetchPark(parkId);
 						String feeRules = parkVo.getFeeRules();
 						if (StringUtils.isEmpty(feeRules)) {
 							message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("停车场:%s规则未配置,无法计算费用!", parkVo.getParkName()));
@@ -94,9 +109,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 							double payMoney = vo.getPayAmount();
 							Date feedDate = new Date();
 							int iMinute = G4Utils.getIntervalMinute(startDate, feedDate);
-							System.err.println(iMinute);
 							double orderFee = this.feelOrderFee(startDate, feedDate, feeRules, iMinute);
-							System.err.println(orderFee);
 							double needPayMoney = orderFee - payMoney;
 							vo.setFeedTime(feedDate);
 							vo.setFeeAmount(orderFee);
@@ -105,7 +118,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 							if (orderFee > 0) {
 								vo.setStatus(CPConstants.ORDER_STATUS_PARKING);
 							}
-							orderService.update(vo);
+							dao.update(vo);
 							money = needPayMoney;
 						}
 					} catch (Exception ex) {
@@ -144,6 +157,26 @@ public class CarRpcServiceImpl implements CarRpcService {
 
 	}
 
+	private Order fetchOrder(String orderCode) {
+		return dao.fetch(Order.class, Cnd.where("orderCode", "=", orderCode));
+	}
+
+	private Park fetchPark(int parkId) {
+		return dao.fetch(Park.class, Cnd.where("parkId", "=", parkId));
+	}
+
+	private Park fetchPark(String mapLb) {
+		return dao.fetch(Park.class, Cnd.where("mapLb", "=", mapLb));
+	}
+
+	private Custom fetchCustom(String wxCode) {
+		return dao.fetch(Custom.class, Cnd.where("wxCode", "=", wxCode));
+	}
+
+	private Client fetchClient(String clientId) {
+		return dao.fetch(Client.class, Cnd.where("clientId", "=", clientId));
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public String queryOrderInfo(String orderCode, String clientCode, String clientKey) {
@@ -151,19 +184,13 @@ public class CarRpcServiceImpl implements CarRpcService {
 		if (!message.startsWith("ERR")) {
 			Integer clientId = Integer.valueOf(message);
 			this.logClientAction(clientId, String.format("查询订单:%s信息", orderCode));
-			IService<OrderVo> orderService = (IService) SpringBeanLoader.getSpringBean("orderService");
-			Dto pDto = new BaseDto();
-			pDto.put("orderCode", orderCode);
-			OrderVo vo = orderService.queryById(pDto);
+			Order vo = this.fetchOrder(orderCode);
 			String status = vo.getStatus();
 			if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PARKING) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PAY_NOT_OUT)) {
 				try {
 					Date startDate = vo.getStartPartTime();
 					Integer parkId = vo.getParkId();
-					IService<ParkVo> parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
-					pDto.clear();
-					pDto.put("parkId", parkId);
-					ParkVo parkVo = parkService.queryById(pDto);
+					Park parkVo = this.fetchPark(parkId);
 					String feeRules = parkVo.getFeeRules();
 					if (StringUtils.isEmpty(feeRules)) {
 						message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("停车场:%s规则未配置,无法计算费用!", parkVo.getParkName()));
@@ -180,7 +207,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 						if (orderFee > 0) {
 							vo.setStatus(CPConstants.ORDER_STATUS_PARKING);
 						}
-						orderService.update(vo);
+						dao.update(vo);
 					}
 				} catch (Exception ex) {
 					message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("计算订单:%s 费用失败:%s!", orderCode, ex.getMessage()));
@@ -202,11 +229,12 @@ public class CarRpcServiceImpl implements CarRpcService {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
 			Integer clientId = Integer.valueOf(message);
-			this.logClientAction(clientId, String.format("新增用户:%s信息", wxCode));
-			Dto pDto = new BaseDto();
-			IService<CustomVo> customService = (IService<CustomVo>) SpringBeanLoader.getSpringBean("customService");
-			pDto.put("wxCode", wxCode);
-			CustomVo vo = new CustomVo();
+			this.logClientAction(clientId, String.format("保存用户:%s信息", wxCode));
+			Custom vo = this.fetchCustom(wxCode);
+			if (vo == null) {
+				vo = new Custom();
+				vo.setRegTime(new Date());
+			}
 			vo.setWxName(wxName);
 			vo.setWxCode(wxCode);
 			vo.setCarCode(carCode);
@@ -217,24 +245,18 @@ public class CarRpcServiceImpl implements CarRpcService {
 			vo.setCertCode(certCode);
 			vo.setEmail(email);
 			vo.setStatus("1");
-			Dto pToDto = new BaseDto();
-			int count = customService.queryCount(pDto);
-			if (count > 0) {
-				customService.update(vo);
-				if (pToDto.getAsInteger("cusId") > 0) {
-					message = CPConstants.RETURN_TRUE;
-				} else {
-					message = logsError(clientId, CPConstants.ERROR_TYPE_SERVER, String.format("更新wxCode=%s 的客户 产生数据库错误", wxCode));
-				}
+			Integer cusId = vo.getCusId();
+			boolean success = true;
+			if (cusId > 0) {
+				success = dao.update(vo) > 0;
 			} else {
-				vo.setRegTime(new Date());
-				G4Utils.copyPropFromBean2Dto(vo, pToDto);
-				customService.save(pToDto);
-				if (pToDto.getAsInteger("cusId") > 0) {
-					message = CPConstants.RETURN_TRUE;
-				} else {
-					message = logsError(clientId, CPConstants.ERROR_TYPE_SERVER, String.format("新增wxCode=%s 的客户 产生数据库错误", wxCode));
-				}
+				vo = dao.insert(vo);
+				success = vo.getCusId() > 0;
+			}
+			if (success) {
+				message = CPConstants.RETURN_TRUE;
+			} else {
+				message = logsError(clientId, CPConstants.ERROR_TYPE_SERVER, String.format("更新wxCode=%s 的客户 产生数据库错误", wxCode));
 			}
 		}
 		return message;
@@ -250,27 +272,33 @@ public class CarRpcServiceImpl implements CarRpcService {
 		if (!message.startsWith("ERR")) {
 			Integer clientId = Integer.valueOf(message);
 			this.logClientAction(clientId, String.format("新增用户:%s信息", wxCode));
-			Dto pDto = new BaseDto();
-			IService customService = (IService) SpringBeanLoader.getSpringBean("customService");
-			pDto.put("wxCode", wxCode);
-			int count = customService.queryCount(pDto);
-			if (count > 0) {
-				message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("系统已经存在wxCode=%s 的客户", wxCode));
-			} else {
-				CustomVo vo = new CustomVo();
-				vo.setWxName(wxName);
-				vo.setWxCode(wxCode);
-				vo.setCity(city);
-				vo.setStatus("1");
+			Custom vo = this.fetchCustom(wxCode);
+			if (vo == null) {
+				vo = new Custom();
 				vo.setRegTime(new Date());
-				Dto pToDto = new BaseDto();
-				G4Utils.copyPropFromBean2Dto(vo, pToDto);
-				customService.save(pToDto);
-				if (pToDto.getAsInteger("cusId") > 0) {
-					message = CPConstants.RETURN_TRUE;
-				} else {
-					message = logsError(clientId, CPConstants.ERROR_TYPE_SERVER, String.format("新增wxCode=%s 的客户 产生数据库错误", wxCode));
+			}
+			vo.setWxName(wxName);
+			vo.setWxCode(wxCode);
+			vo.setCity(city);
+			vo.setStatus("1");
+			Integer cusId = vo.getCusId();
+			boolean success = true;
+			if (cusId > 0) {
+				success = dao.update(vo) > 0;
+				if (success) {
+					clientRpc.pushMessageToCustom(String.format("BIBI停车平台,欢迎%s回来!", wxName), wxCode, clientCode, clientKey);
 				}
+			} else {
+				vo = dao.insert(vo);
+				success = vo.getCusId() > 0;
+				if (success) {
+					clientRpc.pushMessageToCustom(String.format("%s,欢迎关注BIBI停车平台!", wxName), wxCode, clientCode, clientKey);
+				}
+			}
+			if (success) {
+				message = CPConstants.RETURN_TRUE;
+			} else {
+				message = logsError(clientId, CPConstants.ERROR_TYPE_SERVER, String.format("更新wxCode=%s 的客户 产生数据库错误", wxCode));
 			}
 		}
 		return message;
@@ -283,26 +311,27 @@ public class CarRpcServiceImpl implements CarRpcService {
 		if (!message.startsWith("ERR")) {
 			Integer clientId = Integer.valueOf(message);
 			this.logClientAction(clientId, String.format("查询城市合作停车场列表:%s信息", cityCode));
-			
-			Dao dao = (Dao) SpringBeanLoader.getSpringBean("nutzDao");
-			List<Park> list = dao.query(Park.class, Cnd.where("city", "=", cityCode));
+			IService<ParkVo> parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
+			Dto pDto = new BaseDto();
+			pDto.put("city", cityCode);
+			List list = parkService.queryByList(pDto);
 			message = XmlHelper.parseList2Xml2(list, "parks", "park");
 		}
 		return message;
 	}
+
 	public String listCarPart2JSON(String cityCode, String clientCode, String clientKey) {
 		String message = loginValid(clientCode, clientKey);
 		if (!message.startsWith("ERR")) {
 			Integer clientId = Integer.valueOf(message);
 			this.logClientAction(clientId, String.format("查询城市合作停车场列表:%s信息", cityCode));
-			IService<ParkVo> parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
-			Dto pDto = new BaseDto();
-			pDto.put("city", cityCode);
-			List list = parkService.queryByList(pDto);
-			message =JsonHelper.encodeList2PageJson(list, list.size(),G4Constants.FORMAT_DateTime) ;
+			Dao dao = (Dao) SpringBeanLoader.getSpringBean("nutzDao");
+			List<Park> list = dao.query(Park.class, Cnd.where("city", "=", cityCode));
+			message = Json.toJson(list);
 		}
 		return message;
 	}
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public String listNearbyCarPart2Xml(String mabLb, int raidus, String clientCode, String clientKey) {
@@ -351,37 +380,24 @@ public class CarRpcServiceImpl implements CarRpcService {
 		if (!message.startsWith("ERR")) {
 			int clientId = Integer.valueOf(message);
 			this.logClientAction(clientId, String.format("获取客户:%s二维码", wxCode));
-			
-			IService customService = (IService) SpringBeanLoader.getSpringBean("customService");
-			IService orderService = (IService) SpringBeanLoader.getSpringBean("orderService");			
-			IService parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
-			Dto pDto = new BaseDto();
 			boolean success = true;
-			int cusId = 0;
-			JSONStringer json=new JSONStringer();
-			/**
-			 * 检查传递的微信号 客户是否存在
-			 */
-			if (success) {
-				pDto.clear();
-				pDto.put("wxCode", wxCode);
-				List list2 = customService.queryByList(pDto);
-				success = list2.size() > 0;
-				if (success) {
-					cusId = ((CustomVo) list2.get(0)).getCusId();
-				} else {
-					message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("系统不存在微信号为:%s的客户", wxCode));
-					success = false;
-				}
+			Custom custom = this.fetchCustom(wxCode);
+			if(custom==null){
+				message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("系统不存在微信号为:%s的客户", wxCode));
+				success = false;
+			}else{
+				
+				Sql sql=Sqls.create("");
+				Condition cnd=Cnd.where(sql);
+				List<Order> list = dao.query(Order.class, cnd);
 			}
+
 			/**
 			 * 检查当天是否已经申请订单
 			 */
 			if (success) {
 				OrderVo vo = new OrderVo();
-				
-				
-				
+
 				Date date = new Date();
 				vo.setCreateTime(date);
 				String orderCode = IDHelper.getInstance().generatOrderCode();
@@ -490,8 +506,8 @@ public class CarRpcServiceImpl implements CarRpcService {
 	 * @return
 	 */
 	private String loginValid(String clientCode, String clientKey) {
-		ClientVo clientVo = validClientInfo(clientCode, clientKey);
-		int clientInfo = clientVo.getClientId();
+		Client client = validClientInfo(clientCode, clientKey);
+		int clientInfo = client.getClientId();
 		String message = String.valueOf(clientInfo);
 		if (clientInfo == 0) {
 			message = logsError(CPConstants.LOCAL_SERVER_ID, CPConstants.ERROR_TYPE_SERVER, String.format("系统中不存在clientCode=%s clientKey=%s 的客户端", clientCode, clientKey));
@@ -510,17 +526,18 @@ public class CarRpcServiceImpl implements CarRpcService {
 	 */
 	private String logsError(int clientId, String errorType, String detail) {
 		log.info(String.format("开始客户端:%s 错误 类型:%s  内容:%s", clientId, errorType, detail));
-		IService errorService = (IService) SpringBeanLoader.getSpringBean("errorService");
-		ErrorVo vo = new ErrorVo();
+		final Error vo = new Error();
 		vo.setClientId(clientId);
 		vo.setCreateTime(new Date());
 		vo.setErrCode(IDHelper.getInstance().generatErrorCode());
 		vo.setErrDetail(detail);
 		vo.setErrType(errorType);
-		Dto pToDto = new BaseDto();
-		G4Utils.copyPropFromBean2Dto(vo, pToDto);
-		errorService.save(pToDto);
-		String message = String.format(pToDto.getAsString("errCode") + "@%s", detail);
+		Trans.exec(new Atom() {
+			public void run() {
+				dao.insert(vo);
+			}
+		});
+		String message = String.format("%@%s", vo.getErrCode(), detail);
 		log.info(message);
 		return message;
 
@@ -538,17 +555,9 @@ public class CarRpcServiceImpl implements CarRpcService {
 	 * @return
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private ClientVo validClientInfo(String clientCode, String clientKey) {
-		IService clientService = (IService) SpringBeanLoader.getSpringBean("clientService");
-		Dto pDto = new BaseDto();
-		pDto.put("clientCode", clientCode);
-		pDto.put("clientKey", clientKey);
-		List list = clientService.queryByList(pDto);
-		ClientVo vo = new ClientVo();
-		if (list.size() > 0) {
-			vo = ((ClientVo) list.get(0));
-		}
-		return vo;
+	private Client validClientInfo(String clientCode, String clientKey) {
+		Client client = dao.fetch(Client.class, Cnd.where("clientCode", "=", clientCode).and("clientKey", "=", clientKey));
+		return client;
 	}
 
 	/**

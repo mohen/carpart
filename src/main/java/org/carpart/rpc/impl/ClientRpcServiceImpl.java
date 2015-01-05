@@ -22,7 +22,7 @@ public class ClientRpcServiceImpl implements ClientRpcService {
 	private static Log log = LogFactory.getLog(ClientRpcServiceImpl.class);
 	private static String CLIENT_URL = "";
 
-	static {
+	public ClientRpcServiceImpl() {
 		PropertiesHelper pHelper = PropertiesFactory.getPropertiesHelper(PropertiesFile.APP);
 		if (StringUtils.isEmpty(CLIENT_URL)) {
 			CLIENT_URL = pHelper.getValue("wx.server.url");

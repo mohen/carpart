@@ -60,4 +60,6 @@
 		</property>
 	</bean>
 	
+	<bean id="clientRpcService" class="org.carpart.rpc.impl.ClientRpcServiceImpl" lazy-init="false"/>
+	
 </beans>
