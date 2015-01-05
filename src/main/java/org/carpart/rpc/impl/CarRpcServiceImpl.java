@@ -387,7 +387,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 				success = false;
 			}else{
 				
-				Sql sql=Sqls.create("");
+				Sql sql=Sqls.create("select * from cp_order where ");
 				Condition cnd=Cnd.where(sql);
 				List<Order> list = dao.query(Order.class, cnd);
 			}
