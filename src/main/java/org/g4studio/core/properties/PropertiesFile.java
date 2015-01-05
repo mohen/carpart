@@ -20,6 +20,12 @@ public interface PropertiesFile {
 	
 	/**
 	 * Properties文件类型<br>
+	 * 对应global.message.properties属性文件
+	 */
+	public static final String MSG = "message";
+	
+	/**
+	 * Properties文件类型<br>
 	 * 对应global.app.properties属性文件
 	 */
 	public static final String G4SERVER = "g4server";

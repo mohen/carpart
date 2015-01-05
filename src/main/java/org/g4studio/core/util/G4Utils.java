@@ -52,6 +52,10 @@ public class G4Utils {
 
 	private static String HanDiviStr[] = new String[] { "", "拾", "佰", "仟", "万", "拾", "佰", "仟", "亿", "拾", "佰", "仟", "万", "拾", "佰", "仟", "亿", "拾", "佰", "仟", "万", "拾", "佰", "仟" };
 
+	private static final double PI = 3.14159265;
+	private static final double EARTH_RADIUS = 6378137;
+	private static final double RAD = Math.PI / 180.0;
+
 	private static PropertiesHelper pHelper = PropertiesFactory.getPropertiesHelper(PropertiesFile.G4);
 
 	/**
@@ -1003,6 +1007,65 @@ public class G4Utils {
 			e.printStackTrace();
 		}
 		return pString;
+	}
+
+	/**
+	 * 根据经纬度半径计算 经纬度范围
+	 * 
+	 * @param lat
+	 *            经度
+	 * @param lon
+	 *            纬度
+	 * @param raidus
+	 *            半径 米
+	 * @return 最小最大经纬度
+	 */
+	public static double[] getMapLbAround(double lat, double lon, int raidus) {
+		Double latitude = lat;
+		Double longitude = lon;
+		Double degree = (24901 * 1609) / 360.0;
+		double raidusMile = raidus;
+		Double dpmLat = 1 / degree;
+		Double radiusLat = dpmLat * raidusMile;
+		Double minLat = latitude - radiusLat;
+		Double maxLat = latitude + radiusLat;
+		Double mpdLng = degree * Math.cos(latitude * (PI / 180));
+		Double dpmLng = 1 / mpdLng;
+		Double radiusLng = dpmLng * raidusMile;
+		Double minLng = longitude - radiusLng;
+		Double maxLng = longitude + radiusLng;
+		return new double[] { minLat, minLng, maxLat, maxLng };
+	}
+
+	/**
+	 * 获取两个经纬度之间的距离
+	 * 
+	 * @param lng1
+	 * @param lat1
+	 * @param lng2
+	 * @param lat2
+	 * @return
+	 */
+	public static double getMapLbDistance(double lng1, double lat1, double lng2, double lat2) {
+		double radLat1 = lat1 * RAD;
+		double radLat2 = lat2 * RAD;
+		double a = radLat1 - radLat2;
+		double b = (lng1 - lng2) * RAD;
+		double s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2), 2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.pow(Math.sin(b / 2), 2)));
+		s = s * EARTH_RADIUS;
+		s = Math.round(s * 10000) / 10000;
+		return s;
+	}
+
+	public static void main(String args[]) {
+		double lat = 104.075159;
+		double lon =30.539867;
+		int raidus = 10000;
+		double[] around = getMapLbAround(lat, lon, raidus);
+		for (int i = 0; i < around.length; i++) {
+			System.out.println(around[i]);
+		}
+
 	}
 
 }

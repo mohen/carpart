@@ -7,11 +7,11 @@ orderAlias = {
 	createTime : "订单创建时间",
 	startPartTime : "入库时间",
 	endPartTime : "出库时间",
-	partTimes : "计时",
-	validTimes : "有效时间",
-	feeAmount : "合计计费",
-	needAmount : "欠费余额",
-	payAmount : "已付款金额",
+	partTimes : "计时(分钟)",
+	validTimes : "订单失效时间",
+	feeAmount : "合计计费(元)",
+	needAmount : "欠费余额(元)",
+	payAmount : "已付款金额(元)",
 	orderLogs : "订单日志",
 	memo : "备注信息",
 	status : "状态"
@@ -115,54 +115,63 @@ Ext.onReady(function() {
 	// 定义列模型
 	var cm = new Ext.grid.ColumnModel([rownum, {
 				header : orderAlias.orderCode,
-				width : 50,
+				width : 200,
 				sortable : true,
 				dataIndex : 'orderCode'
 			}, {
 				header : orderAlias.parkName,
-				width : 100,
+				width : 80,
 				sortable : true,
 				dataIndex : 'parkName'
 			}, {
 				header : orderAlias.cusName,
-				width : 100,
+				width : 80,
 				sortable : true,
 				dataIndex : 'cusName'
 			}, {
 				header : orderAlias.createTime,
 				sortable : true,
-				dataIndex : 'createTime'
+				width : 150,
+				dataIndex : 'createTimeString'
 			}, {
 				header : orderAlias.startPartTime,
 				sortable : true,
-				dataIndex : 'startPartTime'
+				width : 150,
+				dataIndex : 'startPartTimeString'
 			}, {
 				header : orderAlias.endPartTime,
 				sortable : true,
-				dataIndex : 'endPartTime'
+				width : 150,
+				dataIndex : 'endPartTimeString'
 			}, {
 				header : orderAlias.partTimes,
 				sortable : true,
+				width : 80,
 				dataIndex : 'partTimes'
 			}, {
 				header : orderAlias.validTimes,
 				sortable : true,
-				dataIndex : 'validTimes'
+				width : 150,
+				dataIndex : 'validTimesString'
 			}, {
 				header : orderAlias.feeAmount,
 				sortable : true,
+				width : 80,
 				dataIndex : 'feeAmount'
 			}, {
 				header : orderAlias.needAmount,
 				sortable : true,
+				width : 80,
 				dataIndex : 'needAmount'
 			}, {
 				header : orderAlias.payAmount,
 				sortable : true,
+				width : 80,
 				dataIndex : 'payAmount'
 			}, {
 				header : orderAlias.status,
 				sortable : true,
+				width : 80,
 				renderer : ORDERSTATUSRender,
 				dataIndex : 'status'
 			}]);
@@ -180,7 +189,8 @@ Ext.onReady(function() {
 							root : 'ROOT' // Json中的列表数据根节点
 						}, ['orderCode', 'parkId', "parkName", 'cusId',
 								"cusName", 'createTime', 'startPartTime',
-								'endPartTime', 'partTimes', 'validTimes',
+								'endPartTime', 'partTimes', 'validTimes', 'createTimeString', 'startPartTimeString',
+								'endPartTimeString', 'validTimesString',
 								'feeAmount', 'needAmount', 'payAmount',
 								'orderLogs', 'memo', 'status'])
 			});

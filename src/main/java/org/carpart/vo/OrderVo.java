@@ -5,6 +5,7 @@
 
 package org.carpart.vo;
 
+import org.apache.commons.lang.StringUtils;
 import org.g4studio.core.metatype.BaseVo;
 import org.g4studio.core.util.G4Constants;
 import org.g4studio.core.util.G4Utils;
@@ -28,9 +29,55 @@ public class OrderVo extends BaseVo {
 	 */
 	private java.lang.Integer cusId;
 	/**
+	 * wxCode
+	 */
+	private java.lang.String wxCode;
+	/**
 	 * 停车场
 	 */
 	private String parkName;
+	/**
+	 * 经纬度
+	 */
+	private java.lang.String mapLb;
+	/**
+	 * 地址
+	 */
+	private java.lang.String address;
+	/**
+	 * 计费规则说明
+	 */
+	private java.lang.String rulesDesc;
+
+	/**
+	 * 营业时间
+	 */
+	private java.lang.String officeTime;
+
+	public java.lang.String getAddress() {
+		return address;
+	}
+
+	public void setAddress(java.lang.String address) {
+		this.address = address;
+	}
+
+	public java.lang.String getRulesDesc() {
+		return rulesDesc;
+	}
+
+	public void setRulesDesc(java.lang.String rulesDesc) {
+		this.rulesDesc = rulesDesc;
+	}
+
+	public java.lang.String getOfficeTime() {
+		return officeTime;
+	}
+
+	public void setOfficeTime(java.lang.String officeTime) {
+		this.officeTime = officeTime;
+	}
+
 	/**
 	 * 微信昵称
 	 */
@@ -47,10 +94,15 @@ public class OrderVo extends BaseVo {
 	 * 出库时间
 	 */
 	private java.util.Date endPartTime;
+	
+	/**
+	 * 最近一次计费时间
+	 */
+	private java.util.Date feedTime;
 	/**
 	 * 计时
 	 */
-	private java.lang.Float partTimes;
+	private java.lang.Double partTimes;
 	/**
 	 * 有效时间
 	 */
@@ -58,15 +110,15 @@ public class OrderVo extends BaseVo {
 	/**
 	 * 合计计费
 	 */
-	private java.lang.Float feeAmount;
+	private java.lang.Double feeAmount;
 	/**
 	 * 欠费余额
 	 */
-	private java.lang.Float needAmount;
+	private java.lang.Double needAmount;
 	/**
 	 * 已付款金额
 	 */
-	private java.lang.Float payAmount;
+	private java.lang.Double payAmount;
 	/**
 	 * 订单日志
 	 */
@@ -135,7 +187,8 @@ public class OrderVo extends BaseVo {
 	 *            - String
 	 */
 	public void setCreateTimeString(String value) {
-		setCreateTime(G4Utils.stringToDate(value, G4Constants.FORMAT_DateTime, G4Constants.FORMAT_DateTime));
+		if (StringUtils.isNotEmpty(value))
+			setCreateTime(G4Utils.stringToDate(value, G4Constants.FORMAT_DateTime, G4Constants.FORMAT_DateTime));
 	}
 
 	/**
@@ -164,7 +217,8 @@ public class OrderVo extends BaseVo {
 	 *            - String
 	 */
 	public void setStartPartTimeString(String value) {
-		setStartPartTime(G4Utils.stringToDate(value, G4Constants.FORMAT_DateTime, G4Constants.FORMAT_DateTime));
+		if (StringUtils.isNotBlank(value))
+			setStartPartTime(G4Utils.stringToDate(value, G4Constants.FORMAT_DateTime, G4Constants.FORMAT_DateTime));
 	}
 
 	/**
@@ -193,7 +247,8 @@ public class OrderVo extends BaseVo {
 	 *            - String
 	 */
 	public void setEndPartTimeString(String value) {
-		setEndPartTime(G4Utils.stringToDate(value, G4Constants.FORMAT_DateTime, G4Constants.FORMAT_DateTime));
+		if (StringUtils.isNotBlank(value))
+			setEndPartTime(G4Utils.stringToDate(value, G4Constants.FORMAT_DateTime, G4Constants.FORMAT_DateTime));
 	}
 
 	/**
@@ -201,6 +256,14 @@ public class OrderVo extends BaseVo {
 	 */
 	public void setEndPartTime(java.util.Date value) {
 		this.endPartTime = value;
+	}
+
+	public java.lang.String getMapLb() {
+		return mapLb;
+	}
+
+	public void setMapLb(java.lang.String mapLb) {
+		this.mapLb = mapLb;
 	}
 
 	/**
@@ -213,14 +276,14 @@ public class OrderVo extends BaseVo {
 	/**
 	 * @param 计时
 	 */
-	public void setPartTimes(java.lang.Float value) {
+	public void setPartTimes(java.lang.Double value) {
 		this.partTimes = value;
 	}
 
 	/**
 	 * @return 计时
 	 */
-	public java.lang.Float getPartTimes() {
+	public java.lang.Double getPartTimes() {
 		return this.partTimes;
 	}
 
@@ -236,7 +299,8 @@ public class OrderVo extends BaseVo {
 	 *            - String
 	 */
 	public void setValidTimesString(String value) {
-		setValidTimes(G4Utils.stringToDate(value, G4Constants.FORMAT_DateTime, G4Constants.FORMAT_DateTime));
+		if (StringUtils.isNotEmpty(value))
+			setValidTimes(G4Utils.stringToDate(value, G4Constants.FORMAT_DateTime, G4Constants.FORMAT_DateTime));
 	}
 
 	/**
@@ -256,42 +320,42 @@ public class OrderVo extends BaseVo {
 	/**
 	 * @param 合计计费
 	 */
-	public void setFeeAmount(java.lang.Float value) {
+	public void setFeeAmount(java.lang.Double value) {
 		this.feeAmount = value;
 	}
 
 	/**
 	 * @return 合计计费
 	 */
-	public java.lang.Float getFeeAmount() {
+	public java.lang.Double getFeeAmount() {
 		return this.feeAmount;
 	}
 
 	/**
 	 * @param 欠费余额
 	 */
-	public void setNeedAmount(java.lang.Float value) {
+	public void setNeedAmount(java.lang.Double value) {
 		this.needAmount = value;
 	}
 
 	/**
 	 * @return 欠费余额
 	 */
-	public java.lang.Float getNeedAmount() {
+	public java.lang.Double getNeedAmount() {
 		return this.needAmount;
 	}
 
 	/**
 	 * @param 已付款金额
 	 */
-	public void setPayAmount(java.lang.Float value) {
+	public void setPayAmount(java.lang.Double value) {
 		this.payAmount = value;
 	}
 
 	/**
 	 * @return 已付款金额
 	 */
-	public java.lang.Float getPayAmount() {
+	public java.lang.Double getPayAmount() {
 		return this.payAmount;
 	}
 
@@ -385,6 +449,26 @@ public class OrderVo extends BaseVo {
 	 */
 	public void setCusName(String cusName) {
 		this.cusName = cusName;
+	}
+
+	public java.lang.String getWxCode() {
+		return wxCode;
+	}
+
+	public void setWxCode(java.lang.String wxCode) {
+		this.wxCode = wxCode;
+	}
+
+	public void setParkName(String parkName) {
+		this.parkName = parkName;
+	}
+
+	public java.util.Date getFeedTime() {
+		return feedTime;
+	}
+
+	public void setFeedTime(java.util.Date feedTime) {
+		this.feedTime = feedTime;
 	}
 
 }

@@ -1,11 +1,13 @@
 /**
  * 
  */
-package org.carpart.rpc.impl;
+package org.carpart.rpc.client;
 
 import static org.junit.Assert.fail;
 import junit.framework.Assert;
 
+import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
+import org.carpart.rpc.CarRpcService;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -21,19 +23,25 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:config/global.config.xml", "classpath:config/global.dao.xml" })
-public class CarRpcServiceTest {
+public class CarRpcClientTest {
 
-	private static CarRpcServiceImpl service;
-	String clientCode = "[B@11b6a15";
-	String clientKey = "SYSTEM";
+	final static String clientCode = "[B@1743c6e";
+	final static String clientKey = "client";
+	final static String orderCode = "DT20141124104254DD10000004";
+	final static String SERVICE_URL = "http://pandaz.wicp.net/CarPart/rpc/webservice/CarRpcService";
+	static CarRpcService service = null;
 
 	/**
 	 * @throws java.lang.Exception
 	 */
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		if (service == null)
-			service = new CarRpcServiceImpl();
+		if (service == null) {
+			JaxWsProxyFactoryBean j = new JaxWsProxyFactoryBean();
+			j.setAddress(SERVICE_URL);
+			j.setServiceClass(CarRpcService.class);
+			service = (CarRpcService) j.create();
+		}
 	}
 
 	/**
@@ -64,12 +72,18 @@ public class CarRpcServiceTest {
 	 */
 	@Test
 	public final void testQueryOrderStatus() {
-		String orderCode = "DT20141010170848DD10000002";
+		String orderCode = "DT20141126171011DD10000013";
 		String message = service.queryOrderStatus(orderCode, clientCode, clientKey);
 		System.err.println(message);
 		Assert.assertNotNull(message);
 	}
-
+	@Test
+	public final void testCancelNewOrder() {
+		String orderCode = "DT20141126174120DD10000017";
+		String message = service.cancelOrder(orderCode, clientCode, clientKey);
+		System.err.println(message);
+		Assert.assertNotNull(message);
+	}
 	/**
 	 * Test method for
 	 * {@link org.carpart.rpc.impl.CarRpcServiceImpl#queryOrderFee(java.lang.String, java.lang.String, java.lang.String)}
@@ -77,18 +91,7 @@ public class CarRpcServiceTest {
 	 */
 	@Test
 	public final void testQueryOrderFee() {
-		String orderCode = "DT20141126154407DD10000009";
-		double money = service.queryOrderFee(orderCode, clientCode, clientKey);
-		System.err.println(money);
-		Assert.assertNotNull(money);
-	}
-
-	@Test
-	public final void testPayOrderFee() {
-		String orderCode = "DT20141126154407DD10000009";
-		double money = service.payOrderFee(orderCode, 15, 1, clientCode, clientKey);
-		System.err.println(money);
-		Assert.assertNotNull(money);
+		fail("Not yet implemented"); // TODO
 	}
 
 	/**
@@ -103,7 +106,13 @@ public class CarRpcServiceTest {
 		System.err.println(message);
 		Assert.assertNotNull(message);
 	}
+	@Test
+	public final void testListNearbyCarPart2Xml() {
+		String message = service.listNearbyCarPart2Xml("104.065773,30.536549",2000, clientCode, clientKey);
+		System.err.println(message);
+		Assert.assertNotNull(message);
 
+	}
 	/**
 	 * Test method for
 	 * {@link org.carpart.rpc.impl.CarRpcServiceImpl#addNewUser(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)}
@@ -125,7 +134,15 @@ public class CarRpcServiceTest {
 		System.err.println(message);
 		Assert.assertNotNull(message);
 	}
-
+	@Test
+	public final void testAddCustomInfo() {
+		String wxName = "成都测试1";
+		String wxCode = "9328429";
+		String city = "成都";
+		String message = service.createCustomInfo(wxName, wxCode, city,  clientCode, clientKey);
+		System.err.println(message);
+		Assert.assertNotNull(message);
+	}
 	/**
 	 * Test method for
 	 * {@link org.carpart.rpc.impl.CarRpcServiceImpl#listCarPart2Xml(java.lang.String, java.lang.String, java.lang.String)}
@@ -133,21 +150,7 @@ public class CarRpcServiceTest {
 	 */
 	@Test
 	public final void testListCarPart2Xml() {
-		String message = service.listCarPart2Xml("南宁", clientCode, clientKey);
-		System.err.println(message);
-		Assert.assertNotNull(message);
-
-	}
-	@Test
-	public final void testListCarPart2JSON() {
-		String message = service.listCarPart2JSON("南宁", clientCode, clientKey);
-		System.err.println(message);
-		Assert.assertNotNull(message);
-
-	}
-	@Test
-	public final void testListNearbyCarPart2Xml() {
-		String message = service.listNearbyCarPart2Xml("104.065773,30.536549", 2000, clientCode, clientKey);
+		String message = service.listCarPart2Xml("成都", clientCode, clientKey);
 		System.err.println(message);
 		Assert.assertNotNull(message);
 	}
@@ -159,7 +162,8 @@ public class CarRpcServiceTest {
 	 */
 	@Test
 	public final void testAddNewOrder() {
-		String wxCode = "mohen";
+		String wxCode = "j3WQt5iBVYfxyASmE5PJK8HqHkM";
+		String partMapLb = "104.075159,30.539867";
 		String message = service.createOrder(wxCode, clientCode, clientKey);
 		System.err.println(message);
 		Assert.assertNotNull(message);
@@ -171,35 +175,13 @@ public class CarRpcServiceTest {
 	 * .
 	 */
 	@Test
-	public final void testFitOrderStatusToInPart() {
-		String orderCode = "DT20141024162405DD10000003";
+	public final void testInPart() {
+		String orderCode = "DT20141124104254DD10000004";
 		String message = service.inPart(orderCode, clientCode, clientKey);
 		System.err.println(message);
 		Assert.assertNotNull(message);
 	}
 
-	/**
-	 * Test method for
-	 * {@link org.carpart.rpc.impl.CarRpcServiceImpl#fitOrderStatusToCancelIn(java.lang.String, java.lang.String, java.lang.String)}
-	 * .
-	 */
-	@Test
-	public final void testFitOrderStatusToCancelIn() {
-		String orderCode = "DT20141024162405DD10000003";
-		String message = service.cancelOrder(orderCode, clientCode, clientKey);
-		System.err.println(message);
-		Assert.assertNotNull(message);
-	}
-
-	@Test
-	public final void testCancelNewOrder() {
-		String orderCode = "DT20141126172053DD10000015";
-		String message = service.cancelOrder(orderCode, clientCode, clientKey);
-		System.err.println(message);
-		Assert.assertNotNull(message);
-	}
-
-	
 
 	/**
 	 * Test method for
@@ -223,5 +205,6 @@ public class CarRpcServiceTest {
 	public final void testExeNeedPayMoney() {
 		fail("Not yet implemented"); // TODO
 	}
+
 
 }

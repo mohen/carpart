@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.jws.WebService;
 
+import org.carpart.CPException;
 import org.g4studio.common.service.BaseService;
 import org.g4studio.core.metatype.BaseVo;
 import org.g4studio.core.metatype.Dto;
@@ -23,7 +24,9 @@ public interface IService<T extends BaseVo> extends BaseService {
 	 * @param pDto
 	 * @return
 	 */
-	public Dto save(Dto pDto);
+	public Dto save(Dto pDto) ;
+
+
 
 	/**
 	 * 根据ID 查询一条记录
@@ -72,14 +75,20 @@ public interface IService<T extends BaseVo> extends BaseService {
 	 * @param pDto
 	 * @return
 	 */
-	public Dto update(Dto pDto);
-
+	public Dto update(Dto pDto) throws CPException;
+	/**
+	 * 修改一条记录
+	 * 
+	 * @param pDto
+	 * @return
+	 */
+	public int update(T vo);
 	/**
 	 * 删除一条记录
 	 * 
 	 * @param pDto
 	 * @return
 	 */
-	public Dto delete(Dto pDto);
+	public Dto delete(Dto pDto)throws CPException;
 
 }

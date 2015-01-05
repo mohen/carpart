@@ -12,8 +12,12 @@
 		<result property="feeRules" column="FEE_RULES" />
 		<result property="rulesDesc" column="RULES_DESC" />
 		<result property="mapLb" column="MAP_LB" />
+		<result property="mapLat" column="MAP_LAT" />
+		<result property="mapLng" column="MAP_LNG" />
 		<result property="memo" column="MEMO" />
 		<result property="status" column="STATUS" />
+		<result property="disDetail" column="DIS_DETAIL" />
+		<result property="thumbnailUrl" column="THUMBNAIL_URL" />
 	</resultMap>
 		<select id="Park.findParkNameById" parameterClass="java.lang.Long" resultClass="java.lang.String" >  
     	SELECT
@@ -26,7 +30,7 @@
 	<!-- 用于select查询公用抽取的列 -->
 	<sql id="Park.columns">
 	    <![CDATA[
-        PARK_ID ,PARK_NAME ,ADDRESS ,CITY ,OFFICE_TIME ,FEE_RULES ,RULES_DESC ,MAP_LB ,MEMO ,STATUS 
+        PARK_ID ,PARK_NAME ,ADDRESS ,CITY ,OFFICE_TIME ,FEE_RULES ,RULES_DESC ,MAP_LB ,MEMO ,DIS_DETAIL,STATUS,THUMBNAIL_URL ,MAP_LAT,MAP_LNG
 	    ]]>
 	</sql>
 
@@ -42,7 +46,10 @@
         	RULES_DESC ,
         	MAP_LB ,
         	MEMO ,
-        	STATUS 
+        	STATUS,
+        	THUMBNAIL_URL,
+        	MAP_LAT,
+        	MAP_LNG
         ) VALUES (
         	#parkId# ,
         	#parkName# ,
@@ -53,7 +60,10 @@
         	#rulesDesc# ,
         	#mapLb# ,
         	#memo# ,
-        	#status# 
+        	#status# ,
+        	#thumbnailUrl#,
+        	#mapLat#,
+        	#mapLng#
         )
     ]]>
 		<!-- mysql: type="post" SELECT select last_insert_id() sqlserver: type="post" 
@@ -92,6 +102,16 @@
 			<isNotNull prepend="," property="status">
 				STATUS = #status#
 			</isNotNull>
+			<isNotNull prepend="," property="thumbnailUrl">
+				THUMBNAIL_URL = #thumbnailUrl#
+			</isNotNull>
+			<isNotNull prepend="," property="mapLat">
+				MAP_LAT = #mapLat#
+			</isNotNull>
+			<isNotNull prepend="," property="mapLng">
+				MAP_LNG = #mapLng#
+			</isNotNull>
+			
 		</dynamic>
 		WHERE
 		PARK_ID = #parkId#
@@ -139,6 +159,18 @@
 			</isNotEmpty>
 			<isNotEmpty prepend="AND" property="mapLb">
 				MAP_LB = #mapLb#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="minMapLat">
+				MAP_LAT >= #minMapLat#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="maxMapLat">
+			 <![CDATA[	MAP_LAT <= #maxMapLat#   ]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="minMapLng">
+				MAP_LNG >= #minMapLng#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="maxMapLng">
+			 <![CDATA[	MAP_LNG <= #maxMapLng#   ]]>
 			</isNotEmpty>
 			<isNotEmpty prepend="AND" property="memo">
 				MEMO = #memo#

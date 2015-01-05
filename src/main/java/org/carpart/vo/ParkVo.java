@@ -50,9 +50,60 @@ public class ParkVo extends BaseVo {
 	 */
 	private java.lang.String mapLb;
 	/**
+	 * 信息
+	 */
+	private java.lang.String disDetail;
+	/**
 	 * 备注信息
 	 */
 	private java.lang.String memo;
+	
+	/**
+	 * 缩略图信息
+	 */
+	private java.lang.String thumbnailUrl;
+	/**
+	 * 经度
+	 */
+	private java.lang.String mapLat;
+	/**
+	 * MIN经度
+	 */
+	private java.lang.String minMapLat;
+	/**
+	 * MAX经度
+	 */
+	private java.lang.String maxMapLat;
+	/**
+	 * 纬度
+	 */
+	private java.lang.String mapLng;
+	/**
+	 * MIN纬度
+	 */
+	private java.lang.String minMapLng;
+	/**
+	 * MAX纬度
+	 */
+	private java.lang.String maxMapLng;
+
+	
+	public void setMinMapLat(java.lang.String minMapLat) {
+		this.minMapLat = minMapLat;
+	}
+
+	public void setMaxMapLat(java.lang.String maxMapLat) {
+		this.maxMapLat = maxMapLat;
+	}
+
+	public void setMinMapLng(java.lang.String minMapLng) {
+		this.minMapLng = minMapLng;
+	}
+
+	public void setMaxMapLng(java.lang.String maxMapLng) {
+		this.maxMapLng = maxMapLng;
+	}
+
 	/**
 	 * 状态
 	 */
@@ -208,6 +259,38 @@ public class ParkVo extends BaseVo {
 
 	public Set<OrderVo> getOrderVos() {
 		return orderVos;
+	}
+
+	public java.lang.String getDisDetail() {
+		return disDetail;
+	}
+
+	public void setDisDetail(java.lang.String disDetail) {
+		this.disDetail = disDetail;
+	}
+
+	public java.lang.String getThumbnailUrl() {
+		return thumbnailUrl;
+	}
+
+	public void setThumbnailUrl(java.lang.String thumbnailUrl) {
+		this.thumbnailUrl = thumbnailUrl;
+	}
+
+	public java.lang.String getMapLat() {
+		return mapLat;
+	}
+
+	public void setMapLat(java.lang.String mapLat) {
+		this.mapLat = mapLat;
+	}
+
+	public java.lang.String getMapLng() {
+		return mapLng;
+	}
+
+	public void setMapLng(java.lang.String mapLng) {
+		this.mapLng = mapLng;
 	}
 
 }

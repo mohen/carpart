@@ -8,4 +8,6 @@ package org.g4studio.common.service;
  */
 public interface BaseService {
 
+	public void rollback(String action);
+
 }
