@@ -1,17 +1,19 @@
 package org.carpart.rpc.impl;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.jws.WebService;
-
-import net.sf.json.util.JSONStringer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.common.util.StringUtils;
 import org.carpart.CPConstants;
+import org.carpart.CPException;
+import org.carpart.ResponseResult;
 import org.carpart.bean.Client;
 import org.carpart.bean.Custom;
 import org.carpart.bean.Error;
@@ -21,10 +23,6 @@ import org.carpart.rpc.CarRpcService;
 import org.carpart.rpc.ClientRpcService;
 import org.carpart.service.IService;
 import org.carpart.util.IDHelper;
-import org.carpart.vo.ClientVo;
-import org.carpart.vo.CustomVo;
-import org.carpart.vo.ErrorVo;
-import org.carpart.vo.OrderVo;
 import org.carpart.vo.ParkVo;
 import org.g4studio.common.util.SpringBeanLoader;
 import org.g4studio.core.metatype.Dto;
@@ -35,13 +33,12 @@ import org.g4studio.core.xml.XmlHelper;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Condition;
 import org.nutz.dao.Dao;
-import org.nutz.dao.Sqls;
-import org.nutz.dao.sql.Sql;
-import org.nutz.dao.util.cri.SqlExpression;
+import org.nutz.dao.pager.Pager;
 import org.nutz.json.Json;
 import org.nutz.trans.Atom;
 import org.nutz.trans.Trans;
 
+import bsh.EvalError;
 import bsh.Interpreter;
 
 @WebService
@@ -65,36 +62,35 @@ public class CarRpcServiceImpl implements CarRpcService {
 	@SuppressWarnings("unchecked")
 	@Override
 	public String queryOrderStatus(String orderCode, String clientCode, String clientKey) {
-		String message = loginValid(clientCode, clientKey);
-		if (!message.startsWith("ERR")) {
-			Integer clientId = Integer.valueOf(message);
-			this.logClientAction(clientId, String.format("查询订单:%s状态", orderCode));
+		ResponseResult result = loginValid(clientCode, clientKey);
+		if (result.isSuccess()) {
+			this.logClientAction(result, String.format("查询订单:%s状态", orderCode));
 			try {
 				Order vo = this.fetchOrder(orderCode);
 				if (vo == null) {
-					message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("查询订单:%s不存在!", orderCode));
+					result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("查询订单:%s不存在!", orderCode));
 				} else {
-					message = vo.getStatus();
+					result.getResult().put("status", vo.getStatus());
 				}
 			} catch (Exception e) {
-				message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("查询订单:%s错误:" + e.getMessage(), orderCode));
+				result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("查询订单:%s错误:" + e.getMessage(), orderCode));
 			}
 
 		}
-		return message;
+		return Json.toJson(result);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public double queryOrderFee(String orderCode, String clientCode, String clientKey) {
-		String message = loginValid(clientCode, clientKey);
+		ResponseResult result = loginValid(clientCode, clientKey);
 		double money = 0;
-		if (!message.startsWith("ERR")) {
-			Integer clientId = Integer.valueOf(message);
-			this.logClientAction(clientId, String.format("计算订单:%s费用", orderCode));
+		if (result.isSuccess()) {
+
+			this.logClientAction(result, String.format("计算订单:%s费用", orderCode));
 			Order vo = this.fetchOrder(orderCode);
 			if (vo == null) {
-				message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("订单:%s 不存在,无法计算费用!", orderCode));
+				result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("订单:%s 不存在,无法计算费用!", orderCode));
 			} else {
 				String status = vo.getStatus();
 				if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PARKING) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PAY_NOT_OUT)) {
@@ -104,7 +100,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 						Park parkVo = this.fetchPark(parkId);
 						String feeRules = parkVo.getFeeRules();
 						if (StringUtils.isEmpty(feeRules)) {
-							message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("停车场:%s规则未配置,无法计算费用!", parkVo.getParkName()));
+							result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("停车场:%s规则未配置,无法计算费用!", parkVo.getParkName()));
 						} else {
 							double payMoney = vo.getPayAmount();
 							Date feedDate = new Date();
@@ -122,11 +118,11 @@ public class CarRpcServiceImpl implements CarRpcService {
 							money = needPayMoney;
 						}
 					} catch (Exception ex) {
-						message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("计算订单:%s 费用失败:%s!", orderCode, ex.getMessage()));
+						result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("计算订单:%s 费用失败:%s!", orderCode, ex.getMessage()));
 					}
 
 				} else {
-					message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("查询订单:%s 状态为 %s ,无法计算费用!", orderCode, status));
+					result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("查询订单:%s 状态为 %s ,无法计算费用!", orderCode, status));
 				}
 			}
 		}
@@ -140,18 +136,15 @@ public class CarRpcServiceImpl implements CarRpcService {
 	 * @param endTime
 	 * @param shuffle
 	 * @return
+	 * @throws EvalError
 	 */
-	private double feelOrderFee(Date startDate, Date endDate, String shuffle, int iMinute) {
+	private double feelOrderFee(Date startDate, Date endDate, String shuffle, int iMinute) throws CPException, EvalError {
 		double money = 0;
-		try {
-			Interpreter inter = new Interpreter();
-			inter.set("iMinute", iMinute);
-			Object eval = inter.eval(shuffle);
-			if (eval != null) {
-				money = Double.valueOf(eval.toString());
-			}
-		} catch (Exception e) {
-			logsError(systemId, CPConstants.ERROR_TYPE_SERVER, String.format("计算规则:%s错误:%s", shuffle, e.getMessage()));
+		Interpreter inter = new Interpreter();
+		inter.set("iMinute", iMinute);
+		Object eval = inter.eval(shuffle);
+		if (eval != null) {
+			money = Double.valueOf(eval.toString());
 		}
 		return money;
 
@@ -173,6 +166,10 @@ public class CarRpcServiceImpl implements CarRpcService {
 		return dao.fetch(Custom.class, Cnd.where("wxCode", "=", wxCode));
 	}
 
+	private Custom fetchCustom(int cusId) {
+		return dao.fetch(Custom.class, Cnd.where("cusId", "=", cusId));
+	}
+
 	private Client fetchClient(String clientId) {
 		return dao.fetch(Client.class, Cnd.where("clientId", "=", clientId));
 	}
@@ -180,10 +177,9 @@ public class CarRpcServiceImpl implements CarRpcService {
 	@SuppressWarnings("unchecked")
 	@Override
 	public String queryOrderInfo(String orderCode, String clientCode, String clientKey) {
-		String message = loginValid(clientCode, clientKey);
-		if (!message.startsWith("ERR")) {
-			Integer clientId = Integer.valueOf(message);
-			this.logClientAction(clientId, String.format("查询订单:%s信息", orderCode));
+		ResponseResult result = loginValid(clientCode, clientKey);
+		if (result.isSuccess()) {
+			this.logClientAction(result, String.format("查询订单:%s信息", orderCode));
 			Order vo = this.fetchOrder(orderCode);
 			String status = vo.getStatus();
 			if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PARKING) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PAY_NOT_OUT)) {
@@ -193,7 +189,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 					Park parkVo = this.fetchPark(parkId);
 					String feeRules = parkVo.getFeeRules();
 					if (StringUtils.isEmpty(feeRules)) {
-						message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("停车场:%s规则未配置,无法计算费用!", parkVo.getParkName()));
+						result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("停车场:%s规则未配置,无法计算费用!", parkVo.getParkName()));
 					} else {
 						double payMoney = vo.getPayAmount();
 						Date feedDate = new Date();
@@ -207,17 +203,17 @@ public class CarRpcServiceImpl implements CarRpcService {
 						if (orderFee > 0) {
 							vo.setStatus(CPConstants.ORDER_STATUS_PARKING);
 						}
-						dao.update(vo);
+						int i = dao.update(vo);
+						if (i > 0) {
+							result.getResult().put("order", vo);
+						}
 					}
 				} catch (Exception ex) {
-					message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("计算订单:%s 费用失败:%s!", orderCode, ex.getMessage()));
+					result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("计算订单:%s 费用失败:%s!", orderCode, ex.getMessage()));
 				}
 			}
-			Dto dto = new BaseDto();
-			G4Utils.copyPropFromBean2Dto(vo, dto);
-			message = XmlHelper.parseDto2Xml(dto, "order");
 		}
-		return message;
+		return Json.toJson(result);
 	}
 
 	/**
@@ -226,10 +222,9 @@ public class CarRpcServiceImpl implements CarRpcService {
 	@SuppressWarnings("unchecked")
 	@Override
 	public String saveCustomInfo(String wxName, String wxCode, String city, String carCode, String trueName, String phone, String address, String certCode, String email, String clientCode, String clientKey) {
-		String message = loginValid(clientCode, clientKey);
-		if (!message.startsWith("ERR")) {
-			Integer clientId = Integer.valueOf(message);
-			this.logClientAction(clientId, String.format("保存用户:%s信息", wxCode));
+		ResponseResult result = loginValid(clientCode, clientKey);
+		if (result.isSuccess()) {
+			this.logClientAction(result, String.format("保存用户:%s信息", wxCode));
 			Custom vo = this.fetchCustom(wxCode);
 			if (vo == null) {
 				vo = new Custom();
@@ -254,12 +249,12 @@ public class CarRpcServiceImpl implements CarRpcService {
 				success = vo.getCusId() > 0;
 			}
 			if (success) {
-				message = CPConstants.RETURN_TRUE;
+				result.setMessage("保存用户信息成功");
 			} else {
-				message = logsError(clientId, CPConstants.ERROR_TYPE_SERVER, String.format("更新wxCode=%s 的客户 产生数据库错误", wxCode));
+				result = logsError(result, CPConstants.ERROR_TYPE_SERVER, String.format("更新wxCode=%s 的客户 产生数据库错误", wxCode));
 			}
 		}
-		return message;
+		return result.toJson();
 	}
 
 	/**
@@ -268,10 +263,10 @@ public class CarRpcServiceImpl implements CarRpcService {
 	@SuppressWarnings("unchecked")
 	@Override
 	public String createCustomInfo(String wxName, String wxCode, String city, String clientCode, String clientKey) {
-		String message = loginValid(clientCode, clientKey);
-		if (!message.startsWith("ERR")) {
-			Integer clientId = Integer.valueOf(message);
-			this.logClientAction(clientId, String.format("新增用户:%s信息", wxCode));
+		ResponseResult result = loginValid(clientCode, clientKey);
+		if (result.isSuccess()) {
+
+			this.logClientAction(result, String.format("新增用户:%s信息", wxCode));
 			Custom vo = this.fetchCustom(wxCode);
 			if (vo == null) {
 				vo = new Custom();
@@ -296,49 +291,67 @@ public class CarRpcServiceImpl implements CarRpcService {
 				}
 			}
 			if (success) {
-				message = CPConstants.RETURN_TRUE;
+				result.setMessage("新增用户信息成功");
 			} else {
-				message = logsError(clientId, CPConstants.ERROR_TYPE_SERVER, String.format("更新wxCode=%s 的客户 产生数据库错误", wxCode));
+				result = logsError(result, CPConstants.ERROR_TYPE_SERVER, String.format("更新wxCode=%s 的客户 产生数据库错误", wxCode));
 			}
 		}
-		return message;
+		return result.toJson();
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public String listCarPart2Xml(String cityCode, String clientCode, String clientKey) {
-		String message = loginValid(clientCode, clientKey);
-		if (!message.startsWith("ERR")) {
-			Integer clientId = Integer.valueOf(message);
-			this.logClientAction(clientId, String.format("查询城市合作停车场列表:%s信息", cityCode));
+		ResponseResult result = loginValid(clientCode, clientKey);
+		String xml = "";
+		if (result.isSuccess()) {
+			this.logClientAction(result, String.format("查询城市合作停车场列表:%s信息", cityCode));
 			IService<ParkVo> parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
 			Dto pDto = new BaseDto();
 			pDto.put("city", cityCode);
 			List list = parkService.queryByList(pDto);
-			message = XmlHelper.parseList2Xml2(list, "parks", "park");
+			xml = XmlHelper.parseList2Xml2(list, "parks", "park");
 		}
-		return message;
+		return xml;
 	}
 
 	public String listCarPart2JSON(String cityCode, String clientCode, String clientKey) {
-		String message = loginValid(clientCode, clientKey);
-		if (!message.startsWith("ERR")) {
-			Integer clientId = Integer.valueOf(message);
-			this.logClientAction(clientId, String.format("查询城市合作停车场列表:%s信息", cityCode));
+		ResponseResult result = loginValid(clientCode, clientKey);
+		String json = "";
+		if (result.isSuccess()) {
+			this.logClientAction(result, String.format("查询城市合作停车场列表:%s信息", cityCode));
 			Dao dao = (Dao) SpringBeanLoader.getSpringBean("nutzDao");
 			List<Park> list = dao.query(Park.class, Cnd.where("city", "=", cityCode));
-			message = Json.toJson(list);
+			json = Json.toJson(list);
 		}
-		return message;
+		return json;
+	}
+
+	/**
+	 * 获取 附近停车场分页数据
+	 * 
+	 * @param mapLat
+	 * @param mapLng
+	 * @param pn
+	 * @param pageSize
+	 * @return
+	 */
+	private List<Park> queryNearByPart(double mapLat, double mapLng, int pn, int pageSize) {
+		Condition cnd = Cnd.wrap(String.format("where status='1' order by GetDistance(%d,%d,MAP_LAT,MAP_LNG)", mapLat, mapLng));
+		Pager pager = new Pager();
+		pager.setPageNumber(pn);
+		pager.setPageSize(pageSize);
+		List<Park> list = dao.query(Park.class, cnd, pager);
+		return list;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public String listNearbyCarPart2Xml(String mabLb, int raidus, String clientCode, String clientKey) {
-		String message = loginValid(clientCode, clientKey);
-		if (!message.startsWith("ERR")) {
-			int clientId = Integer.valueOf(message);
-			this.logClientAction(clientId, String.format("查询经纬度:%s附件的停车场信息", mabLb));
+		ResponseResult result = loginValid(clientCode, clientKey);
+		String xml = "";
+		if (result.isSuccess()) {
+			this.logClientAction(result, String.format("查询经纬度:%s附件的停车场信息", mabLb));
 			IService<ParkVo> parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
 			Dto pDto = new BaseDto();
 			if (mabLb.indexOf(",") > 0) {
@@ -359,70 +372,64 @@ public class CarRpcServiceImpl implements CarRpcService {
 						double maxMapLng = mapLbAround[1];
 						pDto.put("maxMapLng", maxMapLng);
 						List list = parkService.queryByList(pDto);
-						message = XmlHelper.parseList2Xml2(list, "parks", "park");
+						xml = XmlHelper.parseList2Xml2(list, "parks", "park");
 					} else {
-						message = logsError(clientId, CPConstants.ERROR_TYPE_SERVER, String.format("获取坐标:%s 方圆1000米范围错误", mabLb));
+						result = logsError(result, CPConstants.ERROR_TYPE_SERVER, String.format("获取坐标:%s 方圆1000米范围错误", mabLb));
 					}
 				} catch (Exception e) {
-					message = logsError(clientId, CPConstants.ERROR_TYPE_SERVER, String.format("坐标:%s的转换错误:%s   必须为:数字,数字 如:103.98530660277922,30.909334238073832", mabLb, e.getMessage()));
+					result = logsError(result, CPConstants.ERROR_TYPE_SERVER, String.format("坐标:%s的转换错误:%s   必须为:数字,数字 如:103.98530660277922,30.909334238073832", mabLb, e.getMessage()));
 				}
 			} else {
-				message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("坐标:%s的格式错误 必须为:数字,数字 如:103.98530660277922,30.909334238073832", mabLb));
+				result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("坐标:%s的格式错误 必须为:数字,数字 如:103.98530660277922,30.909334238073832", mabLb));
 			}
 		}
-		return message;
+		return xml;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public String createOrder(String wxCode, String clientCode, String clientKey) {
-		String message = loginValid(clientCode, clientKey);
-		if (!message.startsWith("ERR")) {
-			int clientId = Integer.valueOf(message);
-			this.logClientAction(clientId, String.format("获取客户:%s二维码", wxCode));
-			boolean success = true;
+	public String createOrder(String wxCode, String mapLb, String clientCode, String clientKey) {
+		ResponseResult result = loginValid(clientCode, clientKey);
+		if (result.isSuccess()) {
+			this.logClientAction(result, String.format("获取客户:%s二维码", wxCode));
 			Custom custom = this.fetchCustom(wxCode);
-			if(custom==null){
-				message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("系统不存在微信号为:%s的客户", wxCode));
-				success = false;
-			}else{
-				
-				Sql sql=Sqls.create("select * from cp_order where ");
-				Condition cnd=Cnd.where(sql);
-				List<Order> list = dao.query(Order.class, cnd);
-			}
-
-			/**
-			 * 检查当天是否已经申请订单
-			 */
-			if (success) {
-				OrderVo vo = new OrderVo();
-
+			if (custom == null) {
+				result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("系统不存在微信号为:%s的客户", wxCode));
+			} else {
 				Date date = new Date();
-				vo.setCreateTime(date);
-				String orderCode = IDHelper.getInstance().generatOrderCode();
-				vo.setOrderCode(orderCode);
-				vo.setCusId(cusId);
-				vo.setFeeAmount((double) 0);
-				vo.setNeedAmount((double) 0);
-				vo.setPayAmount((double) 0);
-				vo.setPartTimes((double) 0);
-				vo.setValidTimes(G4Utils.addMinutes(date, 30));
-				vo.setStatus(CPConstants.ORDER_STATUS_PRE_REG);
-				pDto.clear();
-				G4Utils.copyPropFromBean2Dto(vo, pDto);
-				try {
-					orderService.save(pDto);
-					message = orderCode;
-				} catch (Exception e) {
-					message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("订单心中错误:" + e.getMessage(), wxCode));
-					success = false;
+				int cusId = custom.getCusId();
+				SimpleDateFormat sf = new SimpleDateFormat(G4Constants.FORMAT_Date);
+				Condition cnd = Cnd.wrap(String.format("where cus_id='%s' and date_format(create_time, '%Y-%m-%d')='%s' and status='%s'", cusId, sf.format(date), CPConstants.ORDER_STATUS_PRE_REG));
+				Order order = dao.fetch(Order.class, cnd);
+				Map<String, Object> map = result.getResult();
+				String orderCode = "";
+				if (order == null) {
+					order = new Order();
+					order.setCreateTime(date);
+					orderCode = IDHelper.getInstance().generatOrderCode();
+					order.setOrderCode(orderCode);
+					order.setCusId(cusId);
+					order.setFeeAmount((double) 0);
+					order.setNeedAmount((double) 0);
+					order.setPayAmount((double) 0);
+					order.setPartTimes((double) 0);
+					order.setValidTimes(G4Utils.addMinutes(date, 30));
+					order.setStatus(CPConstants.ORDER_STATUS_PRE_REG);
+					order = dao.insert(order);
+					result.setMessage(String.format("新增订单%s成功", orderCode));
+				} else {
+					orderCode = order.getOrderCode();
+					result.setMessage(String.format("新增订单%s成功", orderCode));
 				}
-
+				map.put("orderCode", order.getOrderCode());
+				if (!StringUtils.isEmpty(mapLb)) {
+					double mapLat = Double.valueOf(mapLb.split(",")[0]);
+					double mapLng = Double.valueOf(mapLb.split(",")[1]);
+					List<Park> list = this.queryNearByPart(mapLat, mapLng, 1, 4);
+					map.put("parks", list);
+				}
 			}
-
 		}
-		return message;
+		return result.toJson();
 	}
 
 	/**
@@ -432,70 +439,85 @@ public class CarRpcServiceImpl implements CarRpcService {
 	 * @param status
 	 * @return
 	 */
-	private String changeOrderStatus(String orderCode, String newStatus, Dto pDto, int clientId) {
-		String message = "";
-		IService<OrderVo> orderService = (IService) SpringBeanLoader.getSpringBean("orderService");
-		pDto.put("orderCode", orderCode);
-		OrderVo vo = orderService.queryById(pDto);
-		String oldStatus = vo.getStatus();
-		this.logClientAction(clientId, String.format("修改订单状态从:%s 到%s", oldStatus, newStatus));
-		if (Integer.valueOf(oldStatus) - Integer.valueOf(newStatus) > 0) {
-			message = logsError(clientId, CPConstants.ERROR_TYPE_BIZ, String.format("系统不允许订单从状态:%s迁徙到:%s", oldStatus, newStatus));
+	private ResponseResult changeOrderStatus(String orderCode, String newStatus, ResponseResult result) {
+		Order vo = this.fetchOrder(orderCode);
+		if (vo == null) {
+			result = logsError(result, CPConstants.ERROR_TYPE_BIZ, String.format("系统中不存在订单:%s", orderCode));
 		} else {
-			pDto.put("status", newStatus);
-			Date startTime = vo.getStartPartTime();
-			Object endTime = pDto.get("endPartTime");
-			if (startTime != null && endTime != null) {
-				int minute = G4Utils.getIntervalMinute(startTime, (Date) endTime);
-				if (vo.getPartTimes().intValue() != minute) {
-					pDto.put("partTimes", minute);
+			String oldStatus = vo.getStatus();
+			this.logClientAction(result, String.format("修改订单状态从:%s 到%s", oldStatus, newStatus));
+			if (Integer.valueOf(oldStatus) - Integer.valueOf(newStatus) > 0) {
+				result = logsError(result, CPConstants.ERROR_TYPE_BIZ, String.format("系统不允许订单从状态:%s迁徙到:%s", oldStatus, newStatus));
+			} else {
+				result.getResult().put("cusId", vo.getCusId());
+				/**
+				 * 入库操作
+				 */
+				if (newStatus.equals(CPConstants.ORDER_STATUS_IN_PARK)) {
+					vo.setStartPartTime(new Date());
+					vo.setParkId(result.getClient().getParkId());
+				}
+				/**
+				 * 出库操作
+				 */
+				if (newStatus.equals(CPConstants.ORDER_STATUS_PAY_AND_OUT)) {
+					Date startTime = vo.getStartPartTime();
+					Date endTime = new Date();
+					vo.setEndPartTime(endTime);
+					int minute = G4Utils.getIntervalMinute(startTime, (Date) endTime);
+					vo.setPartTimes(Double.valueOf(minute));
+				}
+				vo.setStatus(newStatus);
+				int i = dao.update(vo);
+				if (i > 0) {
+					result.setMessage(String.format("订单:%s从状态%s更新状态为%s成功!", orderCode, oldStatus, newStatus));
+				} else {
+					result = logsError(result, CPConstants.ERROR_TYPE_BIZ, String.format("订单从状态:%s迁徙到:%s失败", oldStatus, newStatus));
 				}
 			}
-			try {
-				pDto = orderService.update(pDto);
-			} catch (Exception e) {
-			}
-
-			message = CPConstants.RETURN_TRUE;
 		}
-		return message;
+		return result;
 
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public String inPart(String orderCode, String clientCode, String clientKey) {
-		String message = loginValid(clientCode, clientKey);
-		if (!message.startsWith("ERR")) {
-			Dto pDto = new BaseDto();
-			pDto.put("startPartTime", new Date());
-			message = this.changeOrderStatus(orderCode, CPConstants.ORDER_STATUS_IN_PARK, pDto, Integer.valueOf(message));
+		ResponseResult result = loginValid(clientCode, clientKey);
+		if (result.isSuccess()) {
+			result = this.changeOrderStatus(orderCode, CPConstants.ORDER_STATUS_IN_PARK, result);
+			if (result.isSuccess()) {
+				Object cus = result.getResult().get("cusId");
+				if (cus != null) {
+					Custom custom = this.fetchCustom(Integer.valueOf(cus.toString()));
+					String wxCode = custom.getWxCode();
+					clientRpc.pushMessageToCustom(String.format("订单:%s入库成功", orderCode), wxCode, clientCode, clientKey);
+				}
+			}
 		}
-		return message;
+		return result.toJson();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public String queryErrorInfo(String errorCode, String clientCode, String clientKey) {
-		String message = loginValid(clientCode, clientKey);
-		if (!message.startsWith("ERR")) {
-			Integer clientId = Integer.valueOf(message);
-			this.logClientAction(clientId, String.format("查询错误代码:%s信息", errorCode));
-			IService<ErrorVo> errorService = (IService) SpringBeanLoader.getSpringBean("errorService");
-			Dto pDto = new BaseDto();
-			pDto.put("errCode", errorCode);
-			ErrorVo vo = errorService.queryById(pDto);
-			vo.setQueryTime(new Date());
-			Integer queryNum = vo.getQueryNum();
-			vo.setQueryNum(queryNum != null ? queryNum + 1 : 1);
-			try {
-				G4Utils.copyPropFromBean2Dto(vo, pDto);
-				errorService.update(pDto);
-			} catch (Exception e) {
+	public String queryErrorInfo(String errCode, String clientCode, String clientKey) {
+		ResponseResult result = loginValid(clientCode, clientKey);
+		if (result.isSuccess()) {
+			this.logClientAction(result, String.format("查询错误代码:%s信息", errCode));
+			Error error = dao.fetch(Error.class, Cnd.where("errCode", "=", errCode));
+			if (error == null) {
+				result = logsError(result, CPConstants.ERROR_TYPE_BIZ, String.format(" 错误代码:%s不存在!", errCode));
+			} else {
+				error.setQueryTime(new Date());
+				Integer queryNum = error.getQueryNum();
+				error.setQueryNum(queryNum != null ? queryNum + 1 : 1);
+				int i = dao.update(error);
+				if (i > 0) {
+					result.setMessage(error.getErrDetail());
+				}
 			}
-			message = vo.getErrDetail();
 		}
-		return message;
+		return result.toJson();
 	}
 
 	/**
@@ -505,14 +527,19 @@ public class CarRpcServiceImpl implements CarRpcService {
 	 * @param clientKey
 	 * @return
 	 */
-	private String loginValid(String clientCode, String clientKey) {
+	private ResponseResult loginValid(String clientCode, String clientKey) {
+		ResponseResult result = new ResponseResult();
 		Client client = validClientInfo(clientCode, clientKey);
 		int clientInfo = client.getClientId();
-		String message = String.valueOf(clientInfo);
 		if (clientInfo == 0) {
-			message = logsError(CPConstants.LOCAL_SERVER_ID, CPConstants.ERROR_TYPE_SERVER, String.format("系统中不存在clientCode=%s clientKey=%s 的客户端", clientCode, clientKey));
+			result.setClient(new Client());
+			result = logsError(result, CPConstants.ERROR_TYPE_SERVER, String.format("系统中不存在clientCode=%s clientKey=%s 的客户端", clientCode, clientKey));
+		} else {
+			// 校验 通过
+			result.setSuccess(true);
+			result.setClient(client);
 		}
-		return message;
+		return result;
 
 	}
 
@@ -524,12 +551,16 @@ public class CarRpcServiceImpl implements CarRpcService {
 	 * @param detail
 	 * @return
 	 */
-	private String logsError(int clientId, String errorType, String detail) {
-		log.info(String.format("开始客户端:%s 错误 类型:%s  内容:%s", clientId, errorType, detail));
+	private ResponseResult logsError(ResponseResult result, String errorType, String detail) {
+		Client client = result.getClient();
+		log.info(String.format("记录客户端:%s[%d] 错误 类型:%s  内容:%s", client.getClientDesc(), client.getClientId(), errorType, detail));
+		result.setSuccess(false);
 		final Error vo = new Error();
-		vo.setClientId(clientId);
+		vo.setClientId(client.getClientId());
 		vo.setCreateTime(new Date());
-		vo.setErrCode(IDHelper.getInstance().generatErrorCode());
+		String errorCode = IDHelper.getInstance().generatErrorCode();
+		result.setErrorCode(errorCode);
+		vo.setErrCode(errorCode);
 		vo.setErrDetail(detail);
 		vo.setErrType(errorType);
 		Trans.exec(new Atom() {
@@ -538,8 +569,8 @@ public class CarRpcServiceImpl implements CarRpcService {
 			}
 		});
 		String message = String.format("%@%s", vo.getErrCode(), detail);
-		log.info(message);
-		return message;
+		result.setMessage(message);
+		return result;
 
 	}
 
@@ -566,13 +597,9 @@ public class CarRpcServiceImpl implements CarRpcService {
 	 * @param clientId
 	 * @param action
 	 */
-	@SuppressWarnings("unchecked")
-	private void logClientAction(int clientId, String action) {
-		IService<ClientVo> clientService = (IService) SpringBeanLoader.getSpringBean("clientService");
-		Dto pDto = new BaseDto();
-		pDto.put("clientId", clientId);
-		ClientVo vo = clientService.queryById(pDto);
-		log.info(String.format("客户端:%s 请求:%s", vo.getClientDesc(), action));
+	private void logClientAction(ResponseResult result, String action) {
+		Client client = result.getClient();
+		log.info(String.format("客户端:%s[%d] 请求:%s", client.getClientDesc(), client.getClientId(), action));
 	}
 
 	public void exeNeedPayMoney(String orderCode) {
@@ -581,136 +608,139 @@ public class CarRpcServiceImpl implements CarRpcService {
 
 	@Override
 	public String cancelOrder(String orderCode, String clientCode, String clientKey) {
-		String message = loginValid(clientCode, clientKey);
-		int clientId = 0;
-		if (!message.startsWith("ERR")) {
-			clientId = Integer.valueOf(message);
-			this.logClientAction(clientId, String.format("取消订单:%s", orderCode));
-			IService<OrderVo> orderService = (IService) SpringBeanLoader.getSpringBean("orderService");
-			Dto pDto = new BaseDto();
-			pDto.put("orderCode", orderCode);
-			try {
-				OrderVo vo = orderService.queryById(pDto);
-				if (vo == null) {
-					message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("订单:%s#不存在!", orderCode));
-				} else {
-					message = vo.getStatus();
-					if (vo.getStatus().equals(CPConstants.ORDER_STATUS_PRE_REG)) {
-						vo.setStatus(CPConstants.ORDER_STATUS_CANCEL_IN);
-						G4Utils.copyPropFromBean2Dto(vo, pDto);
-						orderService.update(pDto);
-						message = "success";
-					} else {
-						message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("订单:%s#非预登记状态,不允许撤销!", orderCode));
+		ResponseResult result = loginValid(clientCode, clientKey);
+		if (result.isSuccess()) {
+			this.logClientAction(result, String.format("取消订单:%s", orderCode));
+			Order order = this.fetchOrder(orderCode);
+			if (order != null) {
+				if (order.getStatus().equals(CPConstants.ORDER_STATUS_PRE_REG)) {
+					order.setStatus(CPConstants.ORDER_STATUS_CANCEL_IN);
+					int i = dao.update(order);
+					if (i > 0) {
+						result.setMessage(String.format("订单:%s取消成功", orderCode));
 					}
+				} else {
+					result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("订单:%s#非预登记状态,不允许撤销!", orderCode));
 				}
-			} catch (Exception e) {
-				orderService.rollback(message);
-				message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("修改订单状态:%s#错误:" + e.getMessage(), orderCode));
+			} else {
+				result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("订单:%s#不存在!", orderCode));
 			}
-
 		}
-		return message;
+		return result.toJson();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public String queryParkInfo(String mapLb, String clientCode, String clientKey) {
-		String message = loginValid(clientCode, clientKey);
-		if (!message.startsWith("ERR")) {
-			int clientId = Integer.valueOf(message);
-			this.logClientAction(clientId, String.format("查询停车场:%s信息", mapLb));
-			IService<ParkVo> parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
-			Dto pDto = new BaseDto();
-			pDto.put("mapLb", mapLb);
-			List list = parkService.queryByList(pDto);
-			int parkId = 0;
-			boolean success = list.size() > 0;
-			ParkVo vo = new ParkVo();
-			if (success) {
-				vo = (ParkVo) list.get(0);
+		ResponseResult result = loginValid(clientCode, clientKey);
+		String json = "";
+		if (result.isSuccess()) {
+			this.logClientAction(result, String.format("查询停车场:%s信息", mapLb));
+			Park park = this.fetchPark(mapLb);
+			if (park != null) {
+				json = Json.toJson(park);
 			} else {
-				message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("系统不存在坐标为:%s的停车场", mapLb));
-				success = false;
+				result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("系统不存在坐标为:%s的停车场", mapLb));
+				json = result.toJson();
 			}
-			Dto dto = new BaseDto();
-			G4Utils.copyPropFromBean2Dto(vo, dto);
-			message = XmlHelper.parseDto2Xml(dto, "park");
 		}
-		return message;
+		return json;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public double payOrderFee(String orderCode, double money, int type, String clientCode, String clientKey) {
-		String message = loginValid(clientCode, clientKey);
-		if (!message.startsWith("ERR")) {
-			Integer clientId = Integer.valueOf(message);
-			this.logClientAction(clientId, String.format("支付订单:%s费用:%s", orderCode, money));
-			IService<OrderVo> orderService = (IService) SpringBeanLoader.getSpringBean("orderService");
-			Dto pDto = new BaseDto();
-			pDto.put("orderCode", orderCode);
-			OrderVo vo = orderService.queryById(pDto);
-			if (vo == null) {
-				message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("订单:%s 不存在,无法计算费用!", orderCode));
-			} else {
-				String status = vo.getStatus();
-				if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PARKING) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PAY_NOT_OUT)) {
+	public String payOrderFee(String orderCode, double money, int type, String clientCode, String clientKey) {
+		ResponseResult result = loginValid(clientCode, clientKey);
+		if (result.isSuccess()) {
+			this.logClientAction(result, String.format("支付订单:%s费用:%s", orderCode, money));
+			Order order = this.fetchOrder(orderCode);
+			if (order != null) {
+				String status = order.getStatus();
+				if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || status.equals(CPConstants.ORDER_STATUS_PARKING) || status.equals(CPConstants.ORDER_STATUS_PAY_NOT_OUT)) {
 					try {
-						Date startDate = vo.getStartPartTime();
-						Integer parkId = vo.getParkId();
-						IService<ParkVo> parkService = (IService) SpringBeanLoader.getSpringBean("parkService");
-						pDto.clear();
-						pDto.put("parkId", parkId);
-						ParkVo parkVo = parkService.queryById(pDto);
-						String feeRules = parkVo.getFeeRules();
+						Date startDate = order.getStartPartTime();
+						Integer parkId = order.getParkId();
+						Park park = this.fetchPark(parkId);
+						String feeRules = park.getFeeRules();
 						if (StringUtils.isEmpty(feeRules)) {
-							message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("停车场:%s规则未配置,无法计算费用!", parkVo.getParkName()));
+							result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("停车场:%s规则未配置,无法计算费用!", park.getParkName()));
 						} else {
 							Date feedDate = new Date();
 							SimpleDateFormat sf = new SimpleDateFormat(G4Constants.FORMAT_DateTime);
-							double payMoney = vo.getPayAmount() + money;
-							vo.setPayAmount(payMoney);
-							String logs = vo.getOrderLogs() == null ? "" : vo.getOrderLogs();
+							double payMoney = order.getPayAmount() + money;
+							order.setPayAmount(payMoney);
+							String logs = order.getOrderLogs() == null ? "" : order.getOrderLogs();
 							StringBuilder sb = new StringBuilder(logs);
 							String typeStr = type == 1 ? "线上" : "线下";
 							sb.append(String.format("<p>%s:%s支付:￥%s</p>", sf.format(feedDate), typeStr, money));
-							vo.setOrderLogs(sb.toString());
+							order.setOrderLogs(sb.toString());
 							int iMinute = G4Utils.getIntervalMinute(startDate, feedDate);
 							double orderFee = this.feelOrderFee(startDate, feedDate, feeRules, iMinute);
 							double needPayMoney = orderFee - payMoney;
-							vo.setFeedTime(feedDate);
-							vo.setFeeAmount(orderFee);
-							vo.setNeedAmount(needPayMoney);
-							vo.setPartTimes((double) iMinute);
+							order.setFeedTime(feedDate);
+							order.setFeeAmount(orderFee);
+							order.setNeedAmount(needPayMoney);
+							order.setPartTimes((double) iMinute);
 							if (orderFee > 0) {
-								vo.setStatus(CPConstants.ORDER_STATUS_PARKING);
+								order.setStatus(CPConstants.ORDER_STATUS_PARKING);
 							}
-							orderService.update(vo);
+							int i = dao.update(order);
 							money = needPayMoney;
+							if (i > 0) {
+								DecimalFormat df = new DecimalFormat("###,###,###,###.##");
+								result.setMessage(String.format("订单:%s还需要支付￥%s 元!", orderCode, df.format(needPayMoney)));
+								result.getResult().put("needPayMoney", needPayMoney);
+							}
 						}
 					} catch (Exception ex) {
-						message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("计算订单:%s 费用失败:%s!", orderCode, ex.getMessage()));
+						result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("计算订单:%s 费用失败:%s!", orderCode, ex.getMessage()));
 					}
-
 				} else {
-					message = logsError(clientId, CPConstants.ERROR_TYPE_CLIENT, String.format("查询订单:%s 状态为 %s ,无法计算费用!", orderCode, status));
+					result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("订单:%s#不存在!", orderCode));
 				}
 			}
 		}
-		return money;
+		return result.toJson();
 	}
 
 	@Override
-	public String queryOrderHistory(String wxCode, String yearMonth, String clientCode, String clientKey) {
-		// TODO Auto-generated method stub
-		return null;
+	public String queryOrderHistory(String wxCode, String yearMonth, int pageNumber, int pageSize, String clientCode, String clientKey) {
+		ResponseResult result = loginValid(clientCode, clientKey);
+		String json = "";
+		if (result.isSuccess()) {
+			Pager pager = dao.createPager(pageNumber, pageSize);
+			Custom custom = this.fetchCustom(wxCode);
+			if (custom != null) {
+				Condition cnd = Cnd.wrap(String.format("where cus_id='%s' and date_format(create_time, '%Y%m')='%s' order by create_time desc'", custom.getCusId(), yearMonth));
+				List<Order> list = dao.query(Order.class, cnd, pager);
+				result.setPageSize(pageSize);
+				result.setPageNumber(pageNumber);
+				result.setTotalCount(list.size());
+				result.getResult().put("orders", list);
+				json = result.toJson();
+			} else {
+				result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("系统中不存在微信用户:%s", wxCode));
+			}
+		} else {
+			json = result.toJson();
+		}
+		return json;
 	}
 
 	@Override
 	public String outPart(String orderCode, String clientCode, String clientKey) {
-		// TODO Auto-generated method stub
-		return null;
+		ResponseResult result = loginValid(clientCode, clientKey);
+		if (result.isSuccess()) {
+			result = this.changeOrderStatus(orderCode, CPConstants.ORDER_STATUS_PAY_AND_OUT, result);
+			if (result.isSuccess()) {
+				Object cus = result.getResult().get("cusId");
+				if (cus != null) {
+					Custom custom = this.fetchCustom(Integer.valueOf(cus.toString()));
+					String wxCode = custom.getWxCode();
+					clientRpc.pushMessageToCustom(String.format("订单:%s出库成功", orderCode), wxCode, clientCode, clientKey);
+				}
+			}
+		}
+		return result.toJson();
 	}
 
 }

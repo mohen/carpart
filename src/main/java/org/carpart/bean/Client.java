@@ -1,5 +1,6 @@
 package org.carpart.bean;
 
+import org.carpart.CPConstants;
 import org.nutz.dao.entity.annotation.*;
 
 import lombok.Data;
@@ -16,7 +17,7 @@ public class Client {
 	 */
 	@Id
 	@Column("client_id")
-	private Integer clientId;
+	private Integer clientId=CPConstants.LOCAL_SERVER_ID;
 	/**
 	 * 客户端描述
 	 */

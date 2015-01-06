@@ -75,7 +75,7 @@ public interface CarRpcService {
 	 *         上限1000元</feeRulesDesc>--计费规则 </part> </parts>
 	 */
 	public String listCarPart2Xml(String cityCode, String clientCode, String clientKey);
-	
+
 	/**
 	 * 停车场列表 用于罗列 合作停车场地图列表
 	 * 
@@ -123,7 +123,7 @@ public interface CarRpcService {
 	 *            客户微信号
 	 * @return 返回订单二维码 其他为系统错误码 格式如:ERR_1000
 	 */
-	public String createOrder(String wxCode, String clientCode, String clientKey);
+	public String createOrder(String wxCode, String mapLb, String clientCode, String clientKey);
 
 	/**
 	 * 获取订单状态
@@ -162,7 +162,7 @@ public interface CarRpcService {
 	 * @param
 	 * @return 正数 为还需要支付的金额 负数为找回的金额 --(主要用于现金支付)
 	 */
-	public double payOrderFee(String orderCode, double money, int type, String clientCode, String clientKey);
+	public String payOrderFee(String orderCode, double money, int type, String clientCode, String clientKey);
 
 	/**
 	 * 取消未生效的订单
@@ -214,7 +214,7 @@ public interface CarRpcService {
 	 * @param clientKey
 	 * @return
 	 */
-	public String queryOrderHistory(String wxCode, String yearMonth, String clientCode, String clientKey);
+	public String queryOrderHistory(String wxCode, String yearMonth, int page, int pageSize, String clientCode, String clientKey);
 
 	/**
 	 * 车辆入库操作
