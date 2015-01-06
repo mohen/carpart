@@ -164,7 +164,7 @@ public class CarRpcClientTest {
 	public final void testAddNewOrder() {
 		String wxCode = "j3WQt5iBVYfxyASmE5PJK8HqHkM";
 		String partMapLb = "104.075159,30.539867";
-		String message = service.createOrder(wxCode, clientCode, clientKey);
+		String message = service.createOrder(wxCode, partMapLb,clientCode, clientKey);
 		System.err.println(message);
 		Assert.assertNotNull(message);
 	}

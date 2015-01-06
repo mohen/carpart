@@ -86,9 +86,9 @@ public class CarRpcServiceTest {
 	@Test
 	public final void testPayOrderFee() {
 		String orderCode = "DT20141126154407DD10000009";
-		double money = service.payOrderFee(orderCode, 15, 1, clientCode, clientKey);
-		System.err.println(money);
-		Assert.assertNotNull(money);
+		String result = service.payOrderFee(orderCode, 15, 1, clientCode, clientKey);
+		System.err.println(result);
+		Assert.assertNotNull(result);
 	}
 
 	/**
@@ -119,13 +119,20 @@ public class CarRpcServiceTest {
 		String address = "南宁民族大道45号";
 		String certCode = "4502384857483858";
 		String email = "4858485@163.com";
-
 		String city = "4501";
 		String message = service.saveCustomInfo(wxName, wxCode, carCode, city, trueName, phone, address, certCode, email, clientCode, clientKey);
 		System.err.println(message);
 		Assert.assertNotNull(message);
 	}
-
+	@Test
+	public final void testCreateCustomInfo() {
+		String wxName = "周璇";
+		String city = "南宁";
+		String wxCode="oj3WQt-hHdDPYtt7lTigc0zTklYE";
+		String message = service.createCustomInfo( wxName,wxCode, city, clientCode, clientKey);
+		System.err.println(message);
+		Assert.assertNotNull(message);
+	}
 	/**
 	 * Test method for
 	 * {@link org.carpart.rpc.impl.CarRpcServiceImpl#listCarPart2Xml(java.lang.String, java.lang.String, java.lang.String)}
@@ -158,9 +165,10 @@ public class CarRpcServiceTest {
 	 * .
 	 */
 	@Test
-	public final void testAddNewOrder() {
-		String wxCode = "mohen";
-		String message = service.createOrder(wxCode, clientCode, clientKey);
+	public final void testCreateOrder() {
+		String wxCode = "oj3WQt-hHdDPYtt7lTigc0zTklYE";
+		String mapLb="108.330165,22.819499";
+		String message = service.createOrder(wxCode, mapLb,clientCode, clientKey);
 		System.err.println(message);
 		Assert.assertNotNull(message);
 	}

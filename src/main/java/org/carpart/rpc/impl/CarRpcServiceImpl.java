@@ -265,7 +265,6 @@ public class CarRpcServiceImpl implements CarRpcService {
 	public String createCustomInfo(String wxName, String wxCode, String city, String clientCode, String clientKey) {
 		ResponseResult result = loginValid(clientCode, clientKey);
 		if (result.isSuccess()) {
-
 			this.logClientAction(result, String.format("新增用户:%s信息", wxCode));
 			Custom vo = this.fetchCustom(wxCode);
 			if (vo == null) {

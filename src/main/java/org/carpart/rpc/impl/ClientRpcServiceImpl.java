@@ -69,6 +69,7 @@ public class ClientRpcServiceImpl implements ClientRpcService {
 		String context = "欢迎关注BiBi停车" + "";
 		String clientKey = "wxServer";
 		String clientCode = "[B@1c6b3d1";
+		ClientRpcServiceImpl o=new ClientRpcServiceImpl();
 		String message = sendPost(wxCode, context, clientKey, clientCode);
 		System.err.println(message);
 	}
