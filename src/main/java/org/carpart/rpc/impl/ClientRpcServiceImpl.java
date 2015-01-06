@@ -51,8 +51,10 @@ public class ClientRpcServiceImpl implements ClientRpcService {
 
 		public void run() {
 			if (StringUtils.isNotBlank(clientCode) && StringUtils.isNotBlank(clientKey) && StringUtils.isNotBlank(message) && StringUtils.isNotBlank(wxCode)) {
+				System.err.println(String.format("开始向%s推送信息:%s", wxCode, message));
 				ClientRpcServiceImpl.sendPost(wxCode, message, clientKey, clientCode);
-				log.debug(String.format("向%s推送信息:%s", wxCode, message));
+				System.err.println(String.format("向%s推送信息:%s完成", wxCode, message));
+				log.info(String.format("向%s推送信息:%s", wxCode, message));
 			}
 		}
 	}
@@ -61,7 +63,6 @@ public class ClientRpcServiceImpl implements ClientRpcService {
 	public void pushMessageToCustom(String message, String wxCode, String clientCode, String clientKey) {
 		PushMessageThread thead = new PushMessageThread(message, wxCode, clientCode, clientKey);
 		thead.start();
-
 	}
 
 	public static void main(String args[]) {

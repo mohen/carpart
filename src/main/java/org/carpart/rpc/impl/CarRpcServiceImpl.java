@@ -1,5 +1,6 @@
 package org.carpart.rpc.impl;
 
+import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -32,8 +33,11 @@ import org.g4studio.core.util.G4Utils;
 import org.g4studio.core.xml.XmlHelper;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Condition;
+import org.nutz.dao.ConnCallback;
 import org.nutz.dao.Dao;
+import org.nutz.dao.Sqls;
 import org.nutz.dao.pager.Pager;
+import org.nutz.dao.sql.Sql;
 import org.nutz.json.Json;
 import org.nutz.trans.Atom;
 import org.nutz.trans.Trans;
@@ -254,7 +258,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 				result = logsError(result, CPConstants.ERROR_TYPE_SERVER, String.format("更新wxCode=%s 的客户 产生数据库错误", wxCode));
 			}
 		}
-		return result.toJson();
+		return Json.toJson(result);
 	}
 
 	/**
@@ -264,39 +268,48 @@ public class CarRpcServiceImpl implements CarRpcService {
 	@Override
 	public String createCustomInfo(String wxName, String wxCode, String city, String clientCode, String clientKey) {
 		ResponseResult result = loginValid(clientCode, clientKey);
-		if (result.isSuccess()) {
-			this.logClientAction(result, String.format("新增用户:%s信息", wxCode));
-			Custom vo = this.fetchCustom(wxCode);
-			if (vo == null) {
-				vo = new Custom();
-				vo.setRegTime(new Date());
-			}
-			vo.setWxName(wxName);
-			vo.setWxCode(wxCode);
-			vo.setCity(city);
-			vo.setStatus("1");
-			Integer cusId = vo.getCusId();
-			boolean success = true;
-			if (cusId > 0) {
-				success = dao.update(vo) > 0;
-				if (success) {
-					clientRpc.pushMessageToCustom(String.format("BIBI停车平台,欢迎%s回来!", wxName), wxCode, clientCode, clientKey);
+		try {
+			if (result.isSuccess()) {
+				this.logClientAction(result, String.format("新增用户:%s信息", wxCode));
+				Custom vo = this.fetchCustom(wxCode);
+				if (vo == null) {
+					vo = new Custom();
+					vo.setRegTime(new Date());
 				}
-			} else {
-				vo = dao.insert(vo);
-				success = vo.getCusId() > 0;
+				vo.setWxName(wxName);
+				vo.setWxCode(wxCode);
+				vo.setCity(city);
+				vo.setStatus("1");
+				int cusId = vo.getCusId();
+				boolean success = true;
+				String fmsg = "";
+				if (cusId > 0) {
+					success = dao.update(vo) > 0;
+					if (success) {
+						fmsg = "重新";
+						clientRpc.pushMessageToCustom(String.format("BIBI停车平台,欢迎%s回来!", wxName), wxCode, clientCode, clientKey);
+					}
+				} else {
+					vo = dao.insert(vo);
+					success = vo.getCusId() > 0;
+					if (success) {
+						clientRpc.pushMessageToCustom(String.format("%s,欢迎关注BIBI停车平台!", wxName), wxCode, clientCode, clientKey);
+					}
+				}
 				if (success) {
-					clientRpc.pushMessageToCustom(String.format("%s,欢迎关注BIBI停车平台!", wxName), wxCode, clientCode, clientKey);
+					result.setMessage(String.format("用户:%s%s关注成功!", vo.getWxName(), fmsg));
+				} else {
+					result = logsError(result, CPConstants.ERROR_TYPE_SERVER, String.format("更新wxCode=%s 的客户 产生数据库错误", wxCode));
 				}
 			}
-			if (success) {
-				result.setMessage("新增用户信息成功");
-			} else {
-				result = logsError(result, CPConstants.ERROR_TYPE_SERVER, String.format("更新wxCode=%s 的客户 产生数据库错误", wxCode));
-			}
+		} catch (Exception e) {
+			String msg = String.format("调用createCustomInfo产生系统级别错误,原因:%s", e.getMessage());
+			result = logsError(result, CPConstants.ERROR_TYPE_SERVER, msg);
+			log.error(msg, e);
 		}
-		return result.toJson();
+		return result.json();
 	}
+
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
@@ -428,7 +441,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 				}
 			}
 		}
-		return result.toJson();
+		return Json.toJson(result);
 	}
 
 	/**
@@ -494,7 +507,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 				}
 			}
 		}
-		return result.toJson();
+		return Json.toJson(result);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -516,7 +529,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 				}
 			}
 		}
-		return result.toJson();
+		return Json.toJson(result);
 	}
 
 	/**
@@ -567,8 +580,8 @@ public class CarRpcServiceImpl implements CarRpcService {
 				dao.insert(vo);
 			}
 		});
-		String message = String.format("%@%s", vo.getErrCode(), detail);
-		result.setMessage(message);
+		// String message = String.format("%s#%s", vo.getErrCode(), detail);
+		result.setMessage(detail);
 		return result;
 
 	}
@@ -625,7 +638,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 				result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("订单:%s#不存在!", orderCode));
 			}
 		}
-		return result.toJson();
+		return Json.toJson(result);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -640,7 +653,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 				json = Json.toJson(park);
 			} else {
 				result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("系统不存在坐标为:%s的停车场", mapLb));
-				json = result.toJson();
+				json = Json.toJson(result);
 			}
 		}
 		return json;
@@ -698,7 +711,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 				}
 			}
 		}
-		return result.toJson();
+		return Json.toJson(result);
 	}
 
 	@Override
@@ -715,12 +728,12 @@ public class CarRpcServiceImpl implements CarRpcService {
 				result.setPageNumber(pageNumber);
 				result.setTotalCount(list.size());
 				result.getResult().put("orders", list);
-				json = result.toJson();
+				json = Json.toJson(result);
 			} else {
 				result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("系统中不存在微信用户:%s", wxCode));
 			}
 		} else {
-			json = result.toJson();
+			json = Json.toJson(result);
 		}
 		return json;
 	}
@@ -739,7 +752,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 				}
 			}
 		}
-		return result.toJson();
+		return Json.toJson(result);
 	}
 
 }

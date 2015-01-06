@@ -171,7 +171,7 @@ public class ResponseResult {
 		this.pageNumber = pageNumber;
 	}
 
-	public String toJson() {
+	public String json() {
 		return Json.toJson(this);
 	}
 

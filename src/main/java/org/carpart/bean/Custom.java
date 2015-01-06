@@ -16,7 +16,7 @@ public class Custom {
 	 */
 	@Id
 	@Column("CUS_ID")
-	private Integer cusId;
+	private Integer cusId=0;
 	/**
 	 * 注册时间
 	 */

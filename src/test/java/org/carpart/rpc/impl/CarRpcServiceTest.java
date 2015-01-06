@@ -12,6 +12,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nutz.trans.Atom;
+import org.nutz.trans.Trans;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -124,15 +126,18 @@ public class CarRpcServiceTest {
 		System.err.println(message);
 		Assert.assertNotNull(message);
 	}
+
 	@Test
 	public final void testCreateCustomInfo() {
-		String wxName = "周璇";
-		String city = "南宁";
-		String wxCode="oj3WQt-hHdDPYtt7lTigc0zTklYE";
-		String message = service.createCustomInfo( wxName,wxCode, city, clientCode, clientKey);
-		System.err.println(message);
-		Assert.assertNotNull(message);
+				String wxName = "周璇2";
+				String city = "南宁";
+				String wxCode = "oj3WQt-hHdDPYtt7lTigc0zTklYE2";
+				String message = service.createCustomInfo(wxName, wxCode, city, clientCode, clientKey);
+				System.err.println(message);
+				Assert.assertNotNull(message);
+
 	}
+
 	/**
 	 * Test method for
 	 * {@link org.carpart.rpc.impl.CarRpcServiceImpl#listCarPart2Xml(java.lang.String, java.lang.String, java.lang.String)}
@@ -145,6 +150,7 @@ public class CarRpcServiceTest {
 		Assert.assertNotNull(message);
 
 	}
+
 	@Test
 	public final void testListCarPart2JSON() {
 		String message = service.listCarPart2JSON("南宁", clientCode, clientKey);
@@ -152,6 +158,7 @@ public class CarRpcServiceTest {
 		Assert.assertNotNull(message);
 
 	}
+
 	@Test
 	public final void testListNearbyCarPart2Xml() {
 		String message = service.listNearbyCarPart2Xml("104.065773,30.536549", 2000, clientCode, clientKey);
@@ -167,8 +174,8 @@ public class CarRpcServiceTest {
 	@Test
 	public final void testCreateOrder() {
 		String wxCode = "oj3WQt-hHdDPYtt7lTigc0zTklYE";
-		String mapLb="108.330165,22.819499";
-		String message = service.createOrder(wxCode, mapLb,clientCode, clientKey);
+		String mapLb = "108.330165,22.819499";
+		String message = service.createOrder(wxCode, mapLb, clientCode, clientKey);
 		System.err.println(message);
 		Assert.assertNotNull(message);
 	}
@@ -206,8 +213,6 @@ public class CarRpcServiceTest {
 		System.err.println(message);
 		Assert.assertNotNull(message);
 	}
-
-	
 
 	/**
 	 * Test method for
