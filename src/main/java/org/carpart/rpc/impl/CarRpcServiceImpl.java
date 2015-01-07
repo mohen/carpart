@@ -297,7 +297,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 					}
 				}
 				if (success) {
-					result.setMessage(String.format("用户:%s%s关注成功!", vo.getWxName(), fmsg));
+					result.setMessage(String.format("用户%s%s关注成功!", vo.getWxName(), fmsg));
 				} else {
 					result = logsError(result, CPConstants.ERROR_TYPE_SERVER, String.format("更新wxCode=%s 的客户 产生数据库错误", wxCode));
 				}

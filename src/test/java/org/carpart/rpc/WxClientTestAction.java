@@ -70,11 +70,13 @@ public class WxClientTestAction {
 	 */
 	@Test
 	public final void testCreateCustom() {
-		String wxName = "周璇2";
+		String wxName = "测试";
 		String city = "南宁";
-		String message = service.createCustomInfo(wxName, wxCode, city, clientCode, clientKey);
-		System.err.println(message);
-		Assert.assertNotNull(message);
+		String json = service.createCustomInfo(wxName, wxCode, city, clientCode, clientKey);
+		System.err.println(json);
+		Reader reader = new StringReader(json);
+		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
+		Assert.assertTrue(result.isSuccess());
 	}
 
 	/**
@@ -90,9 +92,11 @@ public class WxClientTestAction {
 		String certCode = "4502384857483858";
 		String email = "4858485@163.com";
 		String city = "南宁";
-		String message = service.saveCustomInfo(wxName, wxCode, carCode, city, trueName, phone, address, certCode, email, clientCode, clientKey);
-		System.err.println(message);
-		Assert.assertNotNull(message);
+		String json = service.saveCustomInfo(wxName, wxCode, carCode, city, trueName, phone, address, certCode, email, clientCode, clientKey);
+		System.err.println(json);
+		Reader reader = new StringReader(json);
+		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
+		Assert.assertTrue(result.isSuccess());
 	}
 
 	/**
@@ -124,6 +128,7 @@ public class WxClientTestAction {
 		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
 		Assert.assertTrue(result.isSuccess());
 	}
+
 	/**
 	 * 模拟用户点击查看停车场详细信息
 	 */
@@ -136,6 +141,7 @@ public class WxClientTestAction {
 		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
 		Assert.assertTrue(result.isSuccess());
 	}
+
 	/**
 	 * 模拟用户点击查看订单详细信息
 	 */
@@ -147,22 +153,21 @@ public class WxClientTestAction {
 		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
 		Assert.assertTrue(result.isSuccess());
 	}
+
 	/**
 	 * 模拟用户查询订单历史
 	 */
 	@Test
 	public final void testViewOrderHistoryAction() {
-		String yearMonth="201501";
-		int pageNumber=1;
-		int pageSize=10;
+		String yearMonth = "201501";
+		int pageNumber = 1;
+		int pageSize = 10;
 		String json = service.queryOrderHistory(wxCode, yearMonth, pageNumber, pageSize, clientCode, clientKey);
 		System.err.println(json);
 		Reader reader = new StringReader(json);
 		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
 		Assert.assertTrue(result.isSuccess());
 	}
-	
-	
 
 	/**
 	 * 模拟线上支付
@@ -176,6 +181,5 @@ public class WxClientTestAction {
 		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
 		Assert.assertTrue(result.isSuccess());
 	}
-	
-	
+
 }

@@ -49,11 +49,13 @@ public class ResponseResult {
 	/**
 	 * 存储返回 分页数据
 	 */
+	@SuppressWarnings("rawtypes")
 	private List list = new ArrayList();
 
 	/**
 	 * 返回的对象
 	 */
+	@SuppressWarnings("rawtypes")
 	private Set data = new HashSet();
 
 	/**

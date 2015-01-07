@@ -13,23 +13,17 @@ public interface CarRpcService {
 	 * @param wxCode
 	 *            微信号 必填
 	 * @param city
-	 *            城市区号前4位 必填
-	 * @param carCode
-	 *            车牌号 选填
-	 * @param trueName
-	 *            真实姓名 选填
-	 * @param phone
-	 *            联系电话 选填
-	 * @param address
-	 *            家庭住址 选填
-	 * @param certCode
-	 *            身份证号 选填
-	 * @param email
-	 *            电子邮件 选填
-	 * @return success表示 成功 其他为系统错误码 格式如:ERR_1000@错误描述
+	 *            城市中文名 必填
+	 * @return JSON  数据 如 :
+	 * 			{
+				   success :true,  ---  true 表示关注成功 false 表示失败
+				   message :"用户:测试关注成功!"  ---返回消息
+				   errorCode:'ERR0000'  ---错误代码  success =false  时出现  用于queryErrorInfo 查询错误原因
+				}
+	 * 
 	 */
 
-	public String createCustomInfo(String name, String wxCode, String city, String clientCode, String clientKey);
+	public String createCustomInfo(String wxName, String wxCode, String city, String clientCode, String clientKey);
 
 	/**
 	 * 更新或者保存 微信客户 用于微信端客户关注注册后调用
@@ -39,7 +33,7 @@ public interface CarRpcService {
 	 * @param wxCode
 	 *            微信号 必填
 	 * @param city
-	 *            城市区号前4位 必填
+	 *            城市名称 必填
 	 * @param carCode
 	 *            车牌号 选填
 	 * @param trueName
@@ -52,7 +46,13 @@ public interface CarRpcService {
 	 *            身份证号 选填
 	 * @param email
 	 *            电子邮件 选填
-	 * @return success表示 成功 其他为系统错误码 格式如:ERR_1000@错误描述
+	 * @return JSON  数据 如 :
+	 * 			{
+				   success :true,  ---  true 表示注册成功 false 表示失败
+				   message :"*********!"  ---返回消息
+				   errorCode:'ERR0000'  ---错误代码  success =false  时出现  用于queryErrorInfo 查询错误原因
+				}
+	 * 
 	 */
 
 	public String saveCustomInfo(String name, String wxCode, String city, String carCode, String trueName, String phone, String address, String certCode, String email, String clientCode, String clientKey);
@@ -60,8 +60,8 @@ public interface CarRpcService {
 	/**
 	 * 停车场列表 用于罗列 合作停车场地图列表
 	 * 
-	 * @param cityCode
-	 *            城市区域编码（2013 -国标） 南宁 450100 柳州 450200
+	 * @param city
+	 *            城市名称  南宁  柳州 
 	 * @return xml表示 成功 其他为系统错误码 格式如:ERR_1000 格式如下: <parts>
 	 *         <part><parkId>1</parkId>--id <parkName>万象城</parkName>--名字
 	 *         <mapLb>108.398348,22.81765</mapLb> -- 经纬度 <address>青秀区民族大道136号
@@ -74,7 +74,7 @@ public interface CarRpcService {
 	 *         --营业时间 <feeRulesDesc>前半小时免费 以三小时刻度 每刻度5元 不满三小时 按一刻度计算
 	 *         上限1000元</feeRulesDesc>--计费规则 </part> </parts>
 	 */
-	public String listCarPart2Xml(String cityCode, String clientCode, String clientKey);
+	public String listCarPart2Xml(String city, String clientCode, String clientKey);
 
 	/**
 	 * 停车场列表 用于罗列 合作停车场地图列表
@@ -94,17 +94,19 @@ public interface CarRpcService {
 	 *         上限1000元</feeRulesDesc>--计费规则 </part> </parts>
 	 */
 	public String listCarPart2JSON(String cityCode, String clientCode, String clientKey);
-/**
- * 分页查询当前城市 合作停车列表  如果传入 mapLb 按 由近到远排序
- * @param cityCode
- * @param mapLb
- * @param pageNumer
- * @param pageSize
- * @param clientCode
- * @param clientKey
- * @return
- */
-	public String listCarPartByPage(String cityCode,String mapLb, int pageNumber, int pageSize, String clientCode, String clientKey);
+
+	/**
+	 * 分页查询当前城市 合作停车列表 如果传入 mapLb 按 由近到远排序
+	 * 
+	 * @param cityCode
+	 * @param mapLb
+	 * @param pageNumer
+	 * @param pageSize
+	 * @param clientCode
+	 * @param clientKey
+	 * @return
+	 */
+	public String listCarPartByPage(String cityCode, String mapLb, int pageNumber, int pageSize, String clientCode, String clientKey);
 
 	/**
 	 * 获取经纬度附近半径内的 合作停车场地图列表
@@ -171,7 +173,8 @@ public interface CarRpcService {
 	 * @param
 	 * @return 正数 为还需要支付的金额 负数为找回的金额 --(主要用于现金支付)
 	 */
-	public String payOrderFeeOnline(String orderCode, double money,  String clientCode, String clientKey);
+	public String payOrderFeeOnline(String orderCode, double money, String clientCode, String clientKey);
+
 	/**
 	 * 线下支付订单费用
 	 * 
@@ -182,8 +185,7 @@ public interface CarRpcService {
 	 * @param
 	 * @return 正数 为还需要支付的金额 负数为找回的金额 --(主要用于现金支付)
 	 */
-	public String payOrderFeeOffline(String orderCode, double money,  String clientCode, String clientKey);
-	
+	public String payOrderFeeOffline(String orderCode, double money, String clientCode, String clientKey);
 
 	/**
 	 * 取消未生效的订单
@@ -228,6 +230,7 @@ public interface CarRpcService {
 
 	/**
 	 * 获取订单历史
+	 * 
 	 * @param wxCode
 	 * @param yearMonth
 	 * @param pageNumber
