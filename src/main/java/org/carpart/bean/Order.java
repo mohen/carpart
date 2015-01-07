@@ -5,6 +5,7 @@ import lombok.Data;
 import org.nutz.dao.entity.annotation.Column;
 import org.nutz.dao.entity.annotation.Name;
 import org.nutz.dao.entity.annotation.One;
+import org.nutz.dao.entity.annotation.SQL;
 import org.nutz.dao.entity.annotation.Table;
 
 /**
