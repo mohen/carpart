@@ -1,9 +1,12 @@
 package org.carpart;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.carpart.bean.Client;
 import org.nutz.json.Json;
+import org.nutz.json.JsonFormat;
 
 /**
  * 返回结果
@@ -16,41 +19,46 @@ public class ResponseResult {
 	/**
 	 * 状态标识
 	 */
-	public boolean success = true;
-	
+	private boolean success = true;
+
 	/**
 	 * 总条数
 	 */
-	public int totalCount=0;
-	
+	private int totalCount ;
+
 	/**
-	 * 每页条数 
+	 * 每页条数
 	 */
-	public int pageSize=0;
-	
+	private int pageSize ;
+
 	/**
 	 * 当前页数
 	 */
-	public int pageNumber=1;
+	private int pageNumber ;
 
 	/**
-	 * 存储返回的结果
+	 * 存储返回的对象结果
 	 */
-	public Map<String,Object> result;
+	private Map<String, Object> result = new HashMap<String, Object>();
+	/**
+	 * 存储返回 分页数据
+	 */
+	private List data;
+	
 
 	/**
 	 * 客户端
 	 */
-	public Client client;
+	private Client client;
 
 	/**
 	 * 错误编码
 	 */
-	public String errorCode = "";
+	private String errorCode;
 	/**
 	 * 错误信息
 	 */
-	public String message;
+	private String message;
 
 	/**
 	 * @return the success
@@ -115,7 +123,7 @@ public class ResponseResult {
 	/**
 	 * @return the result
 	 */
-	public Map<String,Object> getResult() {
+	public Map<String, Object> getResult() {
 		return result;
 	}
 
@@ -123,7 +131,7 @@ public class ResponseResult {
 	 * @param result
 	 *            the result to set
 	 */
-	public void setResult(Map<String,Object> result) {
+	public void setResult(Map<String, Object> result) {
 		this.result = result;
 	}
 
@@ -135,7 +143,8 @@ public class ResponseResult {
 	}
 
 	/**
-	 * @param totalCount the totalCount to set
+	 * @param totalCount
+	 *            the totalCount to set
 	 */
 	public void setTotalCount(int totalCount) {
 		this.totalCount = totalCount;
@@ -149,13 +158,12 @@ public class ResponseResult {
 	}
 
 	/**
-	 * @param pageSize the pageSize to set
+	 * @param pageSize
+	 *            the pageSize to set
 	 */
 	public void setPageSize(int pageSize) {
 		this.pageSize = pageSize;
 	}
-
-
 
 	/**
 	 * @return the pageNumber
@@ -165,14 +173,33 @@ public class ResponseResult {
 	}
 
 	/**
-	 * @param pageNumber the pageNumber to set
+	 * @param pageNumber
+	 *            the pageNumber to set
 	 */
 	public void setPageNumber(int pageNumber) {
 		this.pageNumber = pageNumber;
 	}
 
+	/**
+	 * @return the data
+	 */
+	public List getData() {
+		return data;
+	}
+
+	/**
+	 * @param data the data to set
+	 */
+	public void setData(List data) {
+		this.data = data;
+	}
+
 	public String json() {
-		return Json.toJson(this);
+		this.setClient(null);
+		if(this.result.isEmpty()){
+			this.setResult(null);
+		}
+		return Json.toJson(this,JsonFormat.forLook());
 	}
 
 }

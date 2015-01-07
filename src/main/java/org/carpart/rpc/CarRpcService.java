@@ -94,6 +94,17 @@ public interface CarRpcService {
 	 *         上限1000元</feeRulesDesc>--计费规则 </part> </parts>
 	 */
 	public String listCarPart2JSON(String cityCode, String clientCode, String clientKey);
+/**
+ * 分页查询当前城市 合作停车列表  如果传入 mapLb 按 由近到远排序
+ * @param cityCode
+ * @param mapLb
+ * @param pageNumer
+ * @param pageSize
+ * @param clientCode
+ * @param clientKey
+ * @return
+ */
+	public String listCarPartByPage(String cityCode,String mapLb, int pageNumber, int pageSize, String clientCode, String clientKey);
 
 	/**
 	 * 获取经纬度附近半径内的 合作停车场地图列表

@@ -1,6 +1,5 @@
 package org.carpart.rpc.impl;
 
-import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -33,11 +32,8 @@ import org.g4studio.core.util.G4Utils;
 import org.g4studio.core.xml.XmlHelper;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Condition;
-import org.nutz.dao.ConnCallback;
 import org.nutz.dao.Dao;
-import org.nutz.dao.Sqls;
 import org.nutz.dao.pager.Pager;
-import org.nutz.dao.sql.Sql;
 import org.nutz.json.Json;
 import org.nutz.trans.Atom;
 import org.nutz.trans.Trans;
@@ -310,7 +306,6 @@ public class CarRpcServiceImpl implements CarRpcService {
 		return result.json();
 	}
 
-
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public String listCarPart2Xml(String cityCode, String clientCode, String clientKey) {
@@ -348,11 +343,9 @@ public class CarRpcServiceImpl implements CarRpcService {
 	 * @param pageSize
 	 * @return
 	 */
-	private List<Park> queryNearByPart(double mapLat, double mapLng, int pn, int pageSize) {
-		Condition cnd = Cnd.wrap(String.format("where status='1' order by GetDistance(%d,%d,MAP_LAT,MAP_LNG)", mapLat, mapLng));
-		Pager pager = new Pager();
-		pager.setPageNumber(pn);
-		pager.setPageSize(pageSize);
+	private List<Park> queryNearByPart(double mapLat, double mapLng, int pageNumber, int pageSize) {
+		Condition cnd = Cnd.wrap(String.format("where status='1' order by GetDistance(%s,%s,MAP_LAT,MAP_LNG)", mapLat, mapLng));
+		Pager pager = dao.createPager(pageNumber, pageSize);
 		List<Park> list = dao.query(Park.class, cnd, pager);
 		return list;
 	}
@@ -410,7 +403,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 				Date date = new Date();
 				int cusId = custom.getCusId();
 				SimpleDateFormat sf = new SimpleDateFormat(G4Constants.FORMAT_Date);
-				Condition cnd = Cnd.wrap(String.format("where cus_id='%s' and date_format(create_time, '%Y-%m-%d')='%s' and status='%s'", cusId, sf.format(date), CPConstants.ORDER_STATUS_PRE_REG));
+				Condition cnd = Cnd.wrap(String.format("where cus_id=%d and date_format(create_time, '%%Y-%%m-%%d')='%s' and status='%s'", cusId, sf.format(date), CPConstants.ORDER_STATUS_PRE_REG));
 				Order order = dao.fetch(Order.class, cnd);
 				Map<String, Object> map = result.getResult();
 				String orderCode = "";
@@ -437,11 +430,11 @@ public class CarRpcServiceImpl implements CarRpcService {
 					double mapLat = Double.valueOf(mapLb.split(",")[0]);
 					double mapLng = Double.valueOf(mapLb.split(",")[1]);
 					List<Park> list = this.queryNearByPart(mapLat, mapLng, 1, 4);
-					map.put("parks", list);
+					result.setData(list);
 				}
 			}
 		}
-		return Json.toJson(result);
+		return result.json();
 	}
 
 	/**
@@ -722,7 +715,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 			Pager pager = dao.createPager(pageNumber, pageSize);
 			Custom custom = this.fetchCustom(wxCode);
 			if (custom != null) {
-				Condition cnd = Cnd.wrap(String.format("where cus_id='%s' and date_format(create_time, '%Y%m')='%s' order by create_time desc'", custom.getCusId(), yearMonth));
+				Condition cnd = Cnd.wrap(String.format("where cus_id=%d and date_format(create_time, '%%Y%%m')='%s' order by create_time desc'", custom.getCusId(), yearMonth));
 				List<Order> list = dao.query(Order.class, cnd, pager);
 				result.setPageSize(pageSize);
 				result.setPageNumber(pageNumber);
@@ -755,4 +748,30 @@ public class CarRpcServiceImpl implements CarRpcService {
 		return Json.toJson(result);
 	}
 
+	@Override
+	public String listCarPartByPage(String cityCode, String mapLb, int pageNumber, int pageSize, String clientCode, String clientKey) {
+		ResponseResult result = loginValid(clientCode, clientKey);
+		if (result.isSuccess()) {
+			this.logClientAction(result, String.format("查询城市合作停车场列表:%s信息", cityCode));
+			Dao dao = (Dao) SpringBeanLoader.getSpringBean("nutzDao");
+			Pager pager = dao.createPager(pageNumber, pageSize);
+			String orderby = "";
+			if (!StringUtils.isEmpty(mapLb)) {
+				try {
+					double mapLat = Double.valueOf(mapLb.split(",")[0]);
+					double mapLng = Double.valueOf(mapLb.split(",")[1]);
+					orderby = String.format("order by GetDistance(%s,%s,MAP_LAT,MAP_LNG) asc", mapLat, mapLng);
+				} catch (Exception e) {
+					log.error("格式化经纬度异常", e);
+				}
+			}
+			Condition cnd = Cnd.wrap(String.format("where status='1' and city='%s'  %s", cityCode, orderby));
+			List<Park> list = dao.query(Park.class, cnd, pager);
+			result.setTotalCount(dao.count(Park.class, cnd));
+			result.setPageNumber(pageNumber);
+			result.setPageSize(pageSize);
+			result.setData(list);
+		}
+		return result.json();
+	}
 }
