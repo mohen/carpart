@@ -57,7 +57,6 @@ public class CarRpcServiceImpl implements CarRpcService {
 		}
 	}
 
-
 	@Override
 	public String queryOrderStatus(String orderCode, String clientCode, String clientKey) {
 		ResponseResult result = loginValid(clientCode, clientKey);
@@ -167,7 +166,6 @@ public class CarRpcServiceImpl implements CarRpcService {
 		return dao.fetch(Custom.class, cusId);
 	}
 
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public String queryOrderInfo(String orderCode, String clientCode, String clientKey) {
@@ -207,7 +205,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 							if (orderFee > 0) {
 								vo.setStatus(CPConstants.ORDER_STATUS_PARKING);
 							}
-							if(dao.update(vo)>0){
+							if (dao.update(vo) > 0) {
 								result.setMessage(String.format("欠费￥%s", needPayMoney));
 							}
 						}
@@ -326,16 +324,15 @@ public class CarRpcServiceImpl implements CarRpcService {
 		return xml;
 	}
 
+	@Override
 	public String listCarPart2JSON(String cityCode, String clientCode, String clientKey) {
 		ResponseResult result = loginValid(clientCode, clientKey);
-		String json = "";
 		if (result.isSuccess()) {
 			this.logClientAction(result, String.format("查询城市合作停车场列表:%s信息", cityCode));
-			Dao dao = (Dao) SpringBeanLoader.getSpringBean("nutzDao");
 			List<Park> list = dao.query(Park.class, Cnd.where("city", "=", cityCode));
-			json = Json.toJson(list);
+			result.setList(list);
 		}
-		return json;
+		return result.json();
 	}
 
 	/**
@@ -474,7 +471,11 @@ public class CarRpcServiceImpl implements CarRpcService {
 					Date endTime = new Date();
 					vo.setEndPartTime(endTime);
 					int minute = G4Utils.getIntervalMinute(startTime, (Date) endTime);
+					/**
+					 * 计算出库时间 跟上次计费 误差值   如：相差不到5分钟不进行重新计费
+					 */
 					vo.setPartTimes(Double.valueOf(minute));
+					
 				}
 				vo.setStatus(newStatus);
 				int i = dao.update(vo);

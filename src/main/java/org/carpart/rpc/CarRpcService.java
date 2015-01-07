@@ -48,7 +48,7 @@ public interface CarRpcService {
 	 *            电子邮件 选填
 	 * @return JSON  数据 如 :
 	 * 			{
-				   success :true,  ---  true 表示注册成功 false 表示失败
+				   success :true,  ---  true 表示成功 false 表示失败
 				   message :"*********!"  ---返回消息
 				   errorCode:'ERR0000'  ---错误代码  success =false  时出现  用于queryErrorInfo 查询错误原因
 				}
@@ -74,39 +74,68 @@ public interface CarRpcService {
 	 *         --营业时间 <feeRulesDesc>前半小时免费 以三小时刻度 每刻度5元 不满三小时 按一刻度计算
 	 *         上限1000元</feeRulesDesc>--计费规则 </part> </parts>
 	 */
+	@Deprecated
 	public String listCarPart2Xml(String city, String clientCode, String clientKey);
 
 	/**
-	 * 停车场列表 用于罗列 合作停车场地图列表
+	 * 当前城市全部合作停车场   用与罗列到地图上
 	 * 
 	 * @param cityCode
 	 *            城市区域编码（2013 -国标） 南宁 450100 柳州 450200
-	 * @return xml表示 成功 其他为系统错误码 格式如:ERR_1000 格式如下: <parts>
-	 *         <part><parkId>1</parkId>--id <parkName>万象城</parkName>--名字
-	 *         <mapLb>108.398348,22.81765</mapLb> -- 经纬度 <address>青秀区民族大道136号
-	 *         </address> --地址 <officeTime>全天</officeTime> --营业时间
-	 *         <feeRulesDesc>前半小时免费 以三小时刻度 每刻度5元 不满三小时 按一刻度计算
-	 *         上限500元</feeRulesDesc>--计费规则 <status>1</status> --状态
-	 *         <city>4501</city>--城市 </part> <part> <name>国贸购物中心</name>
-	 *         <mapLb>108.330165,22.819499</mapLb>--经纬度
-	 *         <address>民族共和路口民族大道41号</address> --地址 <officeTime>全天</officeTime>
-	 *         --营业时间 <feeRulesDesc>前半小时免费 以三小时刻度 每刻度5元 不满三小时 按一刻度计算
-	 *         上限1000元</feeRulesDesc>--计费规则 </part> </parts>
+	 * @return 	 JSON 数据:
+	 *
+						{
+						   	success :true,  ---  true 表示成功 false 表示失败
+				   			message :"*********!"  ---返回消息
+							errorCode:'ERR0000'  ---错误代码    
+						   totalCount :1,
+						   list :[{
+						      parkId :1,
+						      parkName :"国贸商场",  --名称
+						      address :"民族大道",  --地址
+						      city :"南宁",--城市
+						      officeTime :"全天" --营业时间,
+						      rulesDesc :"前半小时免费 小于三小时每小时5元 大于3小时每3小时时10元",  --计费规则
+						      mapLb :"108.330165,22.819499", --经纬度
+						      disDetail :"暂无优惠信息",  --优惠信息
+						      thumbnailUrl :"http://pandaz.wicp.net/CarPart/resource/image/login_banner.png"--缩略图
+						   }]
+						}
 	 */
 	public String listCarPart2JSON(String cityCode, String clientCode, String clientKey);
 
 	/**
 	 * 分页查询当前城市 合作停车列表 如果传入 mapLb 按 由近到远排序
 	 * 
-	 * @param cityCode
-	 * @param mapLb
-	 * @param pageNumer
-	 * @param pageSize
-	 * @param clientCode
+	 * @param city 城市名称
+	 * @param mapLb 当前用户经纬度  如没有传null 则不排序
+	 * @param pageNumer 当前页数
+	 * @param pageSize 每页显示条数
+	 * @param clientCode  
 	 * @param clientKey
-	 * @return
+	 * @return JSON 数据:
+	 *
+						{
+						  success :true,  ---  true 表示成功 false 表示失败
+				   			message :"*********!"  ---返回消息
+							errorCode:'ERR0000'  ---错误代码    
+						   totalCount :1, --总条数
+						   pageSize :10,--每页条数
+						   pageNumber :1,--当前页码
+						   list :[{
+						      parkId :1,
+						      parkName :"国贸商场",  --名称
+						      address :"民族大道",  --地址
+						      city :"南宁",--城市
+						      officeTime :"全天" --营业时间,
+						      rulesDesc :"前半小时免费 小于三小时每小时5元 大于3小时每3小时时10元",  --计费规则
+						      mapLb :"108.330165,22.819499", --经纬度
+						      disDetail :"暂无优惠信息",  --优惠信息
+						      thumbnailUrl :"http://pandaz.wicp.net/CarPart/resource/image/login_banner.png"--缩略图
+						   }]
+						}
 	 */
-	public String listCarPartByPage(String cityCode, String mapLb, int pageNumber, int pageSize, String clientCode, String clientKey);
+	public String listCarPartByPage(String city, String mapLb, int pageNumber, int pageSize, String clientCode, String clientKey);
 
 	/**
 	 * 获取经纬度附近半径内的 合作停车场地图列表
