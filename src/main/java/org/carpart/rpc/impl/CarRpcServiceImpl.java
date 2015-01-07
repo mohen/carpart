@@ -709,25 +709,21 @@ public class CarRpcServiceImpl implements CarRpcService {
 	@Override
 	public String queryOrderHistory(String wxCode, String yearMonth, int pageNumber, int pageSize, String clientCode, String clientKey) {
 		ResponseResult result = loginValid(clientCode, clientKey);
-		String json = "";
 		if (result.isSuccess()) {
 			Pager pager = dao.createPager(pageNumber, pageSize);
 			Custom custom = this.fetchCustom(wxCode);
 			if (custom != null) {
-				Condition cnd = Cnd.wrap(String.format("where cus_id=%d and date_format(create_time, '%%Y%%m')='%s' order by create_time desc'", custom.getCusId(), yearMonth));
+				Condition cnd = Cnd.wrap(String.format("where cus_id=%d and date_format(create_time, '%%Y%%m')='%s' order by create_time desc", custom.getCusId(), yearMonth));
 				List<Order> list = dao.query(Order.class, cnd, pager);
 				result.setPageSize(pageSize);
 				result.setPageNumber(pageNumber);
-				result.setTotalCount(list.size());
-				result.getResult().put("orders", list);
-				json = Json.toJson(result);
+				result.setTotalCount(dao.count(Order.class, cnd));
+				result.setData(list);
 			} else {
 				result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("系统中不存在微信用户:%s", wxCode));
 			}
-		} else {
-			json = Json.toJson(result);
-		}
-		return json;
+		} 
+		return result.json();
 	}
 
 	@Override

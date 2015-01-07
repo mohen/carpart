@@ -228,14 +228,15 @@ public interface CarRpcService {
 
 	/**
 	 * 获取订单历史
-	 * 
 	 * @param wxCode
 	 * @param yearMonth
+	 * @param pageNumber
+	 * @param pageSize
 	 * @param clientCode
 	 * @param clientKey
 	 * @return
 	 */
-	public String queryOrderHistory(String wxCode, String yearMonth, int page, int pageSize, String clientCode, String clientKey);
+	public String queryOrderHistory(String wxCode, String yearMonth, int pageNumber, int pageSize, String clientCode, String clientKey);
 
 	/**
 	 * 车辆入库操作

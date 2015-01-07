@@ -22,11 +22,17 @@ public class Order {
 	 */
 	@Column("PARK_ID")
 	private Integer parkId;
+	
+	@SQL("select park_name from cp_park where park_id=@parkId")
+	private String parkName;
 	/**
 	 * 
 	 */
 	@Column("CUS_ID")
 	private Integer cusId;
+	
+	@SQL("select wx_code  from cp_custom where cus_id=@cusId")
+	private String wxCode;
 	/**
 	 * 订单创建时间
 	 */

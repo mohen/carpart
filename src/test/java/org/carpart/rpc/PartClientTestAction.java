@@ -129,7 +129,59 @@ public class PartClientTestAction {
 		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
 		Assert.assertTrue(result.isSuccess());
 	}
+	/**
+	 * 模拟用户点击查看停车场详细信息
+	 */
+	@Test
+	public final void testViewParkAction() {
+		String mapLb = "108.330165,22.819499";
+		String json = service.queryParkInfo(mapLb, w_clientCode, w_clientKey);
+		System.err.println(json);
+		Reader reader = new StringReader(json);
+		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
+		Assert.assertTrue(result.isSuccess());
+	}
+	/**
+	 * 模拟用户点击查看订单详细信息
+	 */
+	@Test
+	public final void testViewOrderAction() {
+		String json = service.queryOrderInfo(orderCode, w_clientCode, w_clientKey);
+		System.err.println(json);
+		Reader reader = new StringReader(json);
+		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
+		Assert.assertTrue(result.isSuccess());
+	}
+	/**
+	 * 模拟用户查询订单历史
+	 */
+	@Test
+	public final void testViewOrderHistoryAction() {
+		String yearMonth="201501";
+		int pageNumber=1;
+		int pageSize=10;
+		String json = service.queryOrderHistory(wxCode, yearMonth, pageNumber, pageSize, w_clientCode, w_clientKey);
+		System.err.println(json);
+		Reader reader = new StringReader(json);
+		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
+		Assert.assertTrue(result.isSuccess());
+	}
+	
+	
 
+	/**
+	 * 模拟线上支付
+	 */
+	@Test
+	public final void testPayOrderFeeOnline() {
+		double fee = service.queryOrderFee(orderCode, w_clientCode, w_clientKey);
+		String json = service.payOrderFeeOffline(orderCode, fee, w_clientCode, w_clientKey);
+		System.err.println(json);
+		Reader reader = new StringReader(json);
+		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
+		Assert.assertTrue(result.isSuccess());
+	}
+	
 	/**
 	 * 模拟车辆 入库
 	 */
@@ -173,18 +225,5 @@ public class PartClientTestAction {
 				Assert.assertTrue(result.isSuccess());
 			}
 		}
-	}
-
-	/**
-	 * 模拟线上支付
-	 */
-	@Test
-	public final void testPayOrderFeeOnline() {
-		double fee = service.queryOrderFee(orderCode, w_clientCode, w_clientKey);
-		String json = service.payOrderFeeOffline(orderCode, fee, w_clientCode, w_clientKey);
-		System.err.println(json);
-		Reader reader = new StringReader(json);
-		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
-		Assert.assertTrue(result.isSuccess());
 	}
 }
