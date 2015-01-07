@@ -29,17 +29,12 @@ public class PartClientTestAction {
 	/**
 	 * 停车场代码
 	 */
-	final static String p_clientCode = "[B@1743c6e";
-	final static String p_clientKey = "client";
-	/**
-	 * 微信端代码
-	 */
-	final static String w_clientCode = "[B@1c6b3d1";
-	final static String w_clientKey = "wxServer";
+	final static String clientCode = "[B@1743c6e";
+	final static String clientKey = "client";
 
 	final static String wxCode = "oj3WQt-hHdDPYtt7lTigc0zTklYE2";
 
-	final static String orderCode = "DT20141124104254DD10000004";
+	final static String orderCode = "DT20150107102537DD10000105";
 	final static String SERVICE_URL = "http://pandaz.wicp.net/CarPart/rpc/webservice/CarRpcService";
 	static CarRpcService service = null;
 	static int web = 2;
@@ -71,123 +66,11 @@ public class PartClientTestAction {
 	}
 
 	/**
-	 * 模拟用户关注
-	 */
-	@Test
-	public final void testCreateCustom() {
-		String wxName = "周璇2";
-		String city = "南宁";
-		String message = service.createCustomInfo(wxName, wxCode, city, w_clientCode, w_clientKey);
-		System.err.println(message);
-		Assert.assertNotNull(message);
-	}
-
-	/**
-	 * 模拟用户注册
-	 */
-	@Test
-	public final void testSaveCustom() {
-		String wxName = "测试1";
-		String carCode = "桂A-A8G90";
-		String trueName = "测试";
-		String phone = "13875647387";
-		String address = "南宁民族大道45号";
-		String certCode = "4502384857483858";
-		String email = "4858485@163.com";
-		String city = "南宁";
-		String message = service.saveCustomInfo(wxName, wxCode, carCode, city, trueName, phone, address, certCode, email, w_clientCode, w_clientKey);
-		System.err.println(message);
-		Assert.assertNotNull(message);
-	}
-
-	/**
-	 * 模拟用户点击BIBI
-	 */
-	@Test
-	public final void testClickBiBiAction() {
-		String wxCode = "oj3WQt-hHdDPYtt7lTigc0zTklYE2";
-		String mapLb = "108.330165,22.819499";
-		String json = service.createOrder(wxCode, mapLb, w_clientCode, w_clientKey);
-		System.err.println(json);
-		Reader reader = new StringReader(json);
-		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
-		Assert.assertTrue(result.isSuccess());
-	}
-
-	/**
-	 * 模拟用户点击更多停车场信息
-	 */
-	@Test
-	public final void testMoreParkAction() {
-		String cityCode = "南宁";
-		String mapLb = "108.330165,22.819499";
-		int pageNumber = 1;
-		int pageSize = 10;
-		String json = service.listCarPartByPage(cityCode, mapLb, pageNumber, pageSize, w_clientCode, w_clientKey);
-		System.err.println(json);
-		Reader reader = new StringReader(json);
-		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
-		Assert.assertTrue(result.isSuccess());
-	}
-	/**
-	 * 模拟用户点击查看停车场详细信息
-	 */
-	@Test
-	public final void testViewParkAction() {
-		String mapLb = "108.330165,22.819499";
-		String json = service.queryParkInfo(mapLb, w_clientCode, w_clientKey);
-		System.err.println(json);
-		Reader reader = new StringReader(json);
-		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
-		Assert.assertTrue(result.isSuccess());
-	}
-	/**
-	 * 模拟用户点击查看订单详细信息
-	 */
-	@Test
-	public final void testViewOrderAction() {
-		String json = service.queryOrderInfo(orderCode, w_clientCode, w_clientKey);
-		System.err.println(json);
-		Reader reader = new StringReader(json);
-		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
-		Assert.assertTrue(result.isSuccess());
-	}
-	/**
-	 * 模拟用户查询订单历史
-	 */
-	@Test
-	public final void testViewOrderHistoryAction() {
-		String yearMonth="201501";
-		int pageNumber=1;
-		int pageSize=10;
-		String json = service.queryOrderHistory(wxCode, yearMonth, pageNumber, pageSize, w_clientCode, w_clientKey);
-		System.err.println(json);
-		Reader reader = new StringReader(json);
-		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
-		Assert.assertTrue(result.isSuccess());
-	}
-	
-	
-
-	/**
-	 * 模拟线上支付
-	 */
-	@Test
-	public final void testPayOrderFeeOnline() {
-		double fee = service.queryOrderFee(orderCode, w_clientCode, w_clientKey);
-		String json = service.payOrderFeeOffline(orderCode, fee, w_clientCode, w_clientKey);
-		System.err.println(json);
-		Reader reader = new StringReader(json);
-		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
-		Assert.assertTrue(result.isSuccess());
-	}
-	
-	/**
 	 * 模拟车辆 入库
 	 */
 	@Test
 	public final void testCarInPartAction() {
-		String json = service.inPart(orderCode, p_clientCode, p_clientKey);
+		String json = service.inPart(orderCode, clientCode, clientKey);
 		System.err.println(json);
 		Reader reader = new StringReader(json);
 		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
@@ -199,12 +82,12 @@ public class PartClientTestAction {
 	 */
 	@Test
 	public final void testCarOutPartAction() {
-		double fee = service.queryOrderFee(orderCode, p_clientCode, p_clientKey);
+		double fee = service.queryOrderFee(orderCode, clientCode, clientKey);
 		if (fee <= 0) {
 			/**
 			 * 无欠费信息 直接出库
 			 */
-			String json = service.outPart(orderCode, p_clientCode, p_clientKey);
+			String json = service.outPart(orderCode, clientCode, clientKey);
 			System.err.println(json);
 			Reader reader = new StringReader(json);
 			ResponseResult result = Json.fromJson(ResponseResult.class, reader);
@@ -213,12 +96,12 @@ public class PartClientTestAction {
 			/**
 			 * 支付现金完成后出库
 			 */
-			String json = service.payOrderFeeOffline(orderCode, fee, p_clientCode, p_clientKey);
+			String json = service.payOrderFeeOffline(orderCode, fee, clientCode, clientKey);
 			System.err.println(json);
 			Reader reader = new StringReader(json);
 			ResponseResult result = Json.fromJson(ResponseResult.class, reader);
 			if (result.isSuccess() && result.getResult().get("needPayMoney").equals("0")) {
-				json = service.outPart(orderCode, p_clientCode, p_clientKey);
+				json = service.outPart(orderCode, clientCode, clientKey);
 				System.err.println(json);
 				reader = new StringReader(json);
 				result = Json.fromJson(ResponseResult.class, reader);

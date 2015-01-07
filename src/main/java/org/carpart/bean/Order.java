@@ -1,8 +1,11 @@
 package org.carpart.bean;
 
-import org.nutz.dao.entity.annotation.*;
-
 import lombok.Data;
+
+import org.nutz.dao.entity.annotation.Column;
+import org.nutz.dao.entity.annotation.Name;
+import org.nutz.dao.entity.annotation.One;
+import org.nutz.dao.entity.annotation.Table;
 
 /**
 * 
@@ -22,17 +25,21 @@ public class Order {
 	 */
 	@Column("PARK_ID")
 	private Integer parkId;
-	
-	@SQL("select park_name from cp_park where park_id=@parkId")
+
 	private String parkName;
+
+	@One(target = Park.class, field = "parkId")
+	private Park park;
 	/**
 	 * 
 	 */
 	@Column("CUS_ID")
 	private Integer cusId;
-	
-	@SQL("select wx_code  from cp_custom where cus_id=@cusId")
-	private String wxCode;
+
+	private String wxName;
+
+	@One(target = Custom.class, field = "cusId")
+	private Custom custom;
 	/**
 	 * 订单创建时间
 	 */

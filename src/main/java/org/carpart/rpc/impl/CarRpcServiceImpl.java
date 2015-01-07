@@ -57,9 +57,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 		}
 	}
 
-	private static int systemId = 1;
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public String queryOrderStatus(String orderCode, String clientCode, String clientKey) {
 		ResponseResult result = loginValid(clientCode, clientKey);
@@ -77,10 +75,9 @@ public class CarRpcServiceImpl implements CarRpcService {
 			}
 
 		}
-		return Json.toJson(result);
+		return result.json();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public double queryOrderFee(String orderCode, String clientCode, String clientKey) {
 		ResponseResult result = loginValid(clientCode, clientKey);
@@ -151,11 +148,11 @@ public class CarRpcServiceImpl implements CarRpcService {
 	}
 
 	private Order fetchOrder(String orderCode) {
-		return dao.fetch(Order.class, Cnd.where("orderCode", "=", orderCode));
+		return dao.fetch(Order.class, orderCode);
 	}
 
 	private Park fetchPark(int parkId) {
-		return dao.fetch(Park.class, Cnd.where("parkId", "=", parkId));
+		return dao.fetch(Park.class, parkId);
 	}
 
 	private Park fetchPark(String mapLb) {
@@ -167,12 +164,9 @@ public class CarRpcServiceImpl implements CarRpcService {
 	}
 
 	private Custom fetchCustom(int cusId) {
-		return dao.fetch(Custom.class, Cnd.where("cusId", "=", cusId));
+		return dao.fetch(Custom.class, cusId);
 	}
 
-	private Client fetchClient(String clientId) {
-		return dao.fetch(Client.class, Cnd.where("clientId", "=", clientId));
-	}
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -181,45 +175,56 @@ public class CarRpcServiceImpl implements CarRpcService {
 		if (result.isSuccess()) {
 			this.logClientAction(result, String.format("查询订单:%s信息", orderCode));
 			Order vo = this.fetchOrder(orderCode);
-			String status = vo.getStatus();
-			if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PARKING) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PAY_NOT_OUT)) {
-				try {
-					Date startDate = vo.getStartPartTime();
-					Integer parkId = vo.getParkId();
-					Park parkVo = this.fetchPark(parkId);
-					String feeRules = parkVo.getFeeRules();
-					if (StringUtils.isEmpty(feeRules)) {
-						result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("停车场:%s规则未配置,无法计算费用!", parkVo.getParkName()));
-					} else {
-						double payMoney = vo.getPayAmount();
-						Date feedDate = new Date();
-						int iMinute = G4Utils.getIntervalMinute(startDate, feedDate);
-						double orderFee = this.feelOrderFee(startDate, feedDate, feeRules, iMinute);
-						double needPayMoney = orderFee - payMoney;
-						vo.setFeedTime(feedDate);
-						vo.setFeeAmount(orderFee);
-						vo.setNeedAmount(needPayMoney);
-						vo.setPartTimes((double) iMinute);
-						if (orderFee > 0) {
-							vo.setStatus(CPConstants.ORDER_STATUS_PARKING);
-						}
-						int i = dao.update(vo);
-						if (i > 0) {
-							result.getResult().put("order", vo);
-						}
+			if (vo == null) {
+				result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("订单:%s 不存在,无法计算费用!", orderCode));
+			} else {
+				if (vo.getParkId() != null) {
+					vo = dao.fetchLinks(vo, "park");
+					Park park = vo.getPark();
+					if (park != null) {
+						vo.setParkName(park.getParkName());
 					}
-				} catch (Exception ex) {
-					result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("计算订单:%s 费用失败:%s!", orderCode, ex.getMessage()));
 				}
+				String status = vo.getStatus();
+				if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PARKING) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PAY_NOT_OUT)) {
+					try {
+						Date startDate = vo.getStartPartTime();
+						Integer parkId = vo.getParkId();
+						Park parkVo = this.fetchPark(parkId);
+						String feeRules = parkVo.getFeeRules();
+						if (StringUtils.isEmpty(feeRules)) {
+							result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("停车场:%s规则未配置,无法计算费用!", parkVo.getParkName()));
+						} else {
+							double payMoney = vo.getPayAmount();
+							Date feedDate = new Date();
+							int iMinute = G4Utils.getIntervalMinute(startDate, feedDate);
+							double orderFee = this.feelOrderFee(startDate, feedDate, feeRules, iMinute);
+							double needPayMoney = orderFee - payMoney;
+							vo.setFeedTime(feedDate);
+							vo.setFeeAmount(orderFee);
+							vo.setNeedAmount(needPayMoney);
+							vo.setPartTimes((double) iMinute);
+							if (orderFee > 0) {
+								vo.setStatus(CPConstants.ORDER_STATUS_PARKING);
+							}
+							if(dao.update(vo)>0){
+								result.setMessage(String.format("欠费￥%s", needPayMoney));
+							}
+						}
+					} catch (Exception ex) {
+						result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("计算订单:%s 费用失败:%s!", orderCode, ex.getMessage()));
+					}
+				}
+				result.getData().add(vo);
 			}
+
 		}
-		return Json.toJson(result);
+		return result.json();
 	}
 
 	/**
 	 * 更新或者保存用户信息
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public String saveCustomInfo(String wxName, String wxCode, String city, String carCode, String trueName, String phone, String address, String certCode, String email, String clientCode, String clientKey) {
 		ResponseResult result = loginValid(clientCode, clientKey);
@@ -254,13 +259,12 @@ public class CarRpcServiceImpl implements CarRpcService {
 				result = logsError(result, CPConstants.ERROR_TYPE_SERVER, String.format("更新wxCode=%s 的客户 产生数据库错误", wxCode));
 			}
 		}
-		return Json.toJson(result);
+		return result.json();
 	}
 
 	/**
 	 * 新增用户信息
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public String createCustomInfo(String wxName, String wxCode, String city, String clientCode, String clientKey) {
 		ResponseResult result = loginValid(clientCode, clientKey);
@@ -430,7 +434,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 					double mapLat = Double.valueOf(mapLb.split(",")[0]);
 					double mapLng = Double.valueOf(mapLb.split(",")[1]);
 					List<Park> list = this.queryNearByPart(mapLat, mapLng, 1, 4);
-					result.setData(list);
+					result.setList(list);
 				}
 			}
 		}
@@ -485,7 +489,6 @@ public class CarRpcServiceImpl implements CarRpcService {
 
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public String inPart(String orderCode, String clientCode, String clientKey) {
 		ResponseResult result = loginValid(clientCode, clientKey);
@@ -500,10 +503,9 @@ public class CarRpcServiceImpl implements CarRpcService {
 				}
 			}
 		}
-		return Json.toJson(result);
+		return result.json();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public String queryErrorInfo(String errCode, String clientCode, String clientKey) {
 		ResponseResult result = loginValid(clientCode, clientKey);
@@ -522,7 +524,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 				}
 			}
 		}
-		return Json.toJson(result);
+		return result.json();
 	}
 
 	/**
@@ -590,7 +592,6 @@ public class CarRpcServiceImpl implements CarRpcService {
 	 * @param clientKey
 	 * @return
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Client validClientInfo(String clientCode, String clientKey) {
 		Client client = dao.fetch(Client.class, Cnd.where("clientCode", "=", clientCode).and("clientKey", "=", clientKey));
 		return client;
@@ -605,10 +606,6 @@ public class CarRpcServiceImpl implements CarRpcService {
 	private void logClientAction(ResponseResult result, String action) {
 		Client client = result.getClient();
 		log.info(String.format("客户端:%s[%d] 请求:%s", client.getClientDesc(), client.getClientId(), action));
-	}
-
-	public void exeNeedPayMoney(String orderCode) {
-
 	}
 
 	@Override
@@ -631,10 +628,9 @@ public class CarRpcServiceImpl implements CarRpcService {
 				result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("订单:%s#不存在!", orderCode));
 			}
 		}
-		return Json.toJson(result);
+		return result.json();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public String queryParkInfo(String mapLb, String clientCode, String clientKey) {
 		ResponseResult result = loginValid(clientCode, clientKey);
@@ -646,7 +642,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 				json = Json.toJson(park);
 			} else {
 				result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("系统不存在坐标为:%s的停车场", mapLb));
-				json = Json.toJson(result);
+				json = result.json();
 			}
 		}
 		return json;
@@ -703,7 +699,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 				}
 			}
 		}
-		return Json.toJson(result);
+		return result.json();
 	}
 
 	@Override
@@ -718,11 +714,11 @@ public class CarRpcServiceImpl implements CarRpcService {
 				result.setPageSize(pageSize);
 				result.setPageNumber(pageNumber);
 				result.setTotalCount(dao.count(Order.class, cnd));
-				result.setData(list);
+				result.setList(list);
 			} else {
 				result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("系统中不存在微信用户:%s", wxCode));
 			}
-		} 
+		}
 		return result.json();
 	}
 
@@ -740,7 +736,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 				}
 			}
 		}
-		return Json.toJson(result);
+		return result.json();
 	}
 
 	@Override
@@ -765,7 +761,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 			result.setTotalCount(dao.count(Park.class, cnd));
 			result.setPageNumber(pageNumber);
 			result.setPageSize(pageSize);
-			result.setData(list);
+			result.setList(list);
 		}
 		return result.json();
 	}
