@@ -652,8 +652,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 		return json;
 	}
 
-	@Override
-	public String payOrderFee(String orderCode, double money, int type, String clientCode, String clientKey) {
+	private String payOrderFee(String orderCode, double money, int type, String clientCode, String clientKey) {
 		ResponseResult result = loginValid(clientCode, clientKey);
 		if (result.isSuccess()) {
 			this.logClientAction(result, String.format("支付订单:%s费用:%s", orderCode, money));
@@ -773,5 +772,15 @@ public class CarRpcServiceImpl implements CarRpcService {
 			result.setData(list);
 		}
 		return result.json();
+	}
+
+	@Override
+	public String payOrderFeeOnline(String orderCode, double money, String clientCode, String clientKey) {
+		return this.payOrderFee(orderCode, money, 1, clientCode, clientKey);
+	}
+
+	@Override
+	public String payOrderFeeOffline(String orderCode, double money, String clientCode, String clientKey) {
+		return this.payOrderFee(orderCode, money, 2, clientCode, clientKey);
 	}
 }

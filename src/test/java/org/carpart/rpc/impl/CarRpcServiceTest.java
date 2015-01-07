@@ -88,7 +88,7 @@ public class CarRpcServiceTest {
 	@Test
 	public final void testPayOrderFee() {
 		String orderCode = "DT20141126154407DD10000009";
-		String result = service.payOrderFee(orderCode, 15, 1, clientCode, clientKey);
+		String result = service.payOrderFeeOnline(orderCode, 15,  clientCode, clientKey);
 		System.err.println(result);
 		Assert.assertNotNull(result);
 	}

@@ -118,12 +118,12 @@ public class PartClientTestAction {
 	 * 模拟用户点击更多停车场信息
 	 */
 	@Test
-	public final void testMoreParkAction(){
-		String cityCode="南宁";
+	public final void testMoreParkAction() {
+		String cityCode = "南宁";
 		String mapLb = "108.330165,22.819499";
-		int pageNumber=1;
-		int pageSize=10;
-		String json =service.listCarPartByPage(cityCode, mapLb, pageNumber, pageSize, w_clientCode,w_clientKey);
+		int pageNumber = 1;
+		int pageSize = 10;
+		String json = service.listCarPartByPage(cityCode, mapLb, pageNumber, pageSize, w_clientCode, w_clientKey);
 		System.err.println(json);
 		Reader reader = new StringReader(json);
 		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
@@ -149,13 +149,42 @@ public class PartClientTestAction {
 	public final void testCarOutPartAction() {
 		double fee = service.queryOrderFee(orderCode, p_clientCode, p_clientKey);
 		if (fee <= 0) {
+			/**
+			 * 无欠费信息 直接出库
+			 */
 			String json = service.outPart(orderCode, p_clientCode, p_clientKey);
 			System.err.println(json);
 			Reader reader = new StringReader(json);
 			ResponseResult result = Json.fromJson(ResponseResult.class, reader);
 			Assert.assertTrue(result.isSuccess());
 		} else {
-
+			/**
+			 * 支付现金完成后出库
+			 */
+			String json = service.payOrderFeeOffline(orderCode, fee, p_clientCode, p_clientKey);
+			System.err.println(json);
+			Reader reader = new StringReader(json);
+			ResponseResult result = Json.fromJson(ResponseResult.class, reader);
+			if (result.isSuccess() && result.getResult().get("needPayMoney").equals("0")) {
+				json = service.outPart(orderCode, p_clientCode, p_clientKey);
+				System.err.println(json);
+				reader = new StringReader(json);
+				result = Json.fromJson(ResponseResult.class, reader);
+				Assert.assertTrue(result.isSuccess());
+			}
 		}
+	}
+
+	/**
+	 * 模拟线上支付
+	 */
+	@Test
+	public final void testPayOrderFeeOnline() {
+		double fee = service.queryOrderFee(orderCode, w_clientCode, w_clientKey);
+		String json = service.payOrderFeeOffline(orderCode, fee, w_clientCode, w_clientKey);
+		System.err.println(json);
+		Reader reader = new StringReader(json);
+		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
+		Assert.assertTrue(result.isSuccess());
 	}
 }

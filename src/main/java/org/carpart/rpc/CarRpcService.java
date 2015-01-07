@@ -168,12 +168,22 @@ public interface CarRpcService {
 	 *            订单号
 	 * @param money
 	 *            支付金额(元)
-	 * @param type
-	 *            支付类型 1 线上支付 2 线下支付
 	 * @param
 	 * @return 正数 为还需要支付的金额 负数为找回的金额 --(主要用于现金支付)
 	 */
-	public String payOrderFee(String orderCode, double money, int type, String clientCode, String clientKey);
+	public String payOrderFeeOnline(String orderCode, double money,  String clientCode, String clientKey);
+	/**
+	 * 线下支付订单费用
+	 * 
+	 * @param orderCode
+	 *            订单号
+	 * @param money
+	 *            支付金额(元)
+	 * @param
+	 * @return 正数 为还需要支付的金额 负数为找回的金额 --(主要用于现金支付)
+	 */
+	public String payOrderFeeOffline(String orderCode, double money,  String clientCode, String clientKey);
+	
 
 	/**
 	 * 取消未生效的订单
