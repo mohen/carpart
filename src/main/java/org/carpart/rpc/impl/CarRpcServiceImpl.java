@@ -2,6 +2,7 @@ package org.carpart.rpc.impl;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import javax.jws.WebService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.binding.corba.wsdl.Array;
 import org.apache.cxf.common.util.StringUtils;
 import org.carpart.CPConstants;
 import org.carpart.CPException;
@@ -91,7 +93,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 				result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("订单:%s 不存在,无法计算费用!", orderCode));
 			} else {
 				String status = vo.getStatus();
-				if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PARKING) ) {
+				if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PARKING)) {
 					try {
 						Date startDate = vo.getStartPartTime();
 						Integer parkId = vo.getParkId();
@@ -179,40 +181,48 @@ public class CarRpcServiceImpl implements CarRpcService {
 		ResponseResult result = loginValid(clientCode, clientKey);
 		if (result.isSuccess()) {
 			this.logClientAction(result, String.format("查询订单:%s信息", orderCode));
-			Order vo = this.fetchOrder(orderCode);
-			if (vo == null) {
+			Order order = this.fetchOrder(orderCode);
+			if (order == null) {
 				result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("订单:%s 不存在,无法计算费用!", orderCode));
 			} else {
-				if (vo.getParkId() != null) {
-					vo = dao.fetchLinks(vo, "park");
-					Park park = vo.getPark();
+				if (order.getParkId() != null) {
+					order = dao.fetchLinks(order, "park|custom");
+					Park park = order.getPark();
 					if (park != null) {
-						vo.setParkName(park.getParkName());
+						order.setCity(park.getCity());
+						order.setParkName(park.getParkName());
+						order.setAddress(park.getAddress());
+						order.setPark(null);
+					}
+					Custom custom = order.getCustom();
+					if (custom != null) {
+						order.setWxName(custom.getWxName());
+						order.setCustom(null);
 					}
 				}
-				String status = vo.getStatus();
-				if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PARKING) ) {
+				String status = order.getStatus();
+				if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || order.getStatus().equals(CPConstants.ORDER_STATUS_PARKING)) {
 					try {
-						Date startDate = vo.getStartPartTime();
-						Integer parkId = vo.getParkId();
+						Date startDate = order.getStartPartTime();
+						Integer parkId = order.getParkId();
 						Park parkVo = this.fetchPark(parkId);
 						String feeRules = parkVo.getFeeRules();
 						if (StringUtils.isEmpty(feeRules)) {
 							result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("停车场:%s规则未配置,无法计算费用!", parkVo.getParkName()));
 						} else {
-							double payMoney = vo.getPayAmount();
+							double payMoney = order.getPayAmount();
 							Date feedDate = new Date();
 							int iMinute = G4Utils.getIntervalMinute(startDate, feedDate);
 							double orderFee = this.feelOrderFee(startDate, feedDate, feeRules, iMinute);
 							double needPayMoney = orderFee - payMoney;
-							vo.setFeedTime(feedDate);
-							vo.setFeeAmount(orderFee);
-							vo.setNeedAmount(needPayMoney);
-							vo.setPartTimes((double) iMinute);
+							order.setFeedTime(feedDate);
+							order.setFeeAmount(orderFee);
+							order.setNeedAmount(needPayMoney);
+							order.setPartTimes((double) iMinute);
 							if (orderFee > 0) {
-								vo.setStatus(CPConstants.ORDER_STATUS_PARKING);
+								order.setStatus(CPConstants.ORDER_STATUS_PARKING);
 							}
-							if (dao.update(vo) > 0) {
+							if (dao.update(order) > 0) {
 								result.setMessage(String.format("欠费￥%s", needPayMoney));
 							}
 						}
@@ -220,7 +230,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 						result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("计算订单:%s 费用失败:%s!", orderCode, ex.getMessage()));
 					}
 				}
-				result.setBean(vo);
+				result.setBean(order);
 			}
 
 		}
@@ -690,7 +700,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 			String status = order.getStatus();
 			Date feedTime = order.getFeedTime();
 			boolean needFee = feedTime == null || this.checkNeedFee(feedTime, 5);
-			if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || status.equals(CPConstants.ORDER_STATUS_PARKING) ) {
+			if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || status.equals(CPConstants.ORDER_STATUS_PARKING)) {
 				try {
 					Date startDate = order.getStartPartTime();
 					Integer parkId = order.getParkId();
@@ -748,6 +758,17 @@ public class CarRpcServiceImpl implements CarRpcService {
 			if (custom != null) {
 				Condition cnd = Cnd.wrap(String.format("where cus_id=%d and date_format(create_time, '%%Y%%m')='%s' order by create_time desc", custom.getCusId(), yearMonth));
 				List<Order> list = dao.query(Order.class, cnd, pager);
+				for (Order order : list) {
+					Order links = dao.fetchLinks(order, "park");
+					Park park = links.getPark();
+					if (park != null) {
+						order.setParkName(park.getParkName());
+						order.setCity(park.getCity());
+						order.setAddress(park.getAddress());
+						order.setPark(null);
+					}
+					order.setWxName(custom.getWxName());
+				}
 				result.setPageSize(pageSize);
 				result.setPageNumber(pageNumber);
 				result.setTotalCount(dao.count(Order.class, cnd));

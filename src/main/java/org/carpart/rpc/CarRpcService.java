@@ -166,11 +166,9 @@ public interface CarRpcService {
 	 * @param clientCode
 	 * @param clientKey
 	 * @return JSON 数据
-	 * {
+	 * 
+	{
    success :true,
-   totalCount :0,
-   pageSize :0,
-   pageNumber :0,
    result :{
       orderCode :"DT20150108094451DD10000107" --订单号信息
    },
@@ -327,29 +325,28 @@ public interface CarRpcService {
 	 *            订单二维码
 	 * @return  JSON 数据 如:
 	 *			
-		{
+	{
 		   success :true,
-		   data :[{
-		      orderCode :"DT20150104110115DD10000102",--订单编号
-		      parkId :5,
-		      parkName :"美年广场C座",  --停车场信息
-		      park :{
-		         parkName :"美年广场C座",
-		         address :"成都市天府大道中段1388",
-		         city :"成都",
-		         officeTime :"全天",
-		         rulesDesc :"前半小时免费 小于三小时每小时5元 大于3小时每3小时时10元",
-		         disDetail :"暂无优惠信息",
-		         thumbnailUrl :"http://pandaz.wicp.net/CarPart/resource/image/login_banner.png"
-		      },
-		      cusId :11,
-		      createTime :"2015-01-04 11:01:15", --订单创建时间
-		      partTimes :0.0,  --停车分钟数
-		      feeAmount :0.0, --应付费用
-		      needAmount :0.0, --欠费金额
-		      payAmount :0.0, --已支付金额
-		      status :"30"--订单状态 状态 10 - 预登记 20 - 入库  30 - 入库撤销    40 - 停泊计费  60 -已出库 
-		   }]
+		   bean :{--详看Order 对象字段描述
+		      orderCode :"DT20150107102611DD10000106",
+		      parkId :4,
+		      parkName :"翰林美筑",
+		      city :"南宁",
+		      address :"东州路23号",
+		      cusId :16,
+		      wxName :"测试1",
+		      createTime :"2015-01-07 10:26:11",
+		      startPartTime :"2015-01-08 16:03:26",
+		      partTimes :101.0,
+		      validTimes :"2015-01-07 10:56:11",
+		      feeAmount :8.0,
+		      needAmount :1.0,
+		      payAmount :7.0,
+		      orderLogs :"<p>2015-01-08 17:29:53:线上支付:￥7.0</p>",
+		      status :"40",
+		      feedTime :"2015-01-08 17:45:15"
+		   },
+		   message :"欠费￥1.0"
 		}
 	 * 		
 	 */
@@ -367,35 +364,66 @@ public interface CarRpcService {
 	 * @param clientKey
 	 * @return JSON 数据:
 	 * 
-	 {
+{
    success :true,
-   totalCount :4,
+   totalCount :5,
    pageSize :10,
    pageNumber :1,
    list :[{
-      orderCode :"DT20150108094451DD10000107",
+      orderCode :"DT20150108172242DD10000108",
       cusId :16,
-      createTime :"2015-01-08 09:44:51",
+      wxName :"测试1",
+      createTime :"2015-01-08 17:22:42",
       partTimes :0.0,
-      validTimes :"2015-01-08 10:14:51",
+      validTimes :"2015-01-08 17:52:42",
       feeAmount :0.0,
       needAmount :0.0,
       payAmount :0.0,
       status :"30"
    }, {
-      orderCode :"DT20150107102611DD10000106",
+      orderCode :"DT20150108094451DD10000107",
+      parkId :4,
+      parkName :"翰林美筑",
+      city :"南宁",
+      address :"东州路23号",
       cusId :16,
-      createTime :"2015-01-07 10:26:11",
+      wxName :"测试1",
+      createTime :"2015-01-08 09:44:51",
+      startPartTime :"2015-01-08 16:49:24",
+      endPartTime :"2015-01-08 16:50:23",
       partTimes :0.0,
-      validTimes :"2015-01-07 10:56:11",
+      validTimes :"2015-01-08 10:14:51",
       feeAmount :0.0,
       needAmount :0.0,
       payAmount :0.0,
-      status :"10"
+      status :"60",
+      feedTime :"2015-01-08 16:50:23"
+   }, {
+      orderCode :"DT20150107102611DD10000106",
+      parkId :4,
+      parkName :"翰林美筑",
+      city :"南宁",
+      address :"东州路23号",
+      cusId :16,
+      wxName :"测试1",
+      createTime :"2015-01-07 10:26:11",
+      startPartTime :"2015-01-08 16:03:26",
+      partTimes :86.0,
+      validTimes :"2015-01-07 10:56:11",
+      feeAmount :7.0,
+      needAmount :0.0,
+      payAmount :7.0,
+      orderLogs :"<p>2015-01-08 17:29:53:线上支付:￥7.0</p>",
+      status :"40",
+      feedTime :"2015-01-08 17:29:53"
    }, {
       orderCode :"DT20150107102537DD10000105",
       parkId :4,
+      parkName :"翰林美筑",
+      city :"南宁",
+      address :"东州路23号",
       cusId :16,
+      wxName :"测试1",
       createTime :"2015-01-07 10:25:37",
       startPartTime :"2015-01-08 10:29:39",
       partTimes :31.0,
@@ -409,7 +437,11 @@ public interface CarRpcService {
    }, {
       orderCode :"DT20150107095645DD10000104",
       parkId :4,
+      parkName :"翰林美筑",
+      city :"南宁",
+      address :"东州路23号",
       cusId :16,
+      wxName :"测试1",
       createTime :"2015-01-06 09:56:45",
       startPartTime :"2015-01-07 15:44:34",
       partTimes :1154.0,

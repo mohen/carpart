@@ -9,12 +9,12 @@ import org.nutz.dao.entity.annotation.One;
 import org.nutz.dao.entity.annotation.Table;
 
 /**
-* 订单信息
-*/
+ * 订单信息
+ */
 @Data
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(callSuper = false)
 @Table("cp_order")
-public class Order extends Base{
+public class Order extends Base {
 
 	/**
 	 * 订单编码
@@ -27,10 +27,19 @@ public class Order extends Base{
 	 */
 	@Column("PARK_ID")
 	private Integer parkId;
-/**
- * 停车场名称
- */
+	/**
+	 * 停车场名称
+	 */
 	private String parkName;
+	/**
+	 * 城市
+	 */
+	private String city;
+
+	/**
+	 * 地址
+	 */
+	private String address;
 
 	/**
 	 * 停车场对象
@@ -42,9 +51,9 @@ public class Order extends Base{
 	 */
 	@Column("CUS_ID")
 	private Integer cusId;
-/**
- * 微信昵称
- */
+	/**
+	 * 微信昵称
+	 */
 	private String wxName;
 
 	/**
@@ -73,7 +82,7 @@ public class Order extends Base{
 	@Column("PART_TIMES")
 	private Double partTimes;
 	/**
-	 * 有效时间  暂时取消该字段
+	 * 有效时间 暂时取消该字段
 	 */
 	@Column("VALID_TIMES")
 	private java.util.Date validTimes;
@@ -103,7 +112,7 @@ public class Order extends Base{
 	@Column("MEMO")
 	private String memo;
 	/**
-	 * 状态 10 - 预登记 20 - 入库  30 - 入库撤销    40 - 停泊计费  60 -已出库
+	 * 状态 10 - 预登记 20 - 入库 30 - 入库撤销 40 - 停泊计费 60 -已出库
 	 */
 	@Column("STATUS")
 	private String status;

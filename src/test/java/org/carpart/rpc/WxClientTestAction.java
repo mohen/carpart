@@ -34,7 +34,7 @@ public class WxClientTestAction {
 
 	final static String wxCode = "oj3WQt-hHdDPYtt7lTigc0zTklYE2";
 
-	final static String orderCode = "DT20150108094451DD10000107";
+	final static String orderCode = "DT20150107102611DD10000106";
 	final static String SERVICE_URL = "http://pandaz.wicp.net/CarPart/rpc/webservice/CarRpcService";
 	static CarRpcService service = null;
 	static int web = 2;
@@ -67,6 +67,13 @@ public class WxClientTestAction {
 
 	/**
 	 * 模拟用户关注
+	 * 输出:
+	 * 
+		{
+		   success :true,
+		   message :"用户测试重新关注成功!"
+		}
+
 	 */
 	@Test
 	public final void testCreateCustom() {
@@ -80,7 +87,12 @@ public class WxClientTestAction {
 	}
 
 	/**
-	 * 模拟用户注册
+	 * 模拟用户注册 
+	 * 输出
+	{
+	   success :true,
+	   message :"保存用户信息成功"
+	}
 	 */
 	@Test
 	public final void testSaveCustom() {
@@ -101,6 +113,80 @@ public class WxClientTestAction {
 
 	/**
 	 * 模拟用户点击BIBI
+	 * 
+	 *输出
+ {
+   success :true,
+   result :{
+      orderCode :"DT20150108172242DD10000108"--订单号
+   },
+   list :[{--对象字段说明 请查看 Park 类
+      parkId :1,
+      parkName :"国贸商场",
+      address :"民族大道",
+      city :"南宁",
+      officeTime :"全天",
+      feeRules :"if(iMinute<=30) return 0;  if(iMinute<=180) return iMinute*5/60; if(iMinute>180) return  (iMinute*5/60+(iMinute-180)*10/180);",
+      rulesDesc :"前半小时免费 小于三小时每小时5元 大于3小时每3小时时10元",
+      mapLb :"108.330165,22.819499",
+      memo :"备注信息:",
+      status :"1",
+      cityCode :"4501",
+      disDetail :"暂无优惠信息",
+      thumbnailUrl :"http://pandaz.wicp.net/CarPart/resource/image/login_banner.png",
+      mapLat :108.330165,
+      mapLng :22.819499
+   }, {
+      parkId :4,
+      parkName :"翰林美筑",
+      address :"东州路23号",
+      city :"南宁",
+      officeTime :"全天",
+      feeRules :"if(iMinute<=30) return 0;  if(iMinute<=180) return iMinute*5/60; if(iMinute>180) return  (iMinute*5/60+(iMinute-180)*10/180);",
+      rulesDesc :"前半小时免费 小于三小时每小时5元 大于3小时每3小时时10元",
+      mapLb :"108.353523,22.859625",
+      memo :"",
+      status :"1",
+      cityCode :"4501",
+      disDetail :"暂无优惠信息",
+      thumbnailUrl :"http://pandaz.wicp.net/CarPart/resource/image/login_banner.png",
+      mapLat :108.353523,
+      mapLng :22.859625
+   }, {
+      parkId :3,
+      parkName :"万象城",
+      address :"万象城",
+      city :"南宁",
+      officeTime :"全天",
+      feeRules :"if(iMinute<=30) return 0;  if(iMinute<=180) return iMinute*5/60; if(iMinute>180) return  (iMinute*5/60+(iMinute-180)*10/180);",
+      rulesDesc :"前半小时免费 小于三小时每小时5元 大于3小时每3小时时10元",
+      mapLb :"108.398348,22.81765",
+      memo :"",
+      status :"1",
+      cityCode :"4501",
+      disDetail :"暂无优惠信息",
+      thumbnailUrl :"http://pandaz.wicp.net/CarPart/resource/image/login_banner.png",
+      mapLat :108.398348,
+      mapLng :22.81765
+   }, {
+      parkId :7,
+      parkName :"柳州梦之岛",
+      address :"柳州梦之岛",
+      city :"柳州",
+      officeTime :"全天",
+      feeRules :"if(iMinute<=30) return 0;  if(iMinute<=180) return iMinute*5/60; if(iMinute>180) return  (iMinute*5/60+(iMinute-180)*10/180);",
+      rulesDesc :"前半小时免费 小于三小时每小时5元 大于3小时每3小时时10元",
+      mapLb :"109.439042,24.331481",
+      memo :"",
+      status :"1",
+      cityCode :"4502",
+      disDetail :"暂无优惠信息",
+      thumbnailUrl :"http://pandaz.wicp.net/CarPart/resource/image/login_banner.png",
+      mapLat :109.439042,
+      mapLng :24.331481
+   }],
+   message :"新增订单DT20150108172242DD10000108成功"
+}
 	 */
 	@Test
 	public final void testClickBiBiAction() {
@@ -115,6 +201,62 @@ public class WxClientTestAction {
 
 	/**
 	 * 模拟用户点击更多停车场信息
+	 * 输出
+{
+   success :true,
+   totalCount :3,  --总条数
+   pageSize :10,--每页显示条数
+   pageNumber :1,--当前页码
+   list :[{
+      parkId :1,
+      parkName :"国贸商场",
+      address :"民族大道",
+      city :"南宁",
+      officeTime :"全天",
+      feeRules :"if(iMinute<=30) return 0;  if(iMinute<=180) return iMinute*5/60; if(iMinute>180) return  (iMinute*5/60+(iMinute-180)*10/180);",
+      rulesDesc :"前半小时免费 小于三小时每小时5元 大于3小时每3小时时10元",
+      mapLb :"108.330165,22.819499",
+      memo :"备注信息:",
+      status :"1",
+      cityCode :"4501",
+      disDetail :"暂无优惠信息",
+      thumbnailUrl :"http://pandaz.wicp.net/CarPart/resource/image/login_banner.png",
+      mapLat :108.330165,
+      mapLng :22.819499
+   }, {
+      parkId :4,
+      parkName :"翰林美筑",
+      address :"东州路23号",
+      city :"南宁",
+      officeTime :"全天",
+      feeRules :"if(iMinute<=30) return 0;  if(iMinute<=180) return iMinute*5/60; if(iMinute>180) return  (iMinute*5/60+(iMinute-180)*10/180);",
+      rulesDesc :"前半小时免费 小于三小时每小时5元 大于3小时每3小时时10元",
+      mapLb :"108.353523,22.859625",
+      memo :"",
+      status :"1",
+      cityCode :"4501",
+      disDetail :"暂无优惠信息",
+      thumbnailUrl :"http://pandaz.wicp.net/CarPart/resource/image/login_banner.png",
+      mapLat :108.353523,
+      mapLng :22.859625
+   }, {
+      parkId :3,
+      parkName :"万象城",
+      address :"万象城",
+      city :"南宁",
+      officeTime :"全天",
+      feeRules :"if(iMinute<=30) return 0;  if(iMinute<=180) return iMinute*5/60; if(iMinute>180) return  (iMinute*5/60+(iMinute-180)*10/180);",
+      rulesDesc :"前半小时免费 小于三小时每小时5元 大于3小时每3小时时10元",
+      mapLb :"108.398348,22.81765",
+      memo :"",
+      status :"1",
+      cityCode :"4501",
+      disDetail :"暂无优惠信息",
+      thumbnailUrl :"http://pandaz.wicp.net/CarPart/resource/image/login_banner.png",
+      mapLat :108.398348,
+      mapLng :22.81765
+   }]
+}
 	 */
 	@Test
 	public final void testMoreParkAction() {
@@ -131,6 +273,24 @@ public class WxClientTestAction {
 
 	/**
 	 * 模拟用户点击查看停车场详细信息
+	 *输出
+	 {
+   "parkId" :1,
+   "parkName" :"国贸商场",
+   "address" :"民族大道",
+   "city" :"南宁",
+   "officeTime" :"全天",
+   "feeRules" :"if(iMinute<=30) return 0;  if(iMinute<=180) return iMinute*5/60; if(iMinute>180) return  (iMinute*5/60+(iMinute-180)*10/180);",
+   "rulesDesc" :"前半小时免费 小于三小时每小时5元 大于3小时每3小时时10元",
+   "mapLb" :"108.330165,22.819499",
+   "memo" :"备注信息:",
+   "status" :"1",
+   "cityCode" :"4501",
+   "disDetail" :"暂无优惠信息",
+   "thumbnailUrl" :"http://pandaz.wicp.net/CarPart/resource/image/login_banner.png",
+   "mapLat" :108.330165,
+   "mapLng" :22.819499
+}
 	 */
 	@Test
 	public final void testViewParkAction() {
@@ -144,6 +304,31 @@ public class WxClientTestAction {
 
 	/**
 	 * 模拟用户点击查 看订单详细信息
+	 * 
+	 * 输出
+{
+   success :true,
+   bean :{--详看Order 对象字段描述
+      orderCode :"DT20150107102611DD10000106",
+      parkId :4,
+      parkName :"翰林美筑",
+      city :"南宁",
+      address :"东州路23号",
+      cusId :16,
+      wxName :"测试1",
+      createTime :"2015-01-07 10:26:11",
+      startPartTime :"2015-01-08 16:03:26",
+      partTimes :101.0,
+      validTimes :"2015-01-07 10:56:11",
+      feeAmount :8.0,
+      needAmount :1.0,
+      payAmount :7.0,
+      orderLogs :"<p>2015-01-08 17:29:53:线上支付:￥7.0</p>",
+      status :"40",
+      feedTime :"2015-01-08 17:45:15"
+   },
+   message :"欠费￥1.0"
+}
 	 */
 	@Test
 	public final void testViewOrderAction() {
@@ -156,6 +341,98 @@ public class WxClientTestAction {
 
 	/**
 	 * 模拟用户查询订单历史
+	 * 输出
+{
+   success :true,
+   totalCount :5,
+   pageSize :10,
+   pageNumber :1,
+   list :[{
+      orderCode :"DT20150108172242DD10000108",
+      cusId :16,
+      wxName :"测试1",
+      createTime :"2015-01-08 17:22:42",
+      partTimes :0.0,
+      validTimes :"2015-01-08 17:52:42",
+      feeAmount :0.0,
+      needAmount :0.0,
+      payAmount :0.0,
+      status :"30"
+   }, {
+      orderCode :"DT20150108094451DD10000107",
+      parkId :4,
+      parkName :"翰林美筑",
+      city :"南宁",
+      address :"东州路23号",
+      cusId :16,
+      wxName :"测试1",
+      createTime :"2015-01-08 09:44:51",
+      startPartTime :"2015-01-08 16:49:24",
+      endPartTime :"2015-01-08 16:50:23",
+      partTimes :0.0,
+      validTimes :"2015-01-08 10:14:51",
+      feeAmount :0.0,
+      needAmount :0.0,
+      payAmount :0.0,
+      status :"60",
+      feedTime :"2015-01-08 16:50:23"
+   }, {
+      orderCode :"DT20150107102611DD10000106",
+      parkId :4,
+      parkName :"翰林美筑",
+      city :"南宁",
+      address :"东州路23号",
+      cusId :16,
+      wxName :"测试1",
+      createTime :"2015-01-07 10:26:11",
+      startPartTime :"2015-01-08 16:03:26",
+      partTimes :86.0,
+      validTimes :"2015-01-07 10:56:11",
+      feeAmount :7.0,
+      needAmount :0.0,
+      payAmount :7.0,
+      orderLogs :"<p>2015-01-08 17:29:53:线上支付:￥7.0</p>",
+      status :"40",
+      feedTime :"2015-01-08 17:29:53"
+   }, {
+      orderCode :"DT20150107102537DD10000105",
+      parkId :4,
+      parkName :"翰林美筑",
+      city :"南宁",
+      address :"东州路23号",
+      cusId :16,
+      wxName :"测试1",
+      createTime :"2015-01-07 10:25:37",
+      startPartTime :"2015-01-08 10:29:39",
+      partTimes :31.0,
+      validTimes :"2015-01-07 10:55:37",
+      feeAmount :2.0,
+      needAmount :0.0,
+      payAmount :2.0,
+      orderLogs :"<p>2015-01-08 11:00:54:线上支付:￥2.0</p>",
+      status :"40",
+      feedTime :"2015-01-08 11:00:54"
+   }, {
+      orderCode :"DT20150107095645DD10000104",
+      parkId :4,
+      parkName :"翰林美筑",
+      city :"南宁",
+      address :"东州路23号",
+      cusId :16,
+      wxName :"测试1",
+      createTime :"2015-01-06 09:56:45",
+      startPartTime :"2015-01-07 15:44:34",
+      partTimes :1154.0,
+      validTimes :"2015-01-07 10:26:45",
+      feeAmount :150.0,
+      needAmount :0.0,
+      payAmount :150.0,
+      orderLogs :"<p>2015-01-07 16:52:35:线下支付:￥5.0</p><p>2015-01-08 10:45:00:线下支付:￥143.0</p><p>2015-01-08 10:57:32:线上支付:￥2.0</p>",
+      status :"40",
+      feedTime :"2015-01-08 10:59:03"
+   }]
+}
+
 	 */
 	@Test
 	public final void testViewOrderHistoryAction() {
@@ -171,6 +448,14 @@ public class WxClientTestAction {
 
 	/**
 	 * 模拟线上支付
+	 * 输出
+	 {
+	   success :true,
+	   result :{
+	      needPayMoney :0.0
+	   },
+	   message :"订单:DT20150107102611DD10000106还需要支付￥0 元!"
+	}
 	 */
 	@Test
 	public final void testPayOrderFeeOnline() {
@@ -190,6 +475,11 @@ public class WxClientTestAction {
 
 	/**
 	 * 模拟订单撤销操作
+	 * 输出:
+	 {
+	   success :true,
+	   message :"订单:DT20150108172242DD10000108取消成功"
+	}
 	 */
 	@Test
 	public final void testCancelOrder() {
@@ -201,6 +491,12 @@ public class WxClientTestAction {
 	}
 	/**
 	 * 模拟查询错误代码
+	 * 输出:
+	 {
+		   success :true,
+		   message :"支付非法,支付金额0.0小于等于0 "
+		}
+
 	 */
 	@Test
 	public final void testQueryErrorInfo() {
