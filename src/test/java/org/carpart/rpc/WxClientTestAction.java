@@ -34,7 +34,7 @@ public class WxClientTestAction {
 
 	final static String wxCode = "oj3WQt-hHdDPYtt7lTigc0zTklYE2";
 
-	final static String orderCode = "DT20150107102537DD10000105";
+	final static String orderCode = "DT20150108094451DD10000107";
 	final static String SERVICE_URL = "http://pandaz.wicp.net/CarPart/rpc/webservice/CarRpcService";
 	static CarRpcService service = null;
 	static int web = 2;
@@ -174,8 +174,26 @@ public class WxClientTestAction {
 	 */
 	@Test
 	public final void testPayOrderFeeOnline() {
+		/**
+		 * 查询欠费情况
+		 */
 		double fee = service.queryOrderFee(orderCode, clientCode, clientKey);
-		String json = service.payOrderFeeOffline(orderCode, fee, clientCode, clientKey);
+		/**
+		 * 支付费用
+		 */
+		String json = service.payOrderFeeOnline(orderCode, fee, clientCode, clientKey);
+		System.err.println(json);
+		Reader reader = new StringReader(json);
+		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
+		Assert.assertTrue(result.isSuccess());
+	}
+
+	/**
+	 * 模拟订单撤销操作
+	 */
+	@Test
+	public final void testCancelOrder() {
+		String json = service.cancelOrder(orderCode, clientCode, clientKey);
 		System.err.println(json);
 		Reader reader = new StringReader(json);
 		ResponseResult result = Json.fromJson(ResponseResult.class, reader);

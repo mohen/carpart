@@ -9,6 +9,7 @@ import java.util.Set;
 
 import lombok.Data;
 
+import org.carpart.bean.Base;
 import org.carpart.bean.Client;
 import org.nutz.json.Json;
 import org.nutz.json.JsonFormat;
@@ -53,11 +54,15 @@ public class ResponseResult {
 	private List list = new ArrayList();
 
 	/**
-	 * 返回的对象
+	 * 返回的对象组
 	 */
 	@SuppressWarnings("rawtypes")
 	private Set data = new HashSet();
 
+	/**
+	 * 返回的单个bean 对象
+	 */
+	private Base bean;
 	/**
 	 * 客户端
 	 */

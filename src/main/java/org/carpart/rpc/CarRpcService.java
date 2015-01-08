@@ -159,12 +159,83 @@ public interface CarRpcService {
 	public String listNearbyCarPart2Xml(String mapLb, int raidus, String clientCode, String clientKey);
 
 	/**
-	 * 新增-预登记订单 订单状态为 10 预登记 用于微信端 客户新增订单时 调用
-	 * 
-	 * @param wxCode
-	 *            客户微信号
-	 * @return 返回订单二维码 其他为系统错误码 格式如:ERR_1000
+	 * 新增订单
+	 * @param wxCode  微信号  必输
+	 * @param mapLb  客户当前所在经纬度  输入时 停车场按近到远排序
+	 * @param clientCode
+	 * @param clientKey
+	 * @return JSON 数据
+	 * {
+   success :true,
+   totalCount :0,
+   pageSize :0,
+   pageNumber :0,
+   result :{
+      orderCode :"DT20150108094451DD10000107" --订单号信息
+   },
+   list :[{--  4个最近的停车场
+      parkName :"国贸商场",
+      address :"民族大道",
+      city :"南宁",
+      officeTime :"全天",
+      rulesDesc :"前半小时免费 小于三小时每小时5元 大于3小时每3小时时10元",
+      mapLb :"108.330165,22.819499",
+      memo :"备注信息:",
+      disDetail :"暂无优惠信息",
+      thumbnailUrl :"http://pandaz.wicp.net/CarPart/resource/image/login_banner.png"
+   }, {
+      parkId :4,
+      parkName :"翰林美筑",
+      address :"东州路23号",
+      city :"南宁",
+      officeTime :"全天",
+      feeRules :"if(iMinute<=30) return 0;  if(iMinute<=180) return iMinute*5/60; if(iMinute>180) return  (iMinute*5/60+(iMinute-180)*10/180);",
+      rulesDesc :"前半小时免费 小于三小时每小时5元 大于3小时每3小时时10元",
+      mapLb :"108.353523,22.859625",
+      memo :"",
+      status :"1",
+      cityCode :"4501",
+      disDetail :"暂无优惠信息",
+      thumbnailUrl :"http://pandaz.wicp.net/CarPart/resource/image/login_banner.png",
+      mapLat :108.353523,
+      mapLng :22.859625
+   }, {
+      parkId :3,
+      parkName :"万象城",
+      address :"万象城",
+      city :"南宁",
+      officeTime :"全天",
+      feeRules :"if(iMinute<=30) return 0;  if(iMinute<=180) return iMinute*5/60; if(iMinute>180) return  (iMinute*5/60+(iMinute-180)*10/180);",
+      rulesDesc :"前半小时免费 小于三小时每小时5元 大于3小时每3小时时10元",
+      mapLb :"108.398348,22.81765",
+      memo :"",
+      status :"1",
+      cityCode :"4501",
+      disDetail :"暂无优惠信息",
+      thumbnailUrl :"http://pandaz.wicp.net/CarPart/resource/image/login_banner.png",
+      mapLat :108.398348,
+      mapLng :22.81765
+   }, {
+      parkId :7,
+      parkName :"柳州梦之岛",
+      address :"柳州梦之岛",
+      city :"柳州",
+      officeTime :"全天",
+      feeRules :"if(iMinute<=30) return 0;  if(iMinute<=180) return iMinute*5/60; if(iMinute>180) return  (iMinute*5/60+(iMinute-180)*10/180);",
+      rulesDesc :"前半小时免费 小于三小时每小时5元 大于3小时每3小时时10元",
+      mapLb :"109.439042,24.331481",
+      memo :"",
+      status :"1",
+      cityCode :"4502",
+      disDetail :"暂无优惠信息",
+      thumbnailUrl :"http://pandaz.wicp.net/CarPart/resource/image/login_banner.png",
+      mapLat :109.439042,
+      mapLng :24.331481
+   }],
+   message :"新增订单DT20150108094451DD10000107成功"
+}
 	 */
+	
 	public String createOrder(String wxCode, String mapLb, String clientCode, String clientKey);
 
 	/**
@@ -198,21 +269,33 @@ public interface CarRpcService {
 	 * @param orderCode
 	 *            订单号
 	 * @param money
-	 *            支付金额(元)
-	 * @param
-	 * @return 正数 为还需要支付的金额 负数为找回的金额 --(主要用于现金支付)
+	 *            本次 支付金额(元)  不能小于等于0
+	 * @return JSON 数据 如:
+	 * {
+			   success :true,
+			   result :{
+			      needPayMoney :0.0--完成本次支付后 还需要支付 的金额
+			   },
+			   message :"订单:DT20150107102537DD10000105还需要支付￥0 元!"
+			}
 	 */
 	public String payOrderFeeOnline(String orderCode, double money, String clientCode, String clientKey);
 
 	/**
 	 * 线下支付订单费用
 	 * 
-	 * @param orderCode
+ * @param orderCode
 	 *            订单号
 	 * @param money
-	 *            支付金额(元)
-	 * @param
-	 * @return 正数 为还需要支付的金额 负数为找回的金额 --(主要用于现金支付)
+	 *            本次 支付金额(元)  不能小于等于0
+	 * @return JSON 数据 如:
+	 * {
+			   success :true,
+			   result :{
+			      needPayMoney :0.0--完成本次支付后 还需要支付 的金额
+			   },
+			   message :"订单:DT20150107102537DD10000105还需要支付￥0 元!"
+			}
 	 */
 	public String payOrderFeeOffline(String orderCode, double money, String clientCode, String clientKey);
 
@@ -222,8 +305,11 @@ public interface CarRpcService {
 	 * @param orderCode
 	 * @param clientCode
 	 * @param clientKey
-	 * @return 撤销成功返回success 错误返回 如 :
-	 *         ERR1000052@订单:DT20141126174120DD10000017#非预登记状态,不允许撤销!
+	 * @return JSON 数据 如:
+	 {
+		   success :true,
+		   message :"订单:DT20150108094451DD10000107取消成功"
+		}
 	 */
 	public String cancelOrder(String orderCode, String clientCode, String clientKey);
 
@@ -232,41 +318,104 @@ public interface CarRpcService {
 	 * 
 	 * @param orderCode
 	 *            订单二维码
-	 * @return xml 表示 成功 其他为系统错误码 格式如:ERR_1000 格式如下: <order>
-	 *         <cusId>2</cusId>--客户ID <wxCode>asd123</wxCode>--微信openId
-	 *         <cusName>mohen008</cusName>微信昵称
-	 *         <orderCode>DT20141024162405DD10000003</orderCode>--订单编号
-	 *         <createTime>Fri Oct 24 16:24:05 CST 2014</createTime> --订单建立时间
-	 *         <createTimeString>2014-10-24 16:24:05</createTimeString>--订单建立时间
-	 *         <startPartTime>Fri Oct 24 16:57:08 CST 2014</startPartTime>--入库时间
-	 *         <startPartTimeString>2014-10-24
-	 *         16:57:08</startPartTimeString>--入库时间 <validTimes>Fri Oct 24
-	 *         16:54:05 CST 2014</validTimes>--失效时间 <validTimesString>2014-10-24
-	 *         16:54:05</validTimesString>--失效时间 <endPartTime>Mon Nov 24
-	 *         10:44:34 CST 2014</endPartTime>--出库时间
-	 *         <endPartTimeString>2014-11-24 10:44:34</endPartTimeString>-出库时间
-	 *         <parkId>1</parkId>--停车场ID <parkName>国贸商场</parkName>--停车场时间
-	 *         <mapLb>108.398348,22.81765</mapLb> -- 经纬度
-	 *         <address>民族大道</address>--地址 <officeTime>全天</officeTime>--营业时间
-	 *         <rulesDesc>前半小时免费 以三小时刻度 每刻度5元 不满三小时 按一刻度计算
-	 *         上限500元</rulesDesc>--计费规则 <partTimes>200</partTimes>--停泊时间 (分钟)
-	 *         <feeAmount>0</feeAmount>--应付费用 <payAmount>0</payAmount>--已付费用
-	 *         <needAmount>0</needAmount>--欠费金额 <memo></memo>--备注
-	 *         <status>70</status>--状态 --欠费余额 订单状态 10 - 预登记 20 - 入库 30 - 入库撤销 40
-	 *         - 停泊计费中 50 -已付款未出库 60 -出库已付款 70 -免费停放 80 -销账 90 -已记账 </order>
+	 * @return  JSON 数据 如:
+	 *			
+		{
+		   success :true,
+		   data :[{
+		      orderCode :"DT20150104110115DD10000102",--订单编号
+		      parkId :5,
+		      parkName :"美年广场C座",  --停车场信息
+		      park :{
+		         parkName :"美年广场C座",
+		         address :"成都市天府大道中段1388",
+		         city :"成都",
+		         officeTime :"全天",
+		         rulesDesc :"前半小时免费 小于三小时每小时5元 大于3小时每3小时时10元",
+		         disDetail :"暂无优惠信息",
+		         thumbnailUrl :"http://pandaz.wicp.net/CarPart/resource/image/login_banner.png"
+		      },
+		      cusId :11,
+		      createTime :"2015-01-04 11:01:15", --订单创建时间
+		      partTimes :0.0,  --停车分钟数
+		      feeAmount :0.0, --应付费用
+		      needAmount :0.0, --欠费金额
+		      payAmount :0.0, --已支付金额
+		      status :"30"--订单状态 10 - 预登记 20 - 入库 30 - 入库撤销 40    - 停泊计费中 50 -已付款未出库 60 -出库已付款 70 -免费停放 80 -销账 90 -已记账
+		   }]
+		}
+	 * 		
 	 */
+	
 	public String queryOrderInfo(String orderCode, String clientCode, String clientKey);
 
 	/**
 	 * 获取订单历史
 	 * 
-	 * @param wxCode
-	 * @param yearMonth
-	 * @param pageNumber
-	 * @param pageSize
+	 * @param wxCode 客户微信号
+	 * @param yearMonth  年月  如201501
+	 * @param pageNumber  页码
+	 * @param pageSize 每页条数
 	 * @param clientCode
 	 * @param clientKey
-	 * @return
+	 * @return JSON 数据:
+	 * 
+	 {
+   success :true,
+   totalCount :4,
+   pageSize :10,
+   pageNumber :1,
+   list :[{
+      orderCode :"DT20150108094451DD10000107",
+      cusId :16,
+      createTime :"2015-01-08 09:44:51",
+      partTimes :0.0,
+      validTimes :"2015-01-08 10:14:51",
+      feeAmount :0.0,
+      needAmount :0.0,
+      payAmount :0.0,
+      status :"30"
+   }, {
+      orderCode :"DT20150107102611DD10000106",
+      cusId :16,
+      createTime :"2015-01-07 10:26:11",
+      partTimes :0.0,
+      validTimes :"2015-01-07 10:56:11",
+      feeAmount :0.0,
+      needAmount :0.0,
+      payAmount :0.0,
+      status :"10"
+   }, {
+      orderCode :"DT20150107102537DD10000105",
+      parkId :4,
+      cusId :16,
+      createTime :"2015-01-07 10:25:37",
+      startPartTime :"2015-01-08 10:29:39",
+      partTimes :31.0,
+      validTimes :"2015-01-07 10:55:37",
+      feeAmount :2.0,
+      needAmount :0.0,
+      payAmount :2.0,
+      orderLogs :"<p>2015-01-08 11:00:54:线上支付:￥2.0</p>",
+      status :"40",
+      feedTime :"2015-01-08 11:00:54"
+   }, {
+      orderCode :"DT20150107095645DD10000104",
+      parkId :4,
+      cusId :16,
+      createTime :"2015-01-06 09:56:45",
+      startPartTime :"2015-01-07 15:44:34",
+      partTimes :1154.0,
+      validTimes :"2015-01-07 10:26:45",
+      feeAmount :150.0,
+      needAmount :0.0,
+      payAmount :150.0,
+      orderLogs :"<p>2015-01-07 16:52:35:线下支付:￥5.0</p><p>2015-01-08 10:45:00:线下支付:￥143.0</p><p>2015-01-08 10:57:32:线上支付:￥2.0</p>",
+      status :"40",
+      feedTime :"2015-01-08 10:59:03"
+   }]
+}
+	 * 
 	 */
 	public String queryOrderHistory(String wxCode, String yearMonth, int pageNumber, int pageSize, String clientCode, String clientKey);
 

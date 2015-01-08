@@ -82,7 +82,6 @@ public class CarRpcServiceImpl implements CarRpcService {
 		ResponseResult result = loginValid(clientCode, clientKey);
 		double money = 0;
 		if (result.isSuccess()) {
-
 			this.logClientAction(result, String.format("计算订单:%s费用", orderCode));
 			Order vo = this.fetchOrder(orderCode);
 			if (vo == null) {
@@ -93,27 +92,32 @@ public class CarRpcServiceImpl implements CarRpcService {
 					try {
 						Date startDate = vo.getStartPartTime();
 						Integer parkId = vo.getParkId();
-						Park parkVo = this.fetchPark(parkId);
-						String feeRules = parkVo.getFeeRules();
-						if (StringUtils.isEmpty(feeRules)) {
-							result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("停车场:%s规则未配置,无法计算费用!", parkVo.getParkName()));
-						} else {
-							double payMoney = vo.getPayAmount();
-							Date feedDate = new Date();
-							int iMinute = G4Utils.getIntervalMinute(startDate, feedDate);
-							double orderFee = this.feelOrderFee(startDate, feedDate, feeRules, iMinute);
-							double needPayMoney = orderFee - payMoney;
-							vo.setFeedTime(feedDate);
-							vo.setFeeAmount(orderFee);
-							vo.setNeedAmount(needPayMoney);
-							vo.setPartTimes((double) iMinute);
-							if (orderFee > 0) {
-								vo.setStatus(CPConstants.ORDER_STATUS_PARKING);
+						if (parkId != null) {
+							Park parkVo = this.fetchPark(parkId);
+							String feeRules = parkVo.getFeeRules();
+							if (StringUtils.isEmpty(feeRules)) {
+								result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("停车场:%s规则未配置,无法计算费用!", parkVo.getParkName()));
+							} else {
+								double payMoney = vo.getPayAmount();
+								Date feedDate = new Date();
+								int iMinute = G4Utils.getIntervalMinute(startDate, feedDate);
+								double orderFee = this.feelOrderFee(startDate, feedDate, feeRules, iMinute);
+								double needPayMoney = orderFee - payMoney;
+								vo.setFeedTime(feedDate);
+								vo.setFeeAmount(orderFee);
+								vo.setNeedAmount(needPayMoney);
+								vo.setPartTimes((double) iMinute);
+								if (orderFee > 0) {
+									vo.setStatus(CPConstants.ORDER_STATUS_PARKING);
+								}
+								dao.update(vo);
+								money = needPayMoney;
 							}
-							dao.update(vo);
-							money = needPayMoney;
+						} else {
+							result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("订单:%s 未入库无法计算费用!", orderCode));
 						}
 					} catch (Exception ex) {
+						log.error(ex);
 						result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("计算订单:%s 费用失败:%s!", orderCode, ex.getMessage()));
 					}
 
@@ -213,7 +217,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 						result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("计算订单:%s 费用失败:%s!", orderCode, ex.getMessage()));
 					}
 				}
-				result.getData().add(vo);
+				result.setBean(vo);
 			}
 
 		}
@@ -472,10 +476,10 @@ public class CarRpcServiceImpl implements CarRpcService {
 					vo.setEndPartTime(endTime);
 					int minute = G4Utils.getIntervalMinute(startTime, (Date) endTime);
 					/**
-					 * 计算出库时间 跟上次计费 误差值   如：相差不到5分钟不进行重新计费
+					 * 计算出库时间 跟上次计费 误差值 如：相差不到5分钟不进行重新计费
 					 */
 					vo.setPartTimes(Double.valueOf(minute));
-					
+
 				}
 				vo.setStatus(newStatus);
 				int i = dao.update(vo);
@@ -649,55 +653,84 @@ public class CarRpcServiceImpl implements CarRpcService {
 		return json;
 	}
 
-	private String payOrderFee(String orderCode, double money, int type, String clientCode, String clientKey) {
-		ResponseResult result = loginValid(clientCode, clientKey);
-		if (result.isSuccess()) {
-			this.logClientAction(result, String.format("支付订单:%s费用:%s", orderCode, money));
-			Order order = this.fetchOrder(orderCode);
-			if (order != null) {
-				String status = order.getStatus();
-				if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || status.equals(CPConstants.ORDER_STATUS_PARKING) || status.equals(CPConstants.ORDER_STATUS_PAY_NOT_OUT)) {
-					try {
-						Date startDate = order.getStartPartTime();
-						Integer parkId = order.getParkId();
+	/**
+	 * 检查是否可以忽略重新计费
+	 * 
+	 * @param lastFeeDate上次计费时间
+	 * @param ignoreMin
+	 *            可以忽略的分钟误差
+	 * @return
+	 */
+	private boolean checkNeedFee(Date lastFeeDate, int ignoreMin) {
+		boolean need = false;
+		Date nowDate = new Date();
+		int minute = G4Utils.getIntervalMinute(lastFeeDate, nowDate);
+		need = minute <= ignoreMin;
+		return need;
+	}
+
+	/**
+	 * 计算停车费用
+	 * 
+	 * @param orderCode
+	 * @param money
+	 * @param type
+	 * @param clientCode
+	 * @param clientKey
+	 * @return
+	 */
+	private String payOrderFee(ResponseResult result, String orderCode, double money, int type) {
+		this.logClientAction(result, String.format("支付订单:%s费用:%s", orderCode, money));
+		Order order = this.fetchOrder(orderCode);
+		if (order != null) {
+			double needPayMoney = 0;
+			String status = order.getStatus();
+			Date feedTime = order.getFeedTime();
+			boolean needFee = feedTime == null || this.checkNeedFee(feedTime, 5);
+			if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || status.equals(CPConstants.ORDER_STATUS_PARKING) || status.equals(CPConstants.ORDER_STATUS_PAY_NOT_OUT)) {
+				try {
+					Date startDate = order.getStartPartTime();
+					Integer parkId = order.getParkId();
+					if (parkId == null) {
+						result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("订单:%s 未入库无法计算费用!", orderCode));
+					} else {
 						Park park = this.fetchPark(parkId);
 						String feeRules = park.getFeeRules();
 						if (StringUtils.isEmpty(feeRules)) {
 							result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("停车场:%s规则未配置,无法计算费用!", park.getParkName()));
 						} else {
-							Date feedDate = new Date();
-							SimpleDateFormat sf = new SimpleDateFormat(G4Constants.FORMAT_DateTime);
-							double payMoney = order.getPayAmount() + money;
-							order.setPayAmount(payMoney);
-							String logs = order.getOrderLogs() == null ? "" : order.getOrderLogs();
-							StringBuilder sb = new StringBuilder(logs);
-							String typeStr = type == 1 ? "线上" : "线下";
-							sb.append(String.format("<p>%s:%s支付:￥%s</p>", sf.format(feedDate), typeStr, money));
-							order.setOrderLogs(sb.toString());
-							int iMinute = G4Utils.getIntervalMinute(startDate, feedDate);
-							double orderFee = this.feelOrderFee(startDate, feedDate, feeRules, iMinute);
-							double needPayMoney = orderFee - payMoney;
-							order.setFeedTime(feedDate);
-							order.setFeeAmount(orderFee);
-							order.setNeedAmount(needPayMoney);
-							order.setPartTimes((double) iMinute);
-							if (orderFee > 0) {
-								order.setStatus(CPConstants.ORDER_STATUS_PARKING);
+							if (needFee) {
+								Date feedDate = new Date();
+								SimpleDateFormat sf = new SimpleDateFormat(G4Constants.FORMAT_DateTime);
+								double payMoney = order.getPayAmount() + money;
+								order.setPayAmount(payMoney);
+								String logs = order.getOrderLogs() == null ? "" : order.getOrderLogs();
+								StringBuilder sb = new StringBuilder(logs);
+								String typeStr = type == 1 ? "线上" : "线下";
+								sb.append(String.format("<p>%s:%s支付:￥%s</p>", sf.format(feedDate), typeStr, money));
+								order.setOrderLogs(sb.toString());
+								int iMinute = G4Utils.getIntervalMinute(startDate, feedDate);
+								double orderFee = this.feelOrderFee(startDate, feedDate, feeRules, iMinute);
+								needPayMoney = orderFee - payMoney;
+								order.setFeedTime(feedDate);
+								order.setFeeAmount(orderFee);
+								order.setNeedAmount(needPayMoney);
+								order.setPartTimes((double) iMinute);
+								if (orderFee > 0) {
+									order.setStatus(CPConstants.ORDER_STATUS_PARKING);
+								}
+								dao.update(order);
 							}
-							int i = dao.update(order);
-							money = needPayMoney;
-							if (i > 0) {
-								DecimalFormat df = new DecimalFormat("###,###,###,###.##");
-								result.setMessage(String.format("订单:%s还需要支付￥%s 元!", orderCode, df.format(needPayMoney)));
-								result.getResult().put("needPayMoney", needPayMoney);
-							}
+							DecimalFormat df = new DecimalFormat("###,###,###,###.##");
+							result.setMessage(String.format("订单:%s还需要支付￥%s 元!", orderCode, df.format(needPayMoney)));
+							result.getResult().put("needPayMoney", needPayMoney);
 						}
-					} catch (Exception ex) {
-						result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("计算订单:%s 费用失败:%s!", orderCode, ex.getMessage()));
 					}
-				} else {
-					result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("订单:%s#不存在!", orderCode));
+				} catch (Exception ex) {
+					result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("计算订单:%s 费用失败:%s!", orderCode, ex.getMessage()));
 				}
+			} else {
+				result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("订单:%s#不存在!", orderCode));
 			}
 		}
 		return result.json();
@@ -769,11 +802,34 @@ public class CarRpcServiceImpl implements CarRpcService {
 
 	@Override
 	public String payOrderFeeOnline(String orderCode, double money, String clientCode, String clientKey) {
-		return this.payOrderFee(orderCode, money, 1, clientCode, clientKey);
+		ResponseResult result = loginValid(clientCode, clientKey);
+		String resultMsg = "";
+		if (result.isSuccess()) {
+			if (money > 0) {
+				resultMsg = this.payOrderFee(result, orderCode, money, 1);
+			} else {
+				resultMsg = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("支付非法,支付金额%s小于等于0 ", money)).json();
+			}
+		} else {
+			resultMsg = result.json();
+		}
+		return resultMsg;
+
 	}
 
 	@Override
 	public String payOrderFeeOffline(String orderCode, double money, String clientCode, String clientKey) {
-		return this.payOrderFee(orderCode, money, 2, clientCode, clientKey);
+		ResponseResult result = loginValid(clientCode, clientKey);
+		String resultMsg = "";
+		if (result.isSuccess()) {
+			if (money > 0) {
+				resultMsg = this.payOrderFee(result, orderCode, money, 2);
+			} else {
+				resultMsg = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("支付非法,支付金额%s小于等于0 ", money)).json();
+			}
+		} else {
+			resultMsg = result.json();
+		}
+		return resultMsg;
 	}
 }

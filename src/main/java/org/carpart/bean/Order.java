@@ -13,7 +13,7 @@ import org.nutz.dao.entity.annotation.Table;
 */
 @Data
 @Table("cp_order")
-public class Order {
+public class Order extends Base{
 
 	/**
 	 * 
