@@ -109,4 +109,15 @@ public class PartClientTestAction {
 			}
 		}
 	}
+	/**
+	 * 模拟查询订单状态
+	 */
+	@Test
+	public final void testQueryOrderStatus() {
+		String json = service.queryOrderStatus(orderCode, clientCode, clientKey);
+		System.err.println(json);
+		Reader reader = new StringReader(json);
+		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
+		Assert.assertTrue(result.isSuccess());
+	}
 }

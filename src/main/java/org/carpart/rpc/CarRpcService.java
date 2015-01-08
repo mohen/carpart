@@ -156,6 +156,7 @@ public interface CarRpcService {
 	 *         --营业时间 <feeRulesDesc>前半小时免费 以三小时刻度 每刻度5元 不满三小时 按一刻度计算
 	 *         上限1000元</feeRulesDesc>--计费规则 </part> </parts>
 	 */
+	@Deprecated
 	public String listNearbyCarPart2Xml(String mapLb, int raidus, String clientCode, String clientKey);
 
 	/**
@@ -235,7 +236,6 @@ public interface CarRpcService {
    message :"新增订单DT20150108094451DD10000107成功"
 }
 	 */
-	
 	public String createOrder(String wxCode, String mapLb, String clientCode, String clientKey);
 
 	/**
@@ -243,8 +243,15 @@ public interface CarRpcService {
 	 * 
 	 * @param orderCode
 	 *            订单二维码
-	 * @return 订单状态 10 - 预登记 20 - 入库 30 - 入库撤销 40 - 停泊计费中 50 -已付款未出库 60 -出库已付款
-	 *         70 -免费停放 80 -销账 90 -已记账 其他为系统错误码 格式如:ERR_1000
+	 * @return JSON数据:
+	 *
+		{
+		   success :true,
+		   result :{
+		      status :"10",name:"预登记"
+		   }
+		}
+	 * 
 	 */
 	public String queryOrderStatus(String orderCode, String clientCode, String clientKey);
 

@@ -211,6 +211,7 @@ public class WxClientTestAction {
 		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
 		Assert.assertTrue(result.isSuccess());
 	}
+
 	
 
 }
