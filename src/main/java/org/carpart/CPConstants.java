@@ -1,6 +1,24 @@
 package org.carpart;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class CPConstants {
+
+	public static Map<String, String> ORDER_MAP = new HashMap<String, String>();
+
+	static {
+		if (ORDER_MAP.isEmpty()) {
+			ORDER_MAP.put("10", "预登记");
+			ORDER_MAP.put("20", "入库");
+			ORDER_MAP.put("30", "入库撤销");
+			ORDER_MAP.put("40", "停泊计费");
+			ORDER_MAP.put("60", "已出库");
+			ORDER_MAP.put("80", "销账");
+			ORDER_MAP.put("90", "已记账");
+		}
+
+	}
 
 	/**
 	 * 成功标识

@@ -67,12 +67,16 @@ public class PartClientTestAction {
 
 	/**
 	 * 模拟车辆 入库
+	 * 
 	 */
 	@Test
 	public final void testCarInPartAction() {
 		String json = service.inPart(orderCode, clientCode, clientKey);
 		System.err.println(json);
 		Reader reader = new StringReader(json);
+		/**
+		 * 反序列化
+		 */
 		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
 		Assert.assertTrue(result.isSuccess());
 	}

@@ -67,7 +67,10 @@ public class CarRpcServiceImpl implements CarRpcService {
 				if (vo == null) {
 					result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("查询订单:%s不存在!", orderCode));
 				} else {
-					result.getResult().put("status", vo.getStatus());
+					Map<String, Object> map = result.getResult();
+					String status = vo.getStatus();
+					map.put("status", status);
+					map.put("name", CPConstants.ORDER_MAP.get(status));
 				}
 			} catch (Exception e) {
 				result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("查询订单:%s错误:" + e.getMessage(), orderCode));
