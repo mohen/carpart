@@ -37,7 +37,7 @@ public class CPConstants {
 	 */
 	public static String ORDER_STATUS_CANCEL_IN = "30";
 	/**
-	 * 订单状态 40 - 停泊计费中
+	 * 订单状态 40 - 停泊计费
 	 */
 	public static String ORDER_STATUS_PARKING = "40";
 
