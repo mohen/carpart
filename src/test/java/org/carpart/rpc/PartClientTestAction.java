@@ -34,7 +34,7 @@ public class PartClientTestAction {
 
 	final static String wxCode = "oj3WQt-hHdDPYtt7lTigc0zTklYE2";
 
-	final static String orderCode = "DT20150107102611DD10000106";
+	final static String orderCode = "DT20150108094451DD10000107";
 	final static String SERVICE_URL = "http://pandaz.wicp.net/CarPart/rpc/webservice/CarRpcService";
 	static CarRpcService service = null;
 	static int web = 2;
@@ -67,7 +67,11 @@ public class PartClientTestAction {
 
 	/**
 	 * 模拟车辆 入库
-	 * 
+	 * 输出:
+	 {
+		   success :true,
+		   message :"订单:DT20150108094451DD10000107从状态10更新状态为20成功!"
+		}
 	 */
 	@Test
 	public final void testCarInPartAction() {
@@ -83,9 +87,17 @@ public class PartClientTestAction {
 
 	/**
 	 * 模拟车辆 出库
+	 * 输出:
+	 * 
+		{
+		   success :true,
+		   message :"订单:DT20150108094451DD10000107从状态20更新状态为60成功!"
+		}
+
 	 */
 	@Test
 	public final void testCarOutPartAction() {
+		//查询欠费情况
 		double fee = service.queryOrderFee(orderCode, clientCode, clientKey);
 		if (fee <= 0) {
 			/**
@@ -115,6 +127,15 @@ public class PartClientTestAction {
 	}
 	/**
 	 * 模拟查询订单状态
+	 * 输出:
+	 {
+		   success :true,
+		   result :{
+		      status :"60",
+		      name :"已出库"
+		   }
+		}
+
 	 */
 	@Test
 	public final void testQueryOrderStatus() {

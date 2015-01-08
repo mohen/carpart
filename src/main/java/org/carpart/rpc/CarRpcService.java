@@ -449,7 +449,11 @@ public interface CarRpcService {
 	 *            订单二维码
 	 * @param clientCode
 	 * @param clientKey
-	 * @return success表示 成功 其他为系统错误码 格式如:ERR_1000
+	 * @return JSON 数据如:
+	 	{
+		   success :true,
+		   message :"订单:DT20150108094451DD10000107从状态20更新状态为60成功!"
+		}
 	 */
 	public String outPart(String orderCode, String clientCode, String clientKey);
 
