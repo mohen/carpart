@@ -88,7 +88,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 				result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("订单:%s 不存在,无法计算费用!", orderCode));
 			} else {
 				String status = vo.getStatus();
-				if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PARKING) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PAY_NOT_OUT)) {
+				if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PARKING) ) {
 					try {
 						Date startDate = vo.getStartPartTime();
 						Integer parkId = vo.getParkId();
@@ -188,7 +188,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 					}
 				}
 				String status = vo.getStatus();
-				if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PARKING) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PAY_NOT_OUT)) {
+				if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PARKING) ) {
 					try {
 						Date startDate = vo.getStartPartTime();
 						Integer parkId = vo.getParkId();
@@ -470,7 +470,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 				/**
 				 * 出库操作
 				 */
-				if (newStatus.equals(CPConstants.ORDER_STATUS_PAY_AND_OUT)) {
+				if (newStatus.equals(CPConstants.ORDER_STATUS_OUT_PARK)) {
 					Date startTime = vo.getStartPartTime();
 					Date endTime = new Date();
 					vo.setEndPartTime(endTime);
@@ -687,7 +687,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 			String status = order.getStatus();
 			Date feedTime = order.getFeedTime();
 			boolean needFee = feedTime == null || this.checkNeedFee(feedTime, 5);
-			if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || status.equals(CPConstants.ORDER_STATUS_PARKING) || status.equals(CPConstants.ORDER_STATUS_PAY_NOT_OUT)) {
+			if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || status.equals(CPConstants.ORDER_STATUS_PARKING) ) {
 				try {
 					Date startDate = order.getStartPartTime();
 					Integer parkId = order.getParkId();
@@ -760,7 +760,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 	public String outPart(String orderCode, String clientCode, String clientKey) {
 		ResponseResult result = loginValid(clientCode, clientKey);
 		if (result.isSuccess()) {
-			result = this.changeOrderStatus(orderCode, CPConstants.ORDER_STATUS_PAY_AND_OUT, result);
+			result = this.changeOrderStatus(orderCode, CPConstants.ORDER_STATUS_OUT_PARK, result);
 			if (result.isSuccess()) {
 				Object cus = result.getResult().get("cusId");
 				if (cus != null) {

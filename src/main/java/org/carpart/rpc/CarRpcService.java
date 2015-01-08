@@ -341,7 +341,7 @@ public interface CarRpcService {
 		      feeAmount :0.0, --应付费用
 		      needAmount :0.0, --欠费金额
 		      payAmount :0.0, --已支付金额
-		      status :"30"--订单状态 10 - 预登记 20 - 入库 30 - 入库撤销 40    - 停泊计费中 50 -已付款未出库 60 -出库已付款 70 -免费停放 80 -销账 90 -已记账
+		      status :"30"--订单状态 状态 10 - 预登记 20 - 入库  30 - 入库撤销    40 - 停泊计费  60 -已出库 
 		   }]
 		}
 	 * 		
@@ -426,12 +426,17 @@ public interface CarRpcService {
 	 *            订单二维码
 	 * @param clientCode
 	 * @param clientKey
-	 * @return success表示 成功 其他为系统错误码 格式如:ERR_1000
+	 * @return JSON  数据 如 :
+	 * 			{
+				   success :true,  ---  true 表示成功 false 表示失败
+				   message :"订单:DT20150107102611DD10000106从状态10更新状态为20成功!"  ---返回消息
+				   errorCode:'ERR0000'  ---错误代码  success =false  时出现  用于queryErrorInfo 查询错误原因
+				}
 	 */
 	public String inPart(String orderCode, String clientCode, String clientKey);
 
 	/**
-	 * 车辆入库操作
+	 * 车辆出库操作
 	 * 
 	 * @param orderCode
 	 *            订单二维码
@@ -446,8 +451,12 @@ public interface CarRpcService {
 	 * 
 	 * @param errorCode
 	 *            错误码
-	 * @return 错误信息
-	 */
+	 	 * @return JSON  数据 如 :
+	 * 			{
+				   success :true,  ---  true 表示成功 false 表示失败
+				  message :"支付非法,支付金额0.0小于等于0 "  ---返回消息
+				}
+	*/
 	public String queryErrorInfo(String errorCode, String clientCode, String clientKey);
 
 	/**
@@ -457,13 +466,22 @@ public interface CarRpcService {
 	 *            经纬度
 	 * @param clientCode
 	 * @param clientKey
-	 * @return <park> <parkId>6</parkId> --停车场ID <memo></memo>--备注信息
-	 *         <disDetail></disDetail>--优惠信息 <status>1</status>--状态
-	 *         <city>成都</city>--城市 <mapLb>104.077482,30.548117</mapLb> --经纬度
-	 *         <parkName>天府软件园C区</parkName>-- 名字 <rulesDesc>前半小时免费 以三小时刻度 每刻度5元
-	 *         不满三小时 按一刻度计算 上限500元</rulesDesc> --计费规则
-	 *         <address>成都市双流县拓新东街81号</address>-- 地址
-	 *         <officeTime>全天</officeTime>--营业时间 </park>
-	 */
+	 * @return JSON 数据  具体字段含义见  Park对象
+	 * 
+		{
+		   "parkId" :1,
+		   "parkName" :"国贸商场",
+		   "address" :"民族大道",
+		   "city" :"南宁",
+		   "officeTime" :"全天",
+		   "rulesDesc" :"前半小时免费 小于三小时每小时5元 大于3小时每3小时时10元",
+		   "mapLb" :"108.330165,22.819499",
+		   "memo" :"备注信息:",
+		   "disDetail" :"暂无优惠信息",
+		   "thumbnailUrl" :"http://pandaz.wicp.net/CarPart/resource/image/login_banner.png",
+		   "mapLat" :108.330165,
+		   "mapLng" :22.819499
+		}
+*/
 	public String queryParkInfo(String mapLb, String clientCode, String clientKey);
 }

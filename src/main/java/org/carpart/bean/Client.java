@@ -6,11 +6,11 @@ import org.nutz.dao.entity.annotation.*;
 import lombok.Data;
 
 /**
-* 
+* 客户端信息
 */
 @Data
 @Table("cp_client")
-public class Client extends Base {
+public class Client  {
 
 	/**
 	 * 客户端ID

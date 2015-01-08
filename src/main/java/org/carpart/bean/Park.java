@@ -1,18 +1,22 @@
 package org.carpart.bean;
 
-import org.nutz.dao.entity.annotation.*;
+import java.util.Date;
 
 import lombok.Data;
 
+import org.nutz.dao.entity.annotation.Column;
+import org.nutz.dao.entity.annotation.Id;
+import org.nutz.dao.entity.annotation.Table;
+
 /**
-* 
+* 停车场信息
 */
 @Data
 @Table("cp_park")
 public class Park {
 
 	/**
-	 * 
+	 * 主键
 	 */
 	@Id
 	@Column("PARK_ID")
@@ -28,7 +32,7 @@ public class Park {
 	@Column("ADDRESS")
 	private String address;
 	/**
-	 * 城市
+	 * 城市名
 	 */
 	@Column("CITY")
 	private String city;
@@ -63,28 +67,44 @@ public class Park {
 	@Column("STATUS")
 	private String status;
 	/**
-	 * 
+	 * 城市代码
 	 */
 	@Column("CITY_CODE")
 	private String cityCode;
 	/**
-	 * 
+	 * 优惠信息
 	 */
 	@Column("DIS_DETAIL")
 	private String disDetail;
 	/**
-	 * 
+	 * 缩略图路径
 	 */
 	@Column("THUMBNAIL_URL")
 	private String thumbnailUrl;
 	/**
-	 * 
+	 * 经度
 	 */
 	@Column("MAP_LAT")
 	private Double mapLat;
 	/**
-	 * 
+	 * 纬度
 	 */
 	@Column("MAP_LNG")
 	private Double mapLng;
+	/**
+	 * 总车位数
+	 */
+	@Column("TOTAL_PARK")
+	private Integer totalPark;
+	/**
+	 * 剩余车位数
+	 */
+	@Column("REMAIN_PARK")
+	private Integer remainPark;
+	/**
+	 * 更新时间
+	 */
+	@Column("UPDATE_TIME")
+	private Date updateTime;
+
 }

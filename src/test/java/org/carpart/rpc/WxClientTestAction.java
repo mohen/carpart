@@ -143,7 +143,7 @@ public class WxClientTestAction {
 	}
 
 	/**
-	 * 模拟用户点击查看订单详细信息
+	 * 模拟用户点击查 看订单详细信息
 	 */
 	@Test
 	public final void testViewOrderAction() {
@@ -199,5 +199,18 @@ public class WxClientTestAction {
 		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
 		Assert.assertTrue(result.isSuccess());
 	}
+	/**
+	 * 模拟查询错误代码
+	 */
+	@Test
+	public final void testQueryErrorInfo() {
+		String errorCode="ERR1000129";
+		String json = service.queryErrorInfo(errorCode, clientCode, clientKey);
+		System.err.println(json);
+		Reader reader = new StringReader(json);
+		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
+		Assert.assertTrue(result.isSuccess());
+	}
+	
 
 }

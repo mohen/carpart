@@ -5,7 +5,7 @@ import org.nutz.dao.entity.annotation.*;
 import lombok.Data;
 
 /**
-* 
+* 客户信息
 */
 @Data
 @Table("cp_custom")

@@ -51,9 +51,7 @@ public class ClientRpcServiceImpl implements ClientRpcService {
 
 		public void run() {
 			if (StringUtils.isNotBlank(clientCode) && StringUtils.isNotBlank(clientKey) && StringUtils.isNotBlank(message) && StringUtils.isNotBlank(wxCode)) {
-				System.err.println(String.format("开始向%s推送信息:%s", wxCode, message));
 				ClientRpcServiceImpl.sendPost(wxCode, message, clientKey, clientCode);
-				System.err.println(String.format("向%s推送信息:%s完成", wxCode, message));
 				log.info(String.format("向%s推送信息:%s", wxCode, message));
 			}
 		}
@@ -96,7 +94,6 @@ public class ClientRpcServiceImpl implements ClientRpcService {
 			content.element("content", URLEncoder.encode(message, "UTF-8"));
 			json.element("text", content);
 			out.writeBytes(json.toString());
-			// System.err.println(json.toString());
 			out.flush();
 			out.close();
 			// 读取响应
