@@ -37,7 +37,7 @@ public class WxClientTestAction {
 	final static String orderCode = "DT20150107102611DD10000106";
 	final static String SERVICE_URL = "http://pandaz.wicp.net/CarPart/rpc/webservice/CarRpcService";
 	static CarRpcService service = null;
-	static int web = 2;
+	static int web = 1;
 
 	/**
 	 * @throws java.lang.Exception

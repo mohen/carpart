@@ -346,7 +346,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 		ResponseResult result = loginValid(clientCode, clientKey);
 		if (result.isSuccess()) {
 			this.logClientAction(result, String.format("查询城市合作停车场列表:%s信息", cityCode));
-			List<Park> list = dao.query(Park.class, Cnd.where("city", "=", cityCode));
+			List<Park> list = dao.query(Park.class, Cnd.where("city", "=", cityCode.trim()));
 			result.setList(list);
 		}
 		return result.json();
