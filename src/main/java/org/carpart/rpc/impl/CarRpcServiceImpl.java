@@ -362,7 +362,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 	 * @return
 	 */
 	private List<Park> queryNearByPart(double mapLat, double mapLng, int pageNumber, int pageSize) {
-		Condition cnd = Cnd.wrap(String.format("where status='1' order by GetDistance(%s,%s,MAP_LAT,MAP_LNG)", mapLat, mapLng));
+		Condition cnd = Cnd.wrap(String.format("where status='1' and GetDistance(%s,%s,MAP_LAT,MAP_LNG)<=100 order by GetDistance(%s,%s,MAP_LAT,MAP_LNG)", mapLat, mapLng, mapLat, mapLng));
 		Pager pager = dao.createPager(pageNumber, pageSize);
 		List<Park> list = dao.query(Park.class, cnd, pager);
 		return list;
