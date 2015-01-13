@@ -96,7 +96,6 @@ public class CarRpcServiceImpl implements CarRpcService {
 					// 判断订单是否需要重新计费 默认 误差五分钟内 不重新计费
 					Date feedTime = vo.getFeedTime();
 					boolean needFee = feedTime != null ? this.checkNeedFee(feedTime, 5) : true;
-					log.info(String.format("订单%s 上次计费日期:%s所以不需要重新计费!", orderCode, feedTime.toLocaleString()));
 					if (needFee) {
 						try {
 							Date startDate = vo.getStartPartTime();
@@ -130,6 +129,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 							result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("计算订单:%s 费用失败:%s!", orderCode, ex.getMessage()));
 						}
 					} else {
+						log.info(String.format("订单%s 上次计费日期:%s所以不需要重新计费!", orderCode, feedTime.toLocaleString()));
 						money = vo.getNeedAmount();
 					}
 				} else {
