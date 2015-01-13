@@ -37,7 +37,7 @@ public class WxClientTestAction {
 	final static String orderCode = "DT20150107102611DD10000106";
 	final static String SERVICE_URL = "http://pandaz.wicp.net/CarPart/rpc/webservice/CarRpcService";
 	static CarRpcService service = null;
-	static int web = 1;
+	static int web = 2;
 
 	/**
 	 * @throws java.lang.Exception
@@ -445,7 +445,81 @@ public class WxClientTestAction {
 		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
 		Assert.assertTrue(result.isSuccess());
 	}
+	/**
+	 * 模拟用户需要支付的订单
+	 * 输出
+{
+   success :true,
+   totalCount :3,
+   pageSize :3,
+   pageNumber :1,
+   list :[{
+      orderCode :"DT20150107095645DD10000104",
+      parkId :4,
+      parkName :"翰林美筑",
+      city :"南宁",
+      address :"东州路23号",
+      cusId :16,
+      wxName :"测试1",
+      createTime :"2015-01-06 09:56:45",
+      startPartTime :"2015-01-07 15:44:34",
+      partTimes :8629.0,
+      validTimes :"2015-01-07 10:26:45",
+      feeAmount :1188.0,
+      needAmount :1038.0,
+      payAmount :150.0,
+      orderLogs :"<p>2015-01-07 16:52:35:线下支付:￥5.0</p><p>2015-01-08 10:45:00:线下支付:￥143.0</p><p>2015-01-08 10:57:32:线上支付:￥2.0</p>",
+      status :"40",
+      feedTime :"2015-01-13 15:34:20"
+   }, {
+      orderCode :"DT20150107102537DD10000105",
+      parkId :4,
+      parkName :"翰林美筑",
+      city :"南宁",
+      address :"东州路23号",
+      cusId :16,
+      wxName :"测试1",
+      createTime :"2015-01-07 10:25:37",
+      startPartTime :"2015-01-08 10:29:39",
+      partTimes :7504.0,
+      validTimes :"2015-01-07 10:55:37",
+      feeAmount :1031.0,
+      needAmount :1029.0,
+      payAmount :2.0,
+      orderLogs :"<p>2015-01-08 11:00:54:线上支付:￥2.0</p>",
+      status :"40",
+      feedTime :"2015-01-13 15:34:20"
+   }, {
+      orderCode :"DT20150107102611DD10000106",
+      parkId :4,
+      parkName :"翰林美筑",
+      city :"南宁",
+      address :"东州路23号",
+      cusId :16,
+      wxName :"测试1",
+      createTime :"2015-01-07 10:26:11",
+      startPartTime :"2015-01-08 16:03:26",
+      partTimes :7170.0,
+      validTimes :"2015-01-07 10:56:11",
+      feeAmount :985.0,
+      needAmount :978.0,
+      payAmount :7.0,
+      orderLogs :"<p>2015-01-08 17:29:53:线上支付:￥7.0</p>",
+      status :"40",
+      feedTime :"2015-01-13 15:34:21"
+   }]
+}
 
+
+	 */
+	@Test
+	public final void testNeed2PayOrderAction() {
+		String json = service.queryNeed2PayOrder(wxCode, clientCode, clientKey);
+		System.err.println(json);
+		Reader reader = new StringReader(json);
+		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
+		Assert.assertTrue(result.isSuccess());
+	}
 	/**
 	 * 模拟线上支付
 	 * 输出

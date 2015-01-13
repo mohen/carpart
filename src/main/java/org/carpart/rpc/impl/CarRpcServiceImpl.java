@@ -11,7 +11,6 @@ import javax.jws.WebService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.cxf.binding.corba.wsdl.Array;
 import org.apache.cxf.common.util.StringUtils;
 import org.carpart.CPConstants;
 import org.carpart.CPException;
@@ -94,38 +93,45 @@ public class CarRpcServiceImpl implements CarRpcService {
 			} else {
 				String status = vo.getStatus();
 				if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PARKING)) {
-					try {
-						Date startDate = vo.getStartPartTime();
-						Integer parkId = vo.getParkId();
-						if (parkId != null) {
-							Park parkVo = this.fetchPark(parkId);
-							String feeRules = parkVo.getFeeRules();
-							if (StringUtils.isEmpty(feeRules)) {
-								result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("停车场:%s规则未配置,无法计算费用!", parkVo.getParkName()));
-							} else {
-								double payMoney = vo.getPayAmount();
-								Date feedDate = new Date();
-								int iMinute = G4Utils.getIntervalMinute(startDate, feedDate);
-								double orderFee = this.feelOrderFee(startDate, feedDate, feeRules, iMinute);
-								double needPayMoney = orderFee - payMoney;
-								vo.setFeedTime(feedDate);
-								vo.setFeeAmount(orderFee);
-								vo.setNeedAmount(needPayMoney);
-								vo.setPartTimes((double) iMinute);
-								if (orderFee > 0) {
-									vo.setStatus(CPConstants.ORDER_STATUS_PARKING);
+					// 判断订单是否需要重新计费 默认 误差五分钟内 不重新计费
+					Date feedTime = vo.getFeedTime();
+					boolean needFee = this.checkNeedFee(feedTime, 5);
+					log.info(String.format("订单%s 上次计费日期:%s所以不需要重新计费!", orderCode,feedTime.toLocaleString()));
+					if (needFee) {
+						try {
+							Date startDate = vo.getStartPartTime();
+							Integer parkId = vo.getParkId();
+							if (parkId != null) {
+								Park parkVo = this.fetchPark(parkId);
+								String feeRules = parkVo.getFeeRules();
+								if (StringUtils.isEmpty(feeRules)) {
+									result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("停车场:%s规则未配置,无法计算费用!", parkVo.getParkName()));
+								} else {
+									double payMoney = vo.getPayAmount();
+									Date feedDate = new Date();
+									int iMinute = G4Utils.getIntervalMinute(startDate, feedDate);
+									double orderFee = this.feelOrderFee(startDate, feedDate, feeRules, iMinute);
+									double needPayMoney = orderFee - payMoney;
+									vo.setFeedTime(feedDate);
+									vo.setFeeAmount(orderFee);
+									vo.setNeedAmount(needPayMoney);
+									vo.setPartTimes((double) iMinute);
+									if (orderFee > 0) {
+										vo.setStatus(CPConstants.ORDER_STATUS_PARKING);
+									}
+									dao.update(vo);
+									money = needPayMoney;
 								}
-								dao.update(vo);
-								money = needPayMoney;
+							} else {
+								result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("订单:%s 未入库无法计算费用!", orderCode));
 							}
-						} else {
-							result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("订单:%s 未入库无法计算费用!", orderCode));
+						} catch (Exception ex) {
+							log.error(ex);
+							result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("计算订单:%s 费用失败:%s!", orderCode, ex.getMessage()));
 						}
-					} catch (Exception ex) {
-						log.error(ex);
-						result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("计算订单:%s 费用失败:%s!", orderCode, ex.getMessage()));
+					} else {
+						money = vo.getNeedAmount();
 					}
-
 				} else {
 					result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("查询订单:%s 状态为 %s ,无法计算费用!", orderCode, status));
 				}
@@ -175,7 +181,6 @@ public class CarRpcServiceImpl implements CarRpcService {
 		return dao.fetch(Custom.class, cusId);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public String queryOrderInfo(String orderCode, String clientCode, String clientKey) {
 		ResponseResult result = loginValid(clientCode, clientKey);
@@ -657,6 +662,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 			this.logClientAction(result, String.format("查询停车场:%s信息", mapLb));
 			Park park = this.fetchPark(mapLb);
 			if (park != null) {
+				park.setFeeRules(null);
 				json = Json.toJson(park);
 			} else {
 				result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("系统不存在坐标为:%s的停车场", mapLb));
@@ -678,7 +684,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 		boolean need = false;
 		Date nowDate = new Date();
 		int minute = G4Utils.getIntervalMinute(lastFeeDate, nowDate);
-		need = minute <= ignoreMin;
+		need = minute > ignoreMin;
 		return need;
 	}
 
@@ -753,6 +759,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 	public String queryOrderHistory(String wxCode, String yearMonth, int pageNumber, int pageSize, String clientCode, String clientKey) {
 		ResponseResult result = loginValid(clientCode, clientKey);
 		if (result.isSuccess()) {
+			this.logClientAction(result, String.format("查询用户:%s %s订单历史", wxCode, yearMonth));
 			Pager pager = dao.createPager(pageNumber, pageSize);
 			Custom custom = this.fetchCustom(wxCode);
 			if (custom != null) {
@@ -855,5 +862,44 @@ public class CarRpcServiceImpl implements CarRpcService {
 			resultMsg = result.json();
 		}
 		return resultMsg;
+	}
+
+	@Override
+	public String queryNeed2PayOrder(String wxCode, String clientCode, String clientKey) {
+		ResponseResult result = loginValid(clientCode, clientKey);
+		if (result.isSuccess()) {
+			this.logClientAction(result, String.format("查询用户:%s 需要支付的订单!", wxCode));
+			Custom custom = this.fetchCustom(wxCode);
+			if (custom != null) {
+				Condition cnd = Cnd.wrap(String.format("where cus_id=%d and status in('%s','%s') order by create_time asc", custom.getCusId(), CPConstants.ORDER_STATUS_IN_PARK, CPConstants.ORDER_STATUS_PARKING));
+				List<Order> list = dao.query(Order.class, cnd);
+				List<Order> nlist = new ArrayList<Order>();
+				for (Order order : list) {
+					String orderCode = order.getOrderCode();
+					double fee = this.queryOrderFee(orderCode, clientCode, clientKey);
+					if (fee > 0) {
+						order = this.fetchOrder(orderCode);
+						Order links = dao.fetchLinks(order, "park");
+						Park park = links.getPark();
+						if (park != null) {
+							order.setParkName(park.getParkName());
+							order.setCity(park.getCity());
+							order.setAddress(park.getAddress());
+							order.setPark(null);
+						}
+						order.setWxName(custom.getWxName());
+						nlist.add(order);
+					}
+				}
+				int size = nlist.size();
+				result.setPageSize(size);
+				result.setPageNumber(1);
+				result.setTotalCount(size);
+				result.setList(nlist);
+			} else {
+				result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("系统中不存在微信用户:%s", wxCode));
+			}
+		}
+		return result.json();
 	}
 }

@@ -457,6 +457,15 @@ public interface CarRpcService {
 	 * 
 	 */
 	public String queryOrderHistory(String wxCode, String yearMonth, int pageNumber, int pageSize, String clientCode, String clientKey);
+	
+	/**
+	 * 获取需要支付的订单列表
+	 * @param wxCode
+	 * @param clientCode
+	 * @param clientKey
+	 * @return
+	 */
+	public String queryNeed2PayOrder(String wxCode, String clientCode, String clientKey);
 
 	/**
 	 * 车辆入库操作
