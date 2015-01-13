@@ -95,8 +95,8 @@ public class CarRpcServiceImpl implements CarRpcService {
 				if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || vo.getStatus().equals(CPConstants.ORDER_STATUS_PARKING)) {
 					// 判断订单是否需要重新计费 默认 误差五分钟内 不重新计费
 					Date feedTime = vo.getFeedTime();
-					boolean needFee = this.checkNeedFee(feedTime, 5);
-					log.info(String.format("订单%s 上次计费日期:%s所以不需要重新计费!", orderCode,feedTime.toLocaleString()));
+					boolean needFee = feedTime != null ? this.checkNeedFee(feedTime, 5) : true;
+					log.info(String.format("订单%s 上次计费日期:%s所以不需要重新计费!", orderCode, feedTime.toLocaleString()));
 					if (needFee) {
 						try {
 							Date startDate = vo.getStartPartTime();
