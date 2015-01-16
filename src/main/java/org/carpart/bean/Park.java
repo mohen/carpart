@@ -13,7 +13,7 @@ import org.nutz.dao.entity.annotation.Table;
 */
 @Data
 @Table("cp_park")
-public class Park {
+public class Park extends Base {
 
 	/**
 	 * 主键

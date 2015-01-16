@@ -86,9 +86,9 @@ public class ResponseResult {
 		if (this.data.isEmpty()) {
 			this.setData(null);
 		}
-		if (this.list.isEmpty()) {
+	/*	if (this.list.isEmpty()) {
 			this.setList(null);
-		}
+		}*/
 		return Json.toJson(this, JsonFormat.forLook());
 	}
 

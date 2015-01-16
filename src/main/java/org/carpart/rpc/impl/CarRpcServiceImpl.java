@@ -81,6 +81,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 		return result.json();
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public double queryOrderFee(String orderCode, String clientCode, String clientKey) {
 		ResponseResult result = loginValid(clientCode, clientKey);
@@ -129,7 +130,8 @@ public class CarRpcServiceImpl implements CarRpcService {
 							result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("计算订单:%s 费用失败:%s!", orderCode, ex.getMessage()));
 						}
 					} else {
-						log.info(String.format("订单%s 上次计费日期:%s所以不需要重新计费!", orderCode, feedTime.toLocaleString()));
+						if (feedTime != null)
+							log.info(String.format("当前时间为%s 订单%s 上次计费时间为%s 时差不到5分钟 ,所以不需要重新计费!", new Date().toLocaleString(), orderCode, feedTime.toLocaleString()));
 						money = vo.getNeedAmount();
 					}
 				} else {
@@ -657,19 +659,17 @@ public class CarRpcServiceImpl implements CarRpcService {
 	@Override
 	public String queryParkInfo(String mapLb, String clientCode, String clientKey) {
 		ResponseResult result = loginValid(clientCode, clientKey);
-		String json = "";
 		if (result.isSuccess()) {
 			this.logClientAction(result, String.format("查询停车场:%s信息", mapLb));
 			Park park = this.fetchPark(mapLb);
 			if (park != null) {
 				park.setFeeRules(null);
-				json = Json.toJson(park);
+				result.setBean(park);
 			} else {
 				result = logsError(result, CPConstants.ERROR_TYPE_CLIENT, String.format("系统不存在坐标为:%s的停车场", mapLb));
-				json = result.json();
 			}
 		}
-		return json;
+		return result.json();
 	}
 
 	/**
