@@ -95,7 +95,7 @@ public class Order extends Base {
 	 * 欠费余额
 	 */
 	@Column("NEED_AMOUNT")
-	private Double needAmount;
+	private Double needAmount=0.0;
 	/**
 	 * 已付款金额
 	 */

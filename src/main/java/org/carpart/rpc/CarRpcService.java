@@ -521,19 +521,29 @@ public interface CarRpcService {
 	 * @return JSON 数据  具体字段含义见  Park对象
 	 * 
 		{
-		   "parkId" :1,
-		   "parkName" :"国贸商场",
-		   "address" :"民族大道",
-		   "city" :"南宁",
-		   "officeTime" :"全天",
-		   "rulesDesc" :"前半小时免费 小于三小时每小时5元 大于3小时每3小时时10元",
-		   "mapLb" :"108.330165,22.819499",
-		   "memo" :"备注信息:",
-		   "disDetail" :"暂无优惠信息",
-		   "thumbnailUrl" :"http://pandaz.wicp.net/CarPart/resource/image/login_banner.png",
-		   "mapLat" :108.330165,
-		   "mapLng" :22.819499
+		   success :true,
+		   totalCount :0,
+		   pageSize :0,
+		   pageNumber :0,
+		   list :[],
+		   bean :{
+		      parkId :1,
+		      parkName :"国贸商场",
+		      address :"民族大道",
+		      city :"南宁",
+		      officeTime :"全天",
+		      rulesDesc :"前半小时免费 小于三小时每小时5元 大于3小时每3小时时10元",
+		      mapLb :"108.330165,22.819499",
+		      memo :"备注信息:",
+		      status :"1",
+		      cityCode :"4501",
+		      disDetail :"暂无优惠信息",
+		      thumbnailUrl :"http://pandaz.wicp.net/CarPart/resource/image/login_banner.png",
+		      mapLat :108.330165,
+		      mapLng :22.819499
+		   }
 		}
+
 */
 	public String queryParkInfo(String mapLb, String clientCode, String clientKey);
 }

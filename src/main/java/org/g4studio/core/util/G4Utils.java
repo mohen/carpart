@@ -1056,7 +1056,21 @@ public class G4Utils {
 		s = Math.round(s * 10000) / 10000;
 		return s;
 	}
-
+/**
+ * 获取当天凌晨日期
+ * @return
+ */
+	public static Date getNextDateBegin(){
+		Date date=new Date();//取时间
+		 Calendar calendar =Calendar.getInstance();
+		 calendar.setTime(date);
+		 calendar.set(calendar.HOUR,0);
+		 calendar.set(calendar.MINUTE,0);
+		 calendar.set(calendar.SECOND,0);
+		 calendar.add(calendar.DATE,1);//把日期往后增加一天.整数往后推,负数往前移动
+		 date=calendar.getTime(); //这个时间就是日期往后推一天的结果 
+		 return date;
+	}
 	public static void main(String args[]) {
 		double lat = 104.075159;
 		double lon =30.539867;

@@ -442,7 +442,8 @@ public class CarRpcServiceImpl implements CarRpcService {
 					order.setNeedAmount((double) 0);
 					order.setPayAmount((double) 0);
 					order.setPartTimes((double) 0);
-					order.setValidTimes(G4Utils.addMinutes(date, 30));
+					order.setValidTimes(G4Utils.getNextDateBegin());// 当天凌晨到期
+					// order.setValidTimes(G4Utils.addMinutes(date, 30));
 					order.setStatus(CPConstants.ORDER_STATUS_PRE_REG);
 					order = dao.insert(order);
 					result.setMessage(String.format("新增订单%s成功", orderCode));
@@ -705,7 +706,8 @@ public class CarRpcServiceImpl implements CarRpcService {
 			double needPayMoney = 0;
 			String status = order.getStatus();
 			Date feedTime = order.getFeedTime();
-			boolean needFee = feedTime == null || this.checkNeedFee(feedTime, 5);
+			Double needAmount = order.getNeedAmount();
+			boolean needFee = feedTime == null || this.checkNeedFee(feedTime, 5) || needAmount == null || needAmount > 0;
 			if (status.equals(CPConstants.ORDER_STATUS_IN_PARK) || status.equals(CPConstants.ORDER_STATUS_PARKING)) {
 				try {
 					Date startDate = order.getStartPartTime();
