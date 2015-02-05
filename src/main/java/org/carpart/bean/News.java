@@ -5,12 +5,11 @@ import org.nutz.dao.entity.annotation.*;
 import lombok.Data;
 
 /**
-* 消息
-*/
+ * 消息
+ */
 @Data
 @Table("cp_news")
 public class News {
-
 	/**
 	 * ID
 	 */
@@ -27,6 +26,9 @@ public class News {
 	 */
 	@Column("PART_ID")
 	private Integer partId;
+
+	@One(field = "partId", target = Park.class)
+	private Park park;
 	/**
 	 * 城市
 	 */
@@ -47,6 +49,11 @@ public class News {
 	 */
 	@Column("scope")
 	private String scope;
+	/**
+	 * 状态
+	 */
+	@Column("status")
+	private String status;
 	/**
 	 * 发布时间
 	 */

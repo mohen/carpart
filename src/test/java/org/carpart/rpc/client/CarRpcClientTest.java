@@ -106,13 +106,7 @@ public class CarRpcClientTest {
 		System.err.println(message);
 		Assert.assertNotNull(message);
 	}
-	@Test
-	public final void testListNearbyCarPart2Xml() {
-		String message = service.listNearbyCarPart2Xml("104.065773,30.536549",2000, clientCode, clientKey);
-		System.err.println(message);
-		Assert.assertNotNull(message);
 
-	}
 	/**
 	 * Test method for
 	 * {@link org.carpart.rpc.impl.CarRpcServiceImpl#addNewUser(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)}
@@ -143,17 +137,7 @@ public class CarRpcClientTest {
 		System.err.println(message);
 		Assert.assertNotNull(message);
 	}
-	/**
-	 * Test method for
-	 * {@link org.carpart.rpc.impl.CarRpcServiceImpl#listCarPart2Xml(java.lang.String, java.lang.String, java.lang.String)}
-	 * .
-	 */
-	@Test
-	public final void testListCarPart2Xml() {
-		String message = service.listCarPart2Xml("成都", clientCode, clientKey);
-		System.err.println(message);
-		Assert.assertNotNull(message);
-	}
+
 
 	/**
 	 * Test method for

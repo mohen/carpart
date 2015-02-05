@@ -72,5 +72,27 @@ public class CPConstants {
 	 * 订单状态 90 -已记账
 	 */
 	public static String ORDER_STATUS_CHARGE_ACCOUNT = "90";
+	/**
+	 * 登记
+	 */
+	public static String NEWS_STATUS_REG="00";
+	/**
+	 * 审批
+	 */
+	public static String NEWS_STATUS_SUBMIT="10";
+	 /**
+	  * 发布
+	  */
+	public static String NEWS_STATUS_PUBLIC="20";
+	/**
+	 * 否决
+	 */
+	public static String NEWS_STATUS_REJECT="30";
+	/**
+	 * 作废
+	 */
+	public static String NEWS_STATUS_INVALID="90";
+	
+	
 
 }

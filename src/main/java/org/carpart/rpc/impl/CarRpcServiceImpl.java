@@ -18,6 +18,7 @@ import org.carpart.ResponseResult;
 import org.carpart.bean.Client;
 import org.carpart.bean.Custom;
 import org.carpart.bean.Error;
+import org.carpart.bean.News;
 import org.carpart.bean.Order;
 import org.carpart.bean.Park;
 import org.carpart.rpc.CarRpcService;
@@ -35,7 +36,7 @@ import org.nutz.dao.Cnd;
 import org.nutz.dao.Condition;
 import org.nutz.dao.Dao;
 import org.nutz.dao.pager.Pager;
-import org.nutz.json.Json;
+import org.nutz.dao.sql.OrderBy;
 import org.nutz.trans.Atom;
 import org.nutz.trans.Trans;
 
@@ -333,7 +334,6 @@ public class CarRpcServiceImpl implements CarRpcService {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	@Override
 	public String listCarPart2Xml(String cityCode, String clientCode, String clientKey) {
 		ResponseResult result = loginValid(clientCode, clientKey);
 		String xml = "";
@@ -376,7 +376,6 @@ public class CarRpcServiceImpl implements CarRpcService {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	@Override
 	public String listNearbyCarPart2Xml(String mabLb, int raidus, String clientCode, String clientKey) {
 		ResponseResult result = loginValid(clientCode, clientKey);
 		String xml = "";
@@ -903,5 +902,68 @@ public class CarRpcServiceImpl implements CarRpcService {
 			}
 		}
 		return result.json();
+	}
+
+	@Override
+	public String listNewsByCityPage(String cityCode, int pageNumber, int pageSize, String clientCode, String clientKey) {
+		ResponseResult result = loginValid(clientCode, clientKey);
+		if (result.isSuccess()) {
+			this.logClientAction(result, String.format("查询城市优惠信息列表:%s信息", cityCode));
+			Pager pager = dao.createPager(pageNumber, pageSize);
+			Cnd cnd = Cnd.where("city", "=", cityCode.trim()).and("status", "=", CPConstants.NEWS_STATUS_PUBLIC);
+			List<News> list = dao.query(News.class, cnd.desc("publicTime"), pager);
+			result.setTotalCount(dao.count(News.class, cnd));
+			result.setPageNumber(pageNumber);
+			result.setPageSize(pageSize);
+			result.setList(list);
+		}
+		return result.json();
+	}
+
+	@Override
+	public String queryHelpMessage(String clientCode, String clientKey) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String companyLogin(String loginKey, String loginPwd, String clientCode, String clientKey) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String companyChangePwd(String loginKey, String oldLoginPwd, String newLoginPwd, String clientCode, String clientKey) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String companyPublicNews(String companyId, String title, String content, String clientCode, String clientKey) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String listNewsByCompanyPage(String companyId, int pageNumber, int pageSize, String clientCode, String clientKey) {
+		return null;
+	}
+
+	@Override
+	public String companyActionNews(String companyId, String newsId, String action, String clientCode, String clientKey) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String companyPayOrder(String orderCode, String companyCode, String companyKey, String clientCode, String clientKey) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String companyChangeCode(String loginKey, String clientCode, String clientKey) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
