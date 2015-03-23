@@ -31,6 +31,11 @@ public class Order extends Base {
 	 * 停车场名称
 	 */
 	private String parkName;
+	
+	/**
+	 * 图片地址
+	 */
+	private String thumbnailUrl; 
 	/**
 	 * 城市
 	 */

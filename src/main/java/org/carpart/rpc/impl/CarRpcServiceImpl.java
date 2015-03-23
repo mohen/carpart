@@ -200,6 +200,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 						order.setCity(park.getCity());
 						order.setParkName(park.getParkName());
 						order.setAddress(park.getAddress());
+						order.setThumbnailUrl(park.getThumbnailUrl());
 						order.setPark(null);
 					}
 					Custom custom = order.getCustom();
@@ -773,6 +774,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 						order.setParkName(park.getParkName());
 						order.setCity(park.getCity());
 						order.setAddress(park.getAddress());
+						order.setThumbnailUrl(park.getThumbnailUrl());
 						order.setPark(null);
 					}
 					order.setWxName(custom.getWxName());
@@ -965,5 +967,16 @@ public class CarRpcServiceImpl implements CarRpcService {
 	public String companyChangeCode(String loginKey, String clientCode, String clientKey) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public String replyRebotMessage(String keyWord, String clientCode,
+			String clientKey) {
+		ResponseResult result = loginValid(clientCode, clientKey);
+		if (result.isSuccess()) {
+			this.logClientAction(result, String.format("回复:%s信息推送信息", keyWord));
+			result.setMessage("推送信息");
+		}
+		return result.json();
 	}
 }

@@ -34,8 +34,8 @@ public class PartClientTestAction {
 
 	final static String wxCode = "oj3WQt-hHdDPYtt7lTigc0zTklYE2";
 
-	final static String orderCode = "DT20150123150236DD10000132";
-	final static String SERVICE_URL = "http://pandaz.wicp.net/CarPart/rpc/webservice/CarRpcService";
+	final static String orderCode = "DT20150323DD10000170";
+	final static String SERVICE_URL = "http://toughbridge.com/CarPart/rpc/webservice/CarRpcService";
 	static CarRpcService service = null;
 	static int web = 1;
 

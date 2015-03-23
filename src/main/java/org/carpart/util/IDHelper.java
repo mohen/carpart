@@ -41,7 +41,7 @@ public class IDHelper {
 	private DefaultIDGenerator defaultIDGenerator_errorCode = null;
 
 	public String generatOrderCode() {
-		String serno = String.format("DT" + G4Utils.Date2String(new Date(), G4Constants.FORMAT_DateTime2) + "%s", defaultIDGenerator_orderCode.create());
+		String serno = String.format("DT" + G4Utils.Date2String(new Date(), G4Constants.FORMAT_ORDER) + "%s", defaultIDGenerator_orderCode.create());
 		return serno;
 
 	}

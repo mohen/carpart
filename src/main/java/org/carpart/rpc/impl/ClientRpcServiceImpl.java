@@ -64,7 +64,7 @@ public class ClientRpcServiceImpl implements ClientRpcService {
 	}
 
 	public static void main(String args[]) {
-		String wxCode = "oj3WQt-hHdDPYtt7lTigc0zTklYE";
+		String wxCode = "oZ-0Qs3oRZeY9I23MFNNzp-O98iE";
 		String context = "欢迎关注BiBi停车" + "";
 		String clientKey = "wxServer";
 		String clientCode = "[B@1c6b3d1";
@@ -93,6 +93,7 @@ public class ClientRpcServiceImpl implements ClientRpcService {
 			JSONObject content = new JSONObject();
 			content.element("content", URLEncoder.encode(message, "UTF-8"));
 			json.element("text", content);
+			System.out.println(json.toString());
 			out.writeBytes(json.toString());
 			out.flush();
 			out.close();

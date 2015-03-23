@@ -62,6 +62,12 @@ public interface G4Constants {
 	 * FORMAT_DateTime: 日期
 	 */
 	public static final String FORMAT_Date = "yyyy-MM-dd";
+	
+	/**
+	 * 格式化<br>
+	 * FORMAT_DateTime: 日期
+	 */
+	public static final String FORMAT_ORDER = "yyyyMMdd";
 
 	/**
 	 * 格式化(24小时制)<br>

@@ -581,6 +581,15 @@ public class WxClientTestAction {
 		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
 		Assert.assertTrue(result.isSuccess());
 	}
+	@Test
+	public final void testReplyRebotMessage() {
+		String errorCode="test";
+		String json = service.replyRebotMessage(errorCode, clientCode, clientKey);
+		System.err.println(json);
+		Reader reader = new StringReader(json);
+		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
+		Assert.assertTrue(result.isSuccess());
+	}
 
 	
 

@@ -456,5 +456,13 @@ public interface CarRpcService {
 	 * @return
 	 */
 	public String companyPayOrder(String orderCode, String companyCode, String companyKey, String clientCode, String clientKey);
-
+	/**
+	 * 关键词回复
+	 * 
+	 * @param keyWord
+	 * @param clientCode
+	 * @param clientKey
+	 * @return
+	 */
+	public String replyRebotMessage(String keyWord,  String clientCode, String clientKey);
 }
