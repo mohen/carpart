@@ -1,7 +1,9 @@
 package org.carpart.rpc.impl;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -23,7 +25,8 @@ public class ClientRpcServiceImpl implements ClientRpcService {
 	private static String CLIENT_URL = "";
 
 	public ClientRpcServiceImpl() {
-		PropertiesHelper pHelper = PropertiesFactory.getPropertiesHelper(PropertiesFile.APP);
+		PropertiesHelper pHelper = PropertiesFactory
+				.getPropertiesHelper(PropertiesFile.APP);
 		if (StringUtils.isEmpty(CLIENT_URL)) {
 			CLIENT_URL = pHelper.getValue("wx.server.url");
 			log.debug("读取到微信服务器URL:" + CLIENT_URL);
@@ -42,7 +45,8 @@ public class ClientRpcServiceImpl implements ClientRpcService {
 		private String clientCode;
 		private String clientKey;
 
-		public PushMessageThread(String message, String wxCode, String clientCode, String clientKey) {
+		public PushMessageThread(String message, String wxCode,
+				String clientCode, String clientKey) {
 			this.clientCode = clientCode;
 			this.clientKey = clientKey;
 			this.message = message;
@@ -50,34 +54,43 @@ public class ClientRpcServiceImpl implements ClientRpcService {
 		}
 
 		public void run() {
-			if (StringUtils.isNotBlank(clientCode) && StringUtils.isNotBlank(clientKey) && StringUtils.isNotBlank(message) && StringUtils.isNotBlank(wxCode)) {
-				ClientRpcServiceImpl.sendPost(wxCode, message, clientKey, clientCode);
+			if (StringUtils.isNotBlank(clientCode)
+					&& StringUtils.isNotBlank(clientKey)
+					&& StringUtils.isNotBlank(message)
+					&& StringUtils.isNotBlank(wxCode)) {
+				ClientRpcServiceImpl.sendPost(wxCode, message, clientKey,
+						clientCode);
 				log.info(String.format("向%s推送信息:%s", wxCode, message));
 			}
 		}
 	}
 
 	@Override
-	public void pushMessageToCustom(String message, String wxCode, String clientCode, String clientKey) {
-		PushMessageThread thead = new PushMessageThread(message, wxCode, clientCode, clientKey);
+	public void pushMessageToCustom(String message, String wxCode,
+			String clientCode, String clientKey) {
+		PushMessageThread thead = new PushMessageThread(message, wxCode,
+				clientCode, clientKey);
 		thead.start();
 	}
 
 	public static void main(String args[]) {
 		String wxCode = "oZ-0Qs3oRZeY9I23MFNNzp-O98iE";
-		String context = "欢迎关注BiBi停车" + "";
+		String context = "欢迎关注BiBi停车!!!!!!!!!!!" + "";
 		String clientKey = "wxServer";
 		String clientCode = "[B@1c6b3d1";
-		ClientRpcServiceImpl o=new ClientRpcServiceImpl();
+		ClientRpcServiceImpl o = new ClientRpcServiceImpl();
 		String message = sendPost(wxCode, context, clientKey, clientCode);
 		System.err.println(message);
 	}
 
-	private static String sendPost(String wxCode, String message, String clientKey, String clientCode) {
+	private static String sendPost(String wxCode, String message,
+			String clientKey, String clientCode) {
 		try {
 			// 创建连接
-			URL url = new URL(String.format("%s?clientKey=%s&clientCode=%s", CLIENT_URL, clientKey, clientCode));
-			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			URL url = new URL(String.format("%s?clientKey=%s&clientCode=%s",
+					CLIENT_URL, clientKey, clientCode));
+			HttpURLConnection connection = (HttpURLConnection) url
+					.openConnection();
 			connection.setDoOutput(true);
 			connection.setDoInput(true);
 			connection.setRequestMethod("POST");
@@ -86,7 +99,8 @@ public class ClientRpcServiceImpl implements ClientRpcService {
 			connection.setRequestProperty("Content-Type", "application/json");
 			connection.connect();
 			// POST请求
-			DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+			DataOutputStream out = new DataOutputStream(
+					connection.getOutputStream());
 			JSONObject json = new JSONObject();
 			json.element("touser", wxCode);
 			json.element("msgtype", "text");
@@ -98,15 +112,19 @@ public class ClientRpcServiceImpl implements ClientRpcService {
 			out.flush();
 			out.close();
 			// 读取响应
-			/*
-			 * BufferedReader reader = new BufferedReader(new
-			 * InputStreamReader(connection.getInputStream())); String lines;
-			 * StringBuffer sb = new StringBuffer(""); while ((lines =
-			 * reader.readLine()) != null) { lines = new
-			 * String(lines.getBytes(), "UTF-8"); sb.append(lines); }
-			 * System.out.println(sb + "finish"); message = sb.toString();
-			 * reader.close();
-			 */
+
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					connection.getInputStream()));
+			String lines;
+			StringBuffer sb = new StringBuffer("");
+			while ((lines = reader.readLine()) != null) {
+				lines = new String(lines.getBytes(), "UTF-8");
+				sb.append(lines);
+			}
+			System.out.println(sb + "finish");
+			message = sb.toString();
+			reader.close();
+
 			connection.disconnect();
 		} catch (MalformedURLException e) {
 			e.printStackTrace();

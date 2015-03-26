@@ -32,12 +32,12 @@ public class WxClientTestAction {
 	final static String clientCode = "[B@1c6b3d1";
 	final static String clientKey = "wxServer";
 
-	final static String wxCode = "oj3WQt30dkLIVrlT4wJL82jJY2-w";
+	final static String wxCode = "oZ-0Qs3oRZeY9I23MFNNzp-O98iE";
 
-	final static String orderCode = "DT20150108172242DD10000108";
+	final static String orderCode = "DT20150326DD10000184";
 	final static String SERVICE_URL = "http://112.74.124.32/CarPart/rpc/webservice/CarRpcService";
 	static CarRpcService service = null;
-	static int web = 1;
+	static int web = 2;
 
 	/**
 	 * @throws java.lang.Exception
@@ -64,6 +64,7 @@ public class WxClientTestAction {
 		if (service != null)
 			service = null;
 	}
+	private String orderTime;
 
 	/**
 	 * 模拟用户关注
@@ -537,10 +538,11 @@ public class WxClientTestAction {
 		 * 查询欠费情况
 		 */
 		double fee = service.queryOrderFee(orderCode, clientCode, clientKey);
+		String paySerno="";//支付流水
 		/**
 		 * 支付费用
 		 */
-		String json = service.payOrderFeeOnline(orderCode, fee, clientCode, clientKey);
+		String json = service.payOrderFeeOnline(orderCode,paySerno, fee, clientCode, clientKey);
 		System.err.println(json);
 		Reader reader = new StringReader(json);
 		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
@@ -585,6 +587,36 @@ public class WxClientTestAction {
 	public final void testReplyRebotMessage() {
 		String errorCode="test";
 		String json = service.replyRebotMessage(errorCode, clientCode, clientKey);
+		System.err.println(json);
+		Reader reader = new StringReader(json);
+		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
+		Assert.assertTrue(result.isSuccess());
+	}
+	@Test
+	public final void testUpdateCustomInfo(){
+		String mapLb="mapLb";
+		String sMsg="s";
+		String Ltime="Ltime";
+		String orderTime="orderTime";
+		String orderDate="orderDate";
+		String json = service.updateCustomInfo(wxCode, mapLb, sMsg, Ltime, orderTime, orderCode, orderDate, clientCode, clientKey);
+		System.err.println(json);
+		Reader reader = new StringReader(json);
+		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
+		Assert.assertTrue(result.isSuccess());
+	}
+	@Test
+	public final void testReadAllCustomInfo(){
+		String json = service.readAllCustomInfo(wxCode, clientCode, clientKey);
+		System.err.println(json);
+		Reader reader = new StringReader(json);
+		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
+		Assert.assertTrue(result.isSuccess());
+	}
+	@Test
+	public final void testReadOneCustomInfo(){
+		String token="mapLb";
+		String json = service.readOneCustomInfo(wxCode, token,clientCode, clientKey);
 		System.err.println(json);
 		Reader reader = new StringReader(json);
 		ResponseResult result = Json.fromJson(ResponseResult.class, reader);

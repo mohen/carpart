@@ -20,7 +20,8 @@ public interface CarRpcService {
 	 * 
 	 */
 
-	public String createCustomInfo(String wxName, String wxCode, String city, String clientCode, String clientKey);
+	public String createCustomInfo(String wxName, String wxCode, String city,
+			String clientCode, String clientKey);
 
 	/**
 	 * 更新或者保存 微信客户 用于微信端客户关注注册后调用
@@ -49,7 +50,9 @@ public interface CarRpcService {
 	 * 
 	 */
 
-	public String saveCustomInfo(String name, String wxCode, String city, String carCode, String trueName, String phone, String address, String certCode, String email, String clientCode, String clientKey);
+	public String saveCustomInfo(String name, String wxCode, String city,
+			String carCode, String trueName, String phone, String address,
+			String certCode, String email, String clientCode, String clientKey);
 
 	/**
 	 * 当前城市全部合作停车场 用与罗列到地图上
@@ -68,7 +71,8 @@ public interface CarRpcService {
 	 *         "http://pandaz.wicp.net/CarPart/resource/image/login_banner.png"
 	 *         --缩略图 }] }
 	 */
-	public String listCarPart2JSON(String cityCode, String clientCode, String clientKey);
+	public String listCarPart2JSON(String cityCode, String clientCode,
+			String clientKey);
 
 	/**
 	 * 分页查询当前城市 合作停车列表 如果传入 mapLb 按 由近到远排序
@@ -95,7 +99,8 @@ public interface CarRpcService {
 	 *         :"http://pandaz.wicp.net/CarPart/resource/image/login_banner.png"
 	 *         --缩略图 }] }
 	 */
-	public String listCarPartByPage(String city, String mapLb, int pageNumber, int pageSize, String clientCode, String clientKey);
+	public String listCarPartByPage(String city, String mapLb, int pageNumber,
+			int pageSize, String clientCode, String clientKey);
 
 	/**
 	 * 新增订单
@@ -140,7 +145,8 @@ public interface CarRpcService {
 	 *         , mapLat :109.439042, mapLng :24.331481 }], message
 	 *         :"新增订单DT20150108094451DD10000107成功" }
 	 */
-	public String createOrder(String wxCode, String mapLb, String clientCode, String clientKey);
+	public String createOrder(String wxCode, String mapLb, String clientCode,
+			String clientKey);
 
 	/**
 	 * 获取订单状态
@@ -152,7 +158,8 @@ public interface CarRpcService {
 	 *         { success :true, result :{ status :"10",name:"预登记" } }
 	 * 
 	 */
-	public String queryOrderStatus(String orderCode, String clientCode, String clientKey);
+	public String queryOrderStatus(String orderCode, String clientCode,
+			String clientKey);
 
 	/**
 	 * 
@@ -167,19 +174,22 @@ public interface CarRpcService {
 	 * @param orderCode
 	 * @return 还需要支付的金额
 	 */
-	public double queryOrderFee(String orderCode, String clientCode, String clientKey);
+	public double queryOrderFee(String orderCode, String clientCode,
+			String clientKey);
 
 	/**
 	 * 线上支付订单费用
 	 * 
 	 * @param orderCode
+	 * @param paySerno
 	 *            订单号
 	 * @param money
 	 *            本次 支付金额(元) 不能小于等于0
 	 * @return JSON 数据 如: { success :true, result :{ needPayMoney :0.0--完成本次支付后
 	 *         还需要支付 的金额 }, message :"订单:DT20150107102537DD10000105还需要支付￥0 元!" }
 	 */
-	public String payOrderFeeOnline(String orderCode, double money, String clientCode, String clientKey);
+	public String payOrderFeeOnline(String orderCode, String paySerno,double money,
+			String clientCode, String clientKey);
 
 	/**
 	 * 线下支付订单费用
@@ -191,7 +201,8 @@ public interface CarRpcService {
 	 * @return JSON 数据 如: { success :true, result :{ needPayMoney :0.0--完成本次支付后
 	 *         还需要支付 的金额 }, message :"订单:DT20150107102537DD10000105还需要支付￥0 元!" }
 	 */
-	public String payOrderFeeOffline(String orderCode, double money, String clientCode, String clientKey);
+	public String payOrderFeeOffline(String orderCode, double money,
+			String clientCode, String clientKey);
 
 	/**
 	 * 取消未生效的订单
@@ -202,7 +213,8 @@ public interface CarRpcService {
 	 * @return JSON 数据 如: { success :true, message
 	 *         :"订单:DT20150108094451DD10000107取消成功" }
 	 */
-	public String cancelOrder(String orderCode, String clientCode, String clientKey);
+	public String cancelOrder(String orderCode, String clientCode,
+			String clientKey);
 
 	/**
 	 * 获取订单信息
@@ -225,7 +237,8 @@ public interface CarRpcService {
 	 * 
 	 */
 
-	public String queryOrderInfo(String orderCode, String clientCode, String clientKey);
+	public String queryOrderInfo(String orderCode, String clientCode,
+			String clientKey);
 
 	/**
 	 * 获取订单历史
@@ -289,7 +302,8 @@ public interface CarRpcService {
 	 *         ", status :"40", feedTime :"2015-01-08 10:59:03" }] }
 	 * 
 	 */
-	public String queryOrderHistory(String wxCode, String yearMonth, int pageNumber, int pageSize, String clientCode, String clientKey);
+	public String queryOrderHistory(String wxCode, String yearMonth,
+			int pageNumber, int pageSize, String clientCode, String clientKey);
 
 	/**
 	 * 获取需要支付的订单列表
@@ -299,7 +313,8 @@ public interface CarRpcService {
 	 * @param clientKey
 	 * @return
 	 */
-	public String queryNeed2PayOrder(String wxCode, String clientCode, String clientKey);
+	public String queryNeed2PayOrder(String wxCode, String clientCode,
+			String clientKey);
 
 	/**
 	 * 车辆入库操作
@@ -335,7 +350,8 @@ public interface CarRpcService {
 	 * @return JSON 数据 如 : { success :true, --- true 表示成功 false 表示失败 message
 	 *         :"支付非法,支付金额0.0小于等于0 " ---返回消息 }
 	 */
-	public String queryErrorInfo(String errorCode, String clientCode, String clientKey);
+	public String queryErrorInfo(String errorCode, String clientCode,
+			String clientKey);
 
 	/**
 	 * 查询单个停车场信息
@@ -355,7 +371,8 @@ public interface CarRpcService {
 	 *         :"http://pandaz.wicp.net/CarPart/resource/image/login_banner.png"
 	 *         , mapLat :108.330165, mapLng :22.819499 } }
 	 */
-	public String queryParkInfo(String mapLb, String clientCode, String clientKey);
+	public String queryParkInfo(String mapLb, String clientCode,
+			String clientKey);
 
 	/**
 	 * 获取城市优惠信息
@@ -367,7 +384,8 @@ public interface CarRpcService {
 	 * @param clientKey
 	 * @return
 	 */
-	public String listNewsByCityPage(String city, int pageNumber, int pageSize, String clientCode, String clientKey);
+	public String listNewsByCityPage(String city, int pageNumber, int pageSize,
+			String clientCode, String clientKey);
 
 	/**
 	 * 获取帮助说明
@@ -387,7 +405,8 @@ public interface CarRpcService {
 	 * @param clientKey
 	 * @return
 	 */
-	public String companyLogin(String loginKey, String loginPwd, String clientCode, String clientKey);
+	public String companyLogin(String loginKey, String loginPwd,
+			String clientCode, String clientKey);
 
 	/**
 	 * 商户重置密码
@@ -399,16 +418,19 @@ public interface CarRpcService {
 	 * @param clientKey
 	 * @return
 	 */
-	public String companyChangePwd(String loginKey, String oldLoginPwd, String newLoginPwd, String clientCode, String clientKey);
-	
+	public String companyChangePwd(String loginKey, String oldLoginPwd,
+			String newLoginPwd, String clientCode, String clientKey);
+
 	/**
 	 * 商户重置优惠编码
+	 * 
 	 * @param loginKey
 	 * @param clientCode
 	 * @param clientKey
 	 * @return
 	 */
-	public String companyChangeCode(String loginKey, String clientCode, String clientKey);
+	public String companyChangeCode(String loginKey, String clientCode,
+			String clientKey);
 
 	/**
 	 * 商户发布消息
@@ -420,7 +442,8 @@ public interface CarRpcService {
 	 * @param clientKey
 	 * @return
 	 */
-	public String companyPublicNews(String companyId, String title, String content, String clientCode, String clientKey);
+	public String companyPublicNews(String companyId, String title,
+			String content, String clientCode, String clientKey);
 
 	/**
 	 * 获取商户发布的消息
@@ -432,10 +455,12 @@ public interface CarRpcService {
 	 * @param clientKey
 	 * @return
 	 */
-	public String listNewsByCompanyPage(String companyId, int pageNumber, int pageSize, String clientCode, String clientKey);
+	public String listNewsByCompanyPage(String companyId, int pageNumber,
+			int pageSize, String clientCode, String clientKey);
 
 	/**
 	 * 消息操作
+	 * 
 	 * @param companyId
 	 * @param newsId
 	 * @param action
@@ -443,7 +468,8 @@ public interface CarRpcService {
 	 * @param clientKey
 	 * @return
 	 */
-	public String companyActionNews(String companyId, String newsId, String action, String clientCode, String clientKey);
+	public String companyActionNews(String companyId, String newsId,
+			String action, String clientCode, String clientKey);
 
 	/**
 	 * 商户支付订单优惠
@@ -455,7 +481,9 @@ public interface CarRpcService {
 	 * @param clientKey
 	 * @return
 	 */
-	public String companyPayOrder(String orderCode, String companyCode, String companyKey, String clientCode, String clientKey);
+	public String companyPayOrder(String orderCode, String companyCode,
+			String companyKey, String clientCode, String clientKey);
+
 	/**
 	 * 关键词回复
 	 * 
@@ -464,5 +492,47 @@ public interface CarRpcService {
 	 * @param clientKey
 	 * @return
 	 */
-	public String replyRebotMessage(String keyWord,  String clientCode, String clientKey);
+	public String replyRebotMessage(String keyWord, String clientCode,
+			String clientKey);
+
+	/**
+	 * 读取用户全局属性
+	 * 
+	 * @param wxCode
+	 * @param clientCode
+	 * @param clientKey
+	 * @return
+	 */
+	public String readAllCustomInfo(String wxCode, String clientCode,
+			String clientKey);
+
+	/**
+	 * 读取用户单个变量全局属性
+	 * 
+	 * @param wxCode
+	 * @param token  :mapLb sMsg Ltime orderTime orderCode orderDate 
+	 * @param clientCode
+	 * @param clientKey
+	 * @return
+	 */
+	public String readOneCustomInfo(String wxCode, String token,
+			String clientCode, String clientKey);
+
+	/**
+	 * 更新用户全局属性
+	 * 
+	 * @param wxCode
+	 * @param mapLb
+	 * @param sMsg
+	 * @param Ltime
+	 * @param orderTime
+	 * @param orderCode
+	 * @param orderDate
+	 * @param clientCode
+	 * @param clientKey
+	 * @return
+	 */
+	public String updateCustomInfo(String wxCode, String mapLb, String sMsg,
+			String Ltime, String orderTime, String orderCode, String orderDate,
+			String clientCode, String clientKey);
 }

@@ -9,7 +9,7 @@ import lombok.Data;
 */
 @Data
 @Table("cp_custom")
-public class Custom {
+public class Custom extends Base {
 
 	/**
 	 * 
@@ -77,4 +77,41 @@ public class Custom {
 	 */
 	@Column("STATUS")
 	private String status;
+	
+	/**
+	 * 经纬度
+	 */
+	@Column("MAP_LB")
+	private String mapLb;
+	
+	/**
+	 * 是否发送过关注信息
+	 */
+	@Column("S_MSG")
+	private String sMsg;
+	
+	/**
+	 * 上次存放地理位置信息时间
+	 */
+	@Column("L_TIME")
+	private String LTime;
+	
+	/**
+	 * 上次下订单时间
+	 */
+	@Column("ORDER_TIME")
+	private String orderTime;
+	
+	/**
+	 * 流水号
+	 */
+	@Column("ORDER_CODE")
+	private String orderCode;
+	/**
+	 * 订单号前面日期
+	 */
+	@Column("ORDER_DATE")
+	private String orderDate;
+	
+
 }
