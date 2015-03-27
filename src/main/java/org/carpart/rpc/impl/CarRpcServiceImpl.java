@@ -1192,7 +1192,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 			String clientCode, String clientKey) {
 		ResponseResult result = loginValid(clientCode, clientKey);
 		if (result.isSuccess()) {
-			this.logClientAction(result, String.format("读取用户:%s全局属性值", wxCode));
+			this.logClientAction(result, String.format("更新用户:%s全局属性值", wxCode));
 			Custom vo = this.fetchCustom(wxCode);
 			if (vo == null) {
 				result = logsError(result, CPConstants.ERROR_TYPE_SERVER,
