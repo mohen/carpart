@@ -75,7 +75,7 @@ public class ClientRpcServiceImpl implements ClientRpcService {
 
 	public static void main(String args[]) {
 		String wxCode = "oZ-0Qs3oRZeY9I23MFNNzp-O98iE";
-		String context = "欢迎关注BiBi停车!!!!!!!!!!!" + "";
+		String context = "<a href='www.baidu.com' style='color:red'>欢迎关注###############BiBi停车!!!!!!!!!!!" + "</a>";
 		String clientKey = "wxServer";
 		String clientCode = "[B@1c6b3d1";
 		ClientRpcServiceImpl o = new ClientRpcServiceImpl();

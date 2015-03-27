@@ -600,7 +600,7 @@ public class WxClientTestAction {
 		String orderTime="orderTime";
 		String orderDate="orderDate";
 		String city="南宁";
-		String json = service.updateCustomInfo(wxCode, mapLb, sMsg, Ltime,city, orderTime, orderCode, orderDate, clientCode, clientKey);
+		String json = service.updateCustomInfo("oZ-0Qs-e5lVtCXGY84BOwHFORhnU", mapLb, sMsg, Ltime,city, orderTime, orderCode, orderDate, clientCode, clientKey);
 		System.err.println(json);
 		Reader reader = new StringReader(json);
 		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
