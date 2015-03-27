@@ -14,7 +14,7 @@
 			<include name="**/*.jar" />
 		</fileset>
 	</path>
-	<property name="compiler.args" value="-encoding UTF-8 -Xlint:unchecked" />
+	<property name="compiler.args" value="-encoding UTF-8 -Xlint:unchecked -Xbootclasspath/a:lombok.jar" />
 	<!--清理任务-->
 	<target name="clean">
 		<delete dir="target" />
