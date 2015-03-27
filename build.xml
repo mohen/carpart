@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="carpart" default="usage" basedir=".">
+	<property name="product" value="wxpark" />
+	<property name="version" value="1.0" />
+	<property name="src.dir" value="src" />
+	<property name="deploy.dir" value="/opt/tomcat7/webapps/CarPart" />
+	<property name="web.dir" value="webapp" />
+	<property name="config.dir" value="config" />
+	<property name="target.dir" value="target" />
+	<property name="lib.dir" value="webapp/WEB-INF/lib" />
+	<property name="jar.file" value="${product}.jar" />
+	<path id="classpath">
+		<fileset dir="${lib.dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+	<property name="compiler.args" value="-encoding UTF-8 -Xlint:unchecked" />
+	<!--清理任务-->
+	<target name="clean">
+		<delete dir="target" />
+	</target>
+
+	<!--创建目录-->
+	<target name="init" depends="clean">
+		<mkdir dir="target" />
+		<mkdir dir="target/classes" />
+	</target>
+	<target name="compile" depends="init">
+		<echo>compile the source</echo>
+		<javac srcdir="${src.dir}" destdir="${target.dir}/classes"
+			debug="false" fork="false" includeantruntime="on" >
+			<compilerarg line="${compiler.args}" />
+			<classpath refid="classpath" />
+		</javac>
+	</target>
+<target name="config">
+	<copy encoding="UTF-8" todir="${target.dir}/classes" overwrite="true">
+				<fileset dir="${config.dir}"/>
+	</copy>
+</target>
+
+<target name="deploy" depends="compile ,config">
+	<delete dir="${deploy.dir}" />
+	<mkdir dir="${deploy.dir}" />
+	<copy encoding="UTF-8" todir="${web.dir}/WEB-INF" overwrite="true">
+				<fileset dir="${target.dir}"/>
+	</copy>
+	<copy encoding="UTF-8" todir="${deploy.dir}" overwrite="true">
+				<fileset dir="${web.dir}"/>
+	</copy>
+</target>
+	<target name="javadoc" description="Generate the Javadoc HTML pages.">
+		<delete dir="${target.dir}/javadoc" />
+		<mkdir dir="${target.dir}/javadoc" />
+		<javadoc destdir="${target.dir}/javadoc" windowtitle="${product} Project Class Library"
+			use="yes" linksource="no" splitindex="yes" encoding="utf-8"
+			docencoding="gbk">
+			<classpath refid="classpath" />
+			<!-- 需要修改 Begin -->
+			<packageset dir="${src.dir}" defaultexcludes="yes">
+				<include name="com/yuchengtech/cmis/bpm/**" />
+			</packageset>
+			<!-- 需要修改 End -->
+		</javadoc>
+	</target>
+	<!--
+		=================================== 显示可选任务，并按用户的选择执行任务
+		====================================
+	-->
+	<target name="usage" description="显示可选任务">
+		<echo message="${ant.project.name} Build 文件" />
+		<echo message="------------------------------------------------------" />
+		<echo message="可选Target:" />
+		<echo message="" />
+		<echo message="javadoc --&gt; 生成文档" />
+		<echo message="compile   --&gt; 编译Java" />
+		<echo message="clean --&gt; 清理项目" />
+		<input message="请选择一个Target" validargs="javadoc,compile,clean"
+			addproperty="ant.task" />
+		<antcall target="${ant.task}" />
+	</target>
+</project>  

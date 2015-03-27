@@ -5,7 +5,6 @@ package org.carpart.rpc.client;
 
 import static org.junit.Assert.fail;
 import junit.framework.Assert;
-
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.carpart.rpc.CarRpcService;
 import org.junit.After;
