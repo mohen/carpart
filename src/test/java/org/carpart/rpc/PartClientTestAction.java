@@ -34,7 +34,7 @@ public class PartClientTestAction {
 
 	final static String wxCode = "oj3WQt-hHdDPYtt7lTigc0zTklYE2";
 
-	final static String orderCode = "DT20150326DD10000183";
+	final static String orderCode = "DT20150326DD10000181";
 	final static String SERVICE_URL = "http://112.74.124.32/CarPart/rpc/webservice/CarRpcService";
 	static CarRpcService service = null;
 	static int web = 1;
