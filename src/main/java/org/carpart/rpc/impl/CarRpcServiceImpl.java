@@ -1188,7 +1188,7 @@ public class CarRpcServiceImpl implements CarRpcService {
 
 	@Override
 	public String updateCustomInfo(String wxCode, String mapLb, String sMsg,
-			String Ltime, String orderTime, String orderCode, String orderDate,
+			String Ltime,String city, String orderTime, String orderCode, String orderDate,
 			String clientCode, String clientKey) {
 		ResponseResult result = loginValid(clientCode, clientKey);
 		if (result.isSuccess()) {
@@ -1202,6 +1202,8 @@ public class CarRpcServiceImpl implements CarRpcService {
 					vo.setMapLb(mapLb);
 				if (sMsg != null)
 					vo.setSMsg(sMsg);
+				if (city != null)
+					vo.setCity(city);
 				if (Ltime != null)
 					vo.setLTime(Ltime);
 				if (orderCode != null)
@@ -1254,7 +1256,9 @@ public class CarRpcServiceImpl implements CarRpcService {
 					value = vo.getSMsg();
 				} else if (token.equals("Ltime")) {
 					value = vo.getLTime();
-				} else if (token.equals("orderCode")) {
+				} else if (token.equals("city")) {
+					value = vo.getCity();
+				}  else if (token.equals("orderCode")) {
 					value = vo.getOrderCode();
 				} else if (token.equals("orderTime")) {
 					value = vo.getOrderTime();

@@ -180,9 +180,9 @@ public interface CarRpcService {
 	/**
 	 * 线上支付订单费用
 	 * 
-	 * @param orderCode
-	 * @param paySerno
-	 *            订单号
+	 * @param orderCode 订单号
+	 * @param paySerno 支付流水
+	 *            
 	 * @param money
 	 *            本次 支付金额(元) 不能小于等于0
 	 * @return JSON 数据 如: { success :true, result :{ needPayMoney :0.0--完成本次支付后
@@ -510,7 +510,7 @@ public interface CarRpcService {
 	 * 读取用户单个变量全局属性
 	 * 
 	 * @param wxCode
-	 * @param token  :mapLb sMsg Ltime orderTime orderCode orderDate 
+	 * @param token  :mapLb sMsg Ltime orderTime orderCode orderDate city
 	 * @param clientCode
 	 * @param clientKey
 	 * @return
@@ -525,6 +525,7 @@ public interface CarRpcService {
 	 * @param mapLb
 	 * @param sMsg
 	 * @param Ltime
+	 * @param city
 	 * @param orderTime
 	 * @param orderCode
 	 * @param orderDate
@@ -533,6 +534,6 @@ public interface CarRpcService {
 	 * @return
 	 */
 	public String updateCustomInfo(String wxCode, String mapLb, String sMsg,
-			String Ltime, String orderTime, String orderCode, String orderDate,
+			String Ltime,String city, String orderTime, String orderCode, String orderDate,
 			String clientCode, String clientKey);
 }

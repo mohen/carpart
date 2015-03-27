@@ -37,7 +37,7 @@ public class WxClientTestAction {
 	final static String orderCode = "DT20150326DD10000184";
 	final static String SERVICE_URL = "http://112.74.124.32/CarPart/rpc/webservice/CarRpcService";
 	static CarRpcService service = null;
-	static int web = 2;
+	static int web = 1;
 
 	/**
 	 * @throws java.lang.Exception
@@ -599,7 +599,8 @@ public class WxClientTestAction {
 		String Ltime="Ltime";
 		String orderTime="orderTime";
 		String orderDate="orderDate";
-		String json = service.updateCustomInfo(wxCode, mapLb, sMsg, Ltime, orderTime, orderCode, orderDate, clientCode, clientKey);
+		String city="南宁";
+		String json = service.updateCustomInfo(wxCode, mapLb, sMsg, Ltime,city, orderTime, orderCode, orderDate, clientCode, clientKey);
 		System.err.println(json);
 		Reader reader = new StringReader(json);
 		ResponseResult result = Json.fromJson(ResponseResult.class, reader);
